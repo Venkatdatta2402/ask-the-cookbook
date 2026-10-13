@@ -19,6 +19,10 @@ scratch agent finds its chapters the way it does there:
 | `05_context` | what each model call is sent |
 | `06_orchestration/supervisor.py` | `Think` and `verbatim` |
 
+Two files are changed since, so agent runs on different keys can run at once: chapter 2's `Think`
+(`02_agent_runtime/think.py`) can be given its own model client, and `agent_scratch.run` takes one and meters
+it. Given none, both use chapter 1's shared client, as in the cookbook.
+
 ## The index
 
 <!-- index-commit -->

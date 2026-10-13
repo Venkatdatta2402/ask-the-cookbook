@@ -39,14 +39,19 @@ THINK_SEES = ("instruction", "request", "constraint", "message", "observation", 
 
 
 class metered:
-    """`ask_index.Budget` around chapter 1's client, for the length of a `with` block."""
+    """`ask_index.Budget` around a client -- the run's own, or chapter 1's shared one -- for the length of a `with`
+    block. Around the shared one, two runs at once would each count the other's calls and put back the wrong
+    method; around a run's own, nothing else is touched."""
 
-    def __init__(self, budget):
-        self.budget = budget
+    def __init__(self, budget, client=None):
+        self.budget, self.client = budget, client
+
+    def _target(self):
+        import llm
+        return (self.client or llm.client).chat.completions
 
     def __enter__(self):
-        import llm
-        real = self._real = llm.client.chat.completions.create
+        real = self._real = self._target().create
 
         def create(*args, **kwargs):
             self.budget.check()
@@ -54,17 +59,17 @@ class metered:
             self.budget.charge(response)
             return response
 
-        llm.client.chat.completions.create = create
+        self._target().create = create
         return self.budget
 
     def __exit__(self, *exc):
-        import llm
-        llm.client.chat.completions.create = self._real
+        self._target().create = self._real
 
 
 def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LAST, floor=None,
-          max_tool_calls=A.MAX_TOOL_CALLS):
-    """The loop, and the context system that chooses what its Think is sent."""
+          max_tool_calls=A.MAX_TOOL_CALLS, client=None):
+    """The loop, and the context system that chooses what its Think is sent. `client`: the OpenAI client its
+    Think calls the model through; chapter 1's shared one if not given."""
     from llama_index.core.llms import MockLLM
 
     from act import Act
@@ -93,7 +98,7 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
     # says so plainly, and keeps the scratch agent's model calls all on chapter 1's client
     registry = Registry([Tool(f) for f in A.tool_functions(index, MockLLM(), floor=floor)])
     context = ContextSystem()
-    think = Think(model=model, tools=registry.tools, allow_fork=False, explain=False, max_tokens=4096)
+    think = Think(model=model, tools=registry.tools, allow_fork=False, explain=False, max_tokens=4096, client=client)
     policy = Policy(budget=context_tokens, keep_last=keep_last, kinds=THINK_SEES)
     focused = FocusedThink(think, prepare=lambda items, conversation: context.apply(items, conversation, policy))
     runtime = Runtime(loop=[focused,
@@ -104,14 +109,17 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
     return runtime, context
 
 
-def run(index, question, budget, **settings):
-    """One question: the answer, every tool call, why it stopped if it did, and what each call was sent."""
+def run(index, question, budget, client=None, **settings):
+    """One question: the answer, every tool call, why it stopped if it did, and what each call was sent.
+
+    `client`: an OpenAI client for this run alone -- its own key and address -- so runs at once on different keys
+    stay apart. Without one, the run uses chapter 1's shared client, as it always did."""
     from chat import Conversation
-    runtime, context = build(index, **settings)
+    runtime, context = build(index, client=client, **settings)
     conversation = Conversation(system=A.AGENT_PROMPT)
     conversation.messages.append({"role": "user", "content": question})
     answer, stopped = None, None
-    with metered(budget):
+    with metered(budget, client):
         try:
             runtime.run(conversation)
             answer = conversation.messages[-1]["content"]

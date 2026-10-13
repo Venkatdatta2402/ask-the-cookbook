@@ -13,5 +13,9 @@ llama-index-llms-openai-like==0.8.0
 llama-index-embeddings-google-genai==0.6.0
 llama-index-retrievers-bm25==0.8.0
 
-# CodeSplitter parses .py files with tree-sitter: only refreshing the index needs it
+# CodeSplitter parses .py files with tree-sitter. Refreshing the index splits with it, and the app needs it too:
+# open_index builds the splitter whenever it loads the index
 tree-sitter-language-pack==1.21.0
+
+# the app (app.py). The Space's sdk_version in README.md must match
+gradio==6.30.0

@@ -407,10 +407,13 @@ class Think:
     # comes back as a BadRequestError and is retried with the real reason (see run()). Ordinary
     # single-tool calls almost never need more than one attempt.
     def __init__(self, tools=None, retries=5, model=DEFAULT_MODEL, temperature=None, top_p=None,
-                 allow_fork=True, allow_advance=None, allow_replan=False, explain=True):
+                 allow_fork=True, allow_advance=None, allow_replan=False, explain=True, client=None):
         self.tools = tools or []
         self.retries = retries
         self.model = model
+        # the client this Think calls the model through: chapter 1's shared one unless it is given its own. A
+        # run on a key of its own -- one visitor's, beside another's -- cannot share a client with anything else
+        self.client = client
         self.temperature = temperature
         self.top_p = top_p
         # leaf-level branches doing one concrete task shouldn't be tempted to delegate further --
@@ -448,6 +451,10 @@ class Think:
             return False
         last = conversation.messages[-1] if conversation.messages else None
         return not (last and last.get("source") == "branches")
+
+    def _client(self):
+        # read with getattr for the same reason as _sampling_kwargs below
+        return getattr(self, "client", None) or client
 
     def _sampling_kwargs(self):
         # read with getattr because finish() can land on any Think subclass, and several
@@ -501,7 +508,7 @@ class Think:
         )})
         for _ in range(2):
             try:
-                response = client.chat.completions.create(
+                response = self._client().chat.completions.create(
                     model=getattr(self, "model", DEFAULT_MODEL), messages=messages,
                     **self._sampling_kwargs())
             except BadRequestError:
@@ -654,7 +661,7 @@ class Think:
                 # `tools` is omitted entirely when there are none, rather than sent as an empty
                 # list -- some components (ReWOO's solver) deliberately hold no tools so that
                 # answering is the only move left, and an empty array is not a valid request.
-                response = client.chat.completions.create(
+                response = self._client().chat.completions.create(
                     model=self.model, messages=messages,
                     **({"tools": all_tools} if all_tools else {}),
                     **self._sampling_kwargs()

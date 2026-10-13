@@ -25,19 +25,17 @@ extracted for the numbers and rules, superseded items salvaged, and recent turns
 and pinned items left untouched.
 
 `why_compress()` reports which of the triggers above apply; it never compresses anything itself.
-`missing()` is how the notebooks measure the loss, against a list of facts that should survive.
 """
 
-import re
 from dataclasses import dataclass, field
 from typing import Literal
 
 from pydantic import BaseModel
 
-from chat import _encoding
-from context import Item, render, route, tokens
-from llm import chat, extract
-from selection import supersede, words
+from .chat import _encoding
+from .context import Item, render, route, tokens
+from .llm import chat, extract
+from .selection import supersede, words
 
 
 def truncate(item, max_tokens, keep="head"):
@@ -77,7 +75,7 @@ def _span(items):
     return f"t{min(turns)}" if min(turns) == max(turns) else f"t{min(turns)}-t{max(turns)}"
 
 
-def summarize(items, focus=None, max_words=120):
+def summarize(items, focus=None, max_words=120, using=None):
     """Several items as one `summary` item, written by the model.
 
     `focus` says what the summary is FOR. Without one, the model decides what matters, and it
@@ -92,7 +90,7 @@ def summarize(items, focus=None, max_words=120):
         "Copy every number exactly as written, with its unit -- never round or convert. Keep "
         "names, versions and times. Say what was asked, found and concluded, in order. "
         f"At most {max_words} words. No preamble.\n\n{render(items)}"
-    )}])
+    )}], using=using)
     return Item("summary", text.strip(), max(i.turn for i in items),
                 source=f"summary of {_span(items)}")
 
@@ -106,7 +104,7 @@ class Facts(BaseModel):
     facts: list[Fact]
 
 
-def extract_facts(items, known=()):
+def extract_facts(items, known=(), using=None):
     """The individual statements in `items` worth keeping, as `fact` and `constraint` items.
 
     Constraints come back pinned, and are asked for WORD FOR WORD. A rule restated in the
@@ -125,11 +123,11 @@ def extract_facts(items, known=()):
         "Below is part of an agent's working session. List every fact in it that someone "
         "continuing the work could need later: measurements with their numbers and units, "
         "times, versions, causes, what was ruled in or out, and decisions.",
-        f"MATERIAL:\n{render(items)}", known), Facts)
+        f"MATERIAL:\n{render(items)}", known), Facts, using=using)
     return _as_items(result, items, render(items), known)
 
 
-def salvage(old, newer, known=()):
+def salvage(old, newer, known=(), using=None):
     """Facts from superseded items that their replacements do not cover.
 
     Not `extract_facts(old)`. Tried first, that brought back exactly what supersession removed:
@@ -148,7 +146,7 @@ def salvage(old, newer, known=()):
         "cause the newer version leaves out. Never list a measurement the newer version "
         "updates. Say when each fact applied (\"yesterday\", \"at 07:05\") so it cannot be "
         "read as current. If nothing survives, return an empty list.",
-        f"OLD:\n{render(old)}\n\nNEWER:\n{render(newer)}", known), Facts)
+        f"OLD:\n{render(old)}\n\nNEWER:\n{render(newer)}", known), Facts, using=using)
     return _as_items(result, old, render(old), known)
 
 
@@ -227,16 +225,6 @@ class Compaction:
     def tokens(self):
         return tokens(self.items)
 
-    def report(self):
-        lines = [f"{tokens(self.replaced)} tokens in {len(self.replaced)} items replaced by "
-                 f"{tokens(self.facts) + (self.summary.tokens if self.summary else 0)} tokens: "
-                 f"a summary and {len(self.facts)} facts"]
-        if self.summary:
-            lines.append(f"\n[summary, {self.summary.source}]\n{self.summary.content}")
-        lines.append("")
-        lines += [f"[{f.kind}{', pinned' if f.pinned else ''}] {f.content}" for f in self.facts]
-        return "\n".join(lines)
-
 
 def compressible(items, keep_recent=6):
     """The items `compact()` would actually replace -- what there is to gain by running it.
@@ -255,7 +243,7 @@ def compressible(items, keep_recent=6):
             and route(i) in ("run", "called")]
 
 
-def compact(items, keep_recent=6):
+def compact(items, keep_recent=6, using=None):
     """Compress everything older than the last `keep_recent` turns. Leave the rest alone.
 
     What is never touched, and why:
@@ -279,6 +267,9 @@ def compact(items, keep_recent=6):
         version does not restate is kept. `supersede()` drops a whole item when one thing in
         it is replaced, and anything else it said goes with it unless it is pulled out first --
         but pulled out blind, the stale values come back too (see `salvage()`)
+
+    `using`: the client its model calls go through -- a visitor's, for a chat on their key. Chapter 1's
+    shared one if not given.
     """
     now = max(i.turn for i in items)
     cutoff = now - keep_recent
@@ -298,12 +289,12 @@ def compact(items, keep_recent=6):
     if not (story or raw or superseded):
         return Compaction(list(items))
     known = [i.content for i in keep if i.pinned or i.kind in ("state", "fact")]
-    summary = summarize(story) if story else None
-    facts = extract_facts(story + raw, known=known) if story or raw else []
+    summary = summarize(story, using=using) if story else None
+    facts = extract_facts(story + raw, known=known, using=using) if story or raw else []
     if superseded:
         versions = {(i.kind, i.about) for i in superseded}
         newer = [i for i in current if (i.kind, i.about) in versions]
-        facts += salvage(superseded, newer, known=known + [f.content for f in facts])
+        facts += salvage(superseded, newer, known=known + [f.content for f in facts], using=using)
 
     new = sorted(keep + facts + ([summary] if summary else []), key=lambda i: i.turn)
     return Compaction(new, summary, facts,
@@ -329,9 +320,3 @@ def why_compress(items, budget, history_limit=None):
     if history_limit is not None and tokens(current) > history_limit:
         reasons.append(f"the run holds {tokens(current)} tokens, past the limit of {history_limit}")
     return reasons
-
-
-def missing(items, checks):
-    """Which of `checks` ({name: regex}) no longer appear anywhere in `items`' text."""
-    text = "\n".join(i.content for i in items)
-    return [name for name, pattern in checks.items() if not re.search(pattern, text, re.I)]

@@ -95,25 +95,3 @@ class Tool:
                 "parameters": parameters,
             },
         }
-
-    def validate(self, args):
-        """Arguments in, checked and converted, back out as a plain dict -- or ValidationError."""
-        return self.args.model_validate(args).model_dump()
-
-    def __call__(self, **kwargs):
-        # Checking here means there is no way to reach the function without going past its own
-        # description first. This is the first half of chapter 1's execute_tool_call(). What
-        # goes around it -- timeouts, failures handed back instead of raised, results too big to
-        # put in a conversation -- belongs to invoke.py, not to the tool.
-        return self.function(**self.validate(kwargs))
-
-    def __repr__(self):
-        return f"<Tool {self.name}({', '.join(self.args.model_fields)})>"
-
-
-def tool(function=None, *, name=None, description=None, args=None, repeatable=True):
-    """Decorator form: @tool, or @tool(description=...) when something needs overriding."""
-    if function is None:
-        return lambda f: Tool(f, name=name, description=description, args=args,
-                              repeatable=repeatable)
-    return Tool(function, name=name, description=description, args=args, repeatable=repeatable)

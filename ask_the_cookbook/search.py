@@ -1,4 +1,4 @@
-"""Ask the cookbook, with LlamaIndex: an index over this repo, a cited question-answering engine, and an agent.
+"""Ask the cookbook, with LlamaIndex: an index over the cookbook, a cited question-answering engine, and the agent's tools.
 
     the models      `chat_model()` -- gpt-oss-120b on Groq through `OpenAILike`, its client metered and capped;
                     `embed_model()` -- Gemini's gemini-embedding-001 at 768 dimensions, as chapter 4 uses it
@@ -9,14 +9,12 @@
     retrieval       `CookbookRetriever` -- vector search and BM25 fused by reciprocal rank, behind a floor:
                     a question nothing in the cookbook is near gets no passages at all
     answering       `engine()` -- LlamaIndex's `CitationQueryEngine`, so every claim points at a numbered source
-    the agent       `agent()` -- a `FunctionAgent` that can search more than once and open a file to read on
-    evaluation      `retrieval_scores()` -- hit rate and MRR with LlamaIndex's `RetrieverEvaluator`
+    the agent       `tool_functions()` -- its two tools, search_cookbook and open_file (the loop is agent.py)
 
 Nothing that calls a model is made at import time; every model is an argument, so the whole system runs
-offline against stand-ins (`ask_stubs.py`) before any token is spent.
+offline against stand-ins (tests/) before any token is spent.
 """
 
-import json
 import os
 import time
 from pathlib import Path
@@ -24,14 +22,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 from llama_index.core.retrievers import BaseRetriever
 
-import cookbook as CB
+from . import corpus as CB
 
-load_dotenv(CB.REPO / ".env")
+ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(ROOT / ".env")
 
 MODEL = "openai/gpt-oss-120b"
 GROQ = "https://api.groq.com/openai/v1"
 EMBED_MODEL, EMBED_DIM = "gemini-embedding-001", 768
-STORE = Path(__file__).resolve().parent / "store"
+STORE = ROOT / "data"
 INDEX_DIR = STORE / "index"
 PROGRESS = STORE / "progress.log"
 
@@ -163,7 +162,7 @@ def _metered():
 
         class MeteredOpenAILike(OpenAILike):
             _budget: object = PrivateAttr(default=None)
-            _context_tokens: object = PrivateAttr(default=None)     # set by agent(): see fit()
+            _context_tokens: object = PrivateAttr(default=None)     # set by the cookbook's agent(), not here: see fit()
 
             @property
             def budget(self):
@@ -291,7 +290,7 @@ def refresh(index, documents, path=INDEX_DIR, every=10, log=print):
 
 # --------------------------------------------------------------------------- retrieval
 
-# Measured with measure_floor() on the built index, not chosen: the 15 questions the cookbook answers score
+# Measured with measure_floor() (in the cookbook's 05_llamaindex/ask_index.py) on the built index, not chosen: the 15 questions the cookbook answers score
 # 0.702-0.787 on their best passage, the three it does not 0.539, 0.547 and 0.624, and the floor sits midway
 # between 0.624 and 0.702. The 0.624 is "How do I fine-tune Llama 3 on my own data?": the cookbook talks about
 # Llama models throughout, so the question is near in words, not in subject. From 18 questions; it moves with
@@ -330,14 +329,6 @@ class CookbookRetriever(BaseRetriever):
         if self.floor is not None and (self.best is None or self.best < self.floor):
             return []
         return self.fused.retrieve(query_bundle)
-
-
-def measure_floor(index, in_scope=None, out_of_scope=None):
-    """The best vector score for questions the cookbook answers, and for ones it does not."""
-    vector = index.as_retriever(similarity_top_k=1)
-    best = lambda q: vector.retrieve(q)[0].score
-    return {"in scope": {q: round(best(q), 3) for q, _, _ in (in_scope or CB.EVAL)},
-            "out of scope": {q: round(best(q), 3) for q in (out_of_scope or CB.OUT_OF_SCOPE)}}
 
 
 def label(node):
@@ -502,25 +493,14 @@ def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None):
     return [wrap(f) if wrap else f for f in (search_cookbook, open_file)]
 
 
-def tools(index, llm, k=SEARCH_K, floor=None, wrap=None):
-    """The two tools as LlamaIndex `FunctionTool`s, which read the schemas off the functions' signatures."""
-    from llama_index.core.tools import FunctionTool
-    return [FunctionTool.from_defaults(f) for f in tool_functions(index, llm, k=k, floor=floor, wrap=wrap)]
-
-
 # Both agents get eight tool calls and then must answer from what they found: chapter 2's `max_tool_calls` with
 # its graceful finish, and LlamaIndex's `max_iterations` with `early_stopping_method="generate"` -- a last call with
 # no tools offered, in each. Without it, both kept exploring a two-sided question until something else stopped
 # them. LlamaIndex's version needed a fix to be the same thing: as it ships, its last call does not include what
-# the tool calls found (`_finishing`).
+# the tool calls found (the cookbook's `_finishing`).
 MAX_TOOL_CALLS = 8
 
 
-# What one agent request may carry, in tokens of messages. LlamaIndex's agent sends everything it has found on every
-# call, and its Memory limit does not trim within a run (ask_checks.agent_memory_limit), so a long search outgrows
-# Groq's 8,000-token request limit: 07_langsmith's round 2 lost the LangGraph question to a 413 on the answer it was
-# made to give after eight tool calls. 6,000 leaves room for the tool schemas, and for the counts differing a little.
-AGENT_CONTEXT_TOKENS = 6000
 KEEP_WHOLE = 2                  # the latest results are never cut: they are what the next step is built on
 _ENCODING = None
 
@@ -567,109 +547,6 @@ def fit(messages, limit):
     return sent
 
 
-_FINISHING = None
-NO_TOOLS_NOW = ("No tools are available now. Answer the question in plain text from what you have found, and cite "
-                "the files it came from.")
-
-
-def _finishing():
-    """LlamaIndex's `FunctionAgent`, with its step-limit answer given what the run found.
-
-    `early_stopping_method="generate"` makes one last request when `max_iterations` is reached, with no tools, for an
-    answer. LlamaIndex builds it from the agent's memory -- and during a run, the tool calls and results are not in
-    memory but in the step "scratchpad", moved into memory only when the run finishes normally (`finalize`). So the
-    last request carried the system prompt, the question and the stop notice, and nothing the eight tool calls had
-    found: an answer written blind (test_ask.test_no_agent_request_outgrows_its_limit, which first showed it).
-
-    So what the run found goes into memory first -- as one message of plain text (`_found`), not as the run's tool
-    calls and results. The first version of this fix moved the tool messages in as they were, and on 08_langfuse's
-    LangGraph question (prompt v2) gpt-oss answered the no-tools request with yet another tool call, which Groq
-    refuses, on every try -- including two after NO_TOOLS_NOW was added: a request that is all tool calls invites
-    one more. With the results as text there is no call in the request to continue. If the model calls a tool
-    anyway, it is asked once more with NO_TOOLS_NOW said plainly.
-    """
-    global _FINISHING
-    if _FINISHING is None:
-        from llama_index.core.agent.workflow import FunctionAgent
-
-        class FinishingAgent(FunctionAgent):
-            async def _generate_early_stopping_response(self, ctx, max_iterations):
-                import openai
-                from llama_index.core.base.llms.types import ChatMessage
-                scratchpad = await ctx.store.get(self.scratchpad_key, default=[])
-                memory = await ctx.store.get("memory")
-                await memory.aput(ChatMessage(role="user", content=_found(scratchpad)))
-                await ctx.store.set(self.scratchpad_key, [])
-                try:
-                    return await super()._generate_early_stopping_response(ctx, max_iterations)
-                except openai.BadRequestError as error:
-                    if not _unparsed(error) and "Tool choice is none" not in str(error):
-                        raise
-                    await memory.aput(ChatMessage(role="user", content=NO_TOOLS_NOW))
-                    return await super()._generate_early_stopping_response(ctx, max_iterations)
-
-        _FINISHING = FinishingAgent
-    return _FINISHING
-
-
-FOUND_TOKENS = AGENT_CONTEXT_TOKENS - 1000      # the rest of the request: system prompt, question, stop notice
-
-
-def _found(scratchpad, limit=FOUND_TOKENS):
-    """The run's tool results as one plain-text message for the step-limit answer: the newest whole, older ones cut
-    to their labels (file, section, lines) once the whole would pass `limit` tokens -- fit()'s rule, in text."""
-    from llama_index.core.base.llms.types import ChatMessage
-    results = [m.content or "" for m in scratchpad if m.role.value == "tool"]
-    kept, used = [], 0
-    for text in reversed(results):
-        size = _tokens(ChatMessage(role="user", content=text))
-        if used + size > limit:
-            text = _labels(text)
-            size = _tokens(ChatMessage(role="user", content=text))
-        kept.append(text)
-        used += size
-    return ("You can make no more tool calls. What your tool calls found, newest last (older results cut to "
-            "their labels):\n\n" + "\n\n---\n\n".join(reversed(kept)))
-
-
-
-# How long LlamaIndex lets one agent run take (its workflow `timeout`). It was 300 seconds. Once fit() keeps every
-# request near 6,000 tokens, Groq's free-tier limit of 8,000 tokens a minute spaces the calls about 45 seconds
-# apart -- the client waits out each 429 -- so a nine- or ten-call question takes six to seven minutes, nearly all of
-# it waiting. 08_langfuse's runs lost the LangGraph question to the 300-second limit with both prompt versions.
-AGENT_TIMEOUT = 900
-
-
-def agent(index, llm, k=SEARCH_K, floor=None, wrap=None, context_tokens=AGENT_CONTEXT_TOKENS, system_prompt=AGENT_PROMPT):
-    """`system_prompt` is the agent's instructions: 08_langfuse passes versions of it kept in Langfuse."""
-    if hasattr(llm, "_context_tokens"):
-        llm._context_tokens = context_tokens        # the metered model cuts each request to fit (fit())
-    # streaming off: a streamed reply carries no `usage`, and the budget is counted from `usage`
-    return _finishing()(tools=tools(index, llm, k=k, floor=floor, wrap=wrap), llm=llm, system_prompt=system_prompt,
-                        streaming=False, timeout=AGENT_TIMEOUT, early_stopping_method="generate")
-
-
-async def run_agent(the_agent, question, max_iterations=MAX_TOOL_CALLS + 1, memory=None):
-    """One question to the agent: its answer, and every tool call it made on the way.
-
-    A run stopped part-way -- its budget spent, or LlamaIndex's step limit reached -- still comes back with
-    the calls it made and why it stopped, rather than as an exception that takes the record with it.
-    """
-    from llama_index.core.agent.workflow import ToolCallResult
-    handler = the_agent.run(user_msg=question, max_iterations=max_iterations,
-                            **({"memory": memory} if memory is not None else {}))
-    calls, answer, stopped = [], None, None
-    try:
-        async for event in handler.stream_events():
-            if isinstance(event, ToolCallResult):
-                calls.append({"tool": event.tool_name, "args": event.tool_kwargs,
-                              "returned chars": len(str(event.tool_output))})
-        answer = str(await handler).strip()
-    except Exception as error:      # noqa: BLE001 -- a stopped run is reported, not raised
-        stopped = f"{type(error).__name__}: {error}"
-    return {"question": question, "answer": answer, "stopped": stopped, "calls": calls}
-
-
 def refused_size(stopped):
     """The size of a request Groq refused as too large (a 413), from why a run stopped; else None.
 
@@ -678,33 +555,3 @@ def refused_size(stopped):
     import re
     found = re.search(r"Requested (\d+)", stopped) if stopped and "Request too large" in stopped else None
     return int(found.group(1)) if found else None
-
-
-# --------------------------------------------------------------------------- evaluation
-
-def expected_ids(index, files):
-    """Every chunk of the files an answer is in: a retrieval hits if it returns any of them."""
-    return [node_id for ref, info in index.ref_doc_info.items() if ref in files for node_id in info.node_ids]
-
-
-async def retrieval_scores(index, retriever, questions=None):
-    """Hit rate and MRR per question, by LlamaIndex's `RetrieverEvaluator`."""
-    from llama_index.core.evaluation import RetrieverEvaluator
-    evaluator = RetrieverEvaluator.from_metric_names(["hit_rate", "mrr"], retriever=retriever)
-    rows = []
-    for question, files, _ in questions or CB.EVAL:
-        result = await evaluator.aevaluate(query=question, expected_ids=expected_ids(index, files))
-        rows.append({"question": question, **{k: round(v, 3) for k, v in result.metric_vals_dict.items()}})
-    return rows
-
-
-def save(name, record):
-    """A live result, kept on disk so the notebook's summary does not depend on one kernel."""
-    STORE.mkdir(exist_ok=True)
-    (STORE / f"{name}.json").write_text(json.dumps(record, indent=1, default=str), encoding="utf-8")
-    return record
-
-
-def load(name):
-    path = STORE / f"{name}.json"
-    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None

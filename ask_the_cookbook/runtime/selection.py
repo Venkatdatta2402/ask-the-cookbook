@@ -1,15 +1,11 @@
 """Choosing which of the information you already have goes into one operation's context.
 
-Selection works on what is already in hand -- `context.available()`'s list. Retrieval is the
-other way in: it asks a memory store a question and gets back things that were NOT in hand.
-They are different operations with different failure modes, so they are different code:
+Selection works on what is already in hand -- `context.available()`'s list:
 
     select()      [Item] in, [Item] out. Local, cheap, and it can only ever drop things.
-    retrieved()   a chapter 4 `Recall` and a query in, [Item] out. It can add things, and it
-                  can be wrong about what is relevant in ways a selection over known items
-                  cannot.
-    gather()      runs one selection and any number of retrievals at the same time. Neither
-                  needs the other's output, so neither waits for it.
+
+(The cookbook also has retrieval from a chapter 4 memory store, run beside selection. This app keeps no
+memories between questions, so it is not here.)
 
 `select()` runs in a fixed order, and the order is the design:
 
@@ -28,12 +24,11 @@ The result keeps the original order. Selection decides WHAT goes in; where each 
 the model's input is construction's decision, and doing it here would decide it by accident.
 """
 
-import concurrent.futures
 import re
 from dataclasses import dataclass, field
 
-from context import Item, route, tokens
-from recall import unit
+from .context import route, tokens
+from .recall import unit
 
 # Importance is a property of what KIND of thing an item is, fixed in advance. Not rated by a
 # model per item: chapter 4 measured that, and a model asked "how important is this, 1-10"
@@ -84,23 +79,6 @@ class Selection:
     @property
     def tokens(self):
         return tokens(self.kept)
-
-    def report(self, width=70):
-        lines = [f"kept {len(self.kept)} items, {self.tokens} tokens"]
-        for item in self.kept:
-            mark = "pinned" if item.pinned else "      "
-            lines.append(f"  + {mark} t{item.turn:<3} {item.kind:<11} {_short(item.content, width)}")
-        if self.dropped:
-            lines.append(f"dropped {len(self.dropped)}")
-            for item, why in self.dropped:
-                lines.append(f"  -        t{item.turn:<3} {item.kind:<11} "
-                             f"{_short(item.content, width - 20)}  <- {why}")
-        return "\n".join(lines)
-
-
-def _short(text, width):
-    text = " ".join(text.split())
-    return text if len(text) <= width else text[: width - 3] + "..."
 
 
 def supersede(items):
@@ -222,55 +200,3 @@ def select(items, budget=None, query=None, kinds=None, relevance=overlap, keep_l
 
     kept = [i for i in current if id(i) in chosen]
     return Selection(kept, sorted(dropped, key=lambda d: d[0].turn))
-
-
-SUMMARY_HINT = ("The memories above are summaries. Call open_memory(memory_id=N) for the full "
-                "text of one before answering from it.")
-
-
-def retrieved(recall, query, k=3, turn=0, hint=True):
-    """A chapter 4 `Recall` asked `query`, its hits as `memory` items.
-
-    `Recall` already did the ranking -- similarity floor, reinforcement, top k -- so this does
-    not rank again. It only says what came back and where from.
-
-    **What goes in depends on the store, not on a setting** -- the rule `04_memory`'s `Retrieve`
-    settles. A journal that writes summaries has a second stage, so the summary goes in and
-    `open_memory` fetches a body when the model wants one. A journal without them has no second
-    stage, so the entry itself goes in. Injecting bodies from a summarising store is the
-    expensive mistake: 2,136 characters for three memories against 363, measured in
-    `04_memory/05_memory_in_the_loop`, and the model then has no reason to open anything, so
-    two-stage recall silently stops happening while the answers stay right.
-
-    **The id is in the CONTENT, not only in `about`.** It is what makes the entry openable, so
-    it has to survive every renderer: `about` only reaches the model when construction is asked
-    for labels, and `04_memory` measured ids surviving one live run in three once a listing had
-    been through a paraphrase. A fact the loop depends on does not belong in an attribute.
-    """
-    items, summarised = [], False
-    for _, eid, at, text in recall(query, k=k):
-        row = recall.journal.get(eid)
-        summary = row["summary"] if row is not None and row["summary"] else None
-        summarised |= summary is not None
-        items.append(Item("memory", f"#{eid}  {at}  {summary or text}", turn,
-                          about=f"journal#{eid}", source=f"journal#{eid}"))
-    if items and summarised and hint:
-        # An instruction about how to use the data, so it renders as one -- and unpinned, because
-        # it is true only for the calls that actually retrieved a summary. `instruction` carries
-        # the top importance, so a budget has to be very tight before it goes.
-        items.append(Item("instruction", SUMMARY_HINT, turn, source="retrieval"))
-    return items
-
-
-def gather(select_fn, *retrieve_fns):
-    """Run one selection and any number of retrievals at once; return (Selection, [Item]).
-
-    Each argument is a zero-argument callable, so the caller decides everything about how
-    each one runs -- budget, query, k -- and this only decides WHEN: all at the same time.
-    Threads rather than asyncio for the same reason as chapter 2's `Graph`: a notebook already
-    runs an event loop, and this work is blocking I/O.
-    """
-    with concurrent.futures.ThreadPoolExecutor() as pool:
-        selection = pool.submit(select_fn)
-        memories = [pool.submit(fn) for fn in retrieve_fns]
-        return selection.result(), [item for f in memories for item in f.result()]

@@ -2,9 +2,9 @@ import concurrent.futures
 import threading
 from types import SimpleNamespace
 
-from chat import Conversation
-from llm import execute_tool_call
-from think import DebugThink, transcript
+from .chat import Conversation
+from .llm import execute_tool_call
+from .think import DebugThink, transcript
 
 
 def pending_decision(conversation):
@@ -14,10 +14,12 @@ def pending_decision(conversation):
 
 
 class Act:
-    def __init__(self, functions=None, schemas=None, retries=3, branch_runtime=None, max_workers=8):
+    def __init__(self, functions=None, schemas=None, retries=3, branch_runtime=None, max_workers=8, client=None):
         self.functions = functions
         self.schemas = schemas
         self.retries = retries
+        # the client a failed call's repair (DebugThink) goes through: the run's own, or chapter 1's shared one
+        self.client = client
         # branch_runtime(branch) -> a fresh Runtime for that branch's own sub-agent loop.
         # Only needed if this Act will ever see a "fork" or "advance_branch" decision.
         self.branch_runtime = branch_runtime
@@ -351,7 +353,7 @@ class Act:
     def execute(self, tool_name, args):
         # pure: reads/writes nothing shared, only its own locals -- safe to call from several
         # threads at once (see runtime.Graph, which runs independent steps concurrently).
-        debugger = DebugThink(self.schemas)
+        debugger = DebugThink(self.schemas, client=self.client)
         attempts = []
 
         for attempt in range(self.retries):

@@ -18,10 +18,10 @@ something with `.run(conversation)`.
 
 Two things make this safe rather than clever:
 
-  - `View` overrides exactly one attribute, `messages`, and delegates everything else -- reads
-    AND writes -- to the real conversation. `pending`, `step_outputs`, `branches`, budgets and
-    the rest are machinery, not context, and a component setting `conversation.pending` must
-    set it on the real one or `Act`'s result is thrown away with the view.
+  - `View` overrides exactly one attribute, `messages`, and reads everything else from the real
+    conversation. `pending`, `step_outputs`, `branches`, budgets and the rest are machinery, not
+    context. (In the cookbook a View also passed writes through, for components that set
+    `conversation.pending`; here only `Think` is focused, and it writes nothing.)
   - the component's return value is passed straight back, so whatever it produces is appended
     to the REAL conversation by `Runtime`, exactly as before.
 
@@ -30,10 +30,8 @@ What a narrowed view cannot do is narrow what a component takes from somewhere o
 `invoke(max_tokens=)` in 03_tools or `truncate()` in this chapter, not this file's business.
 """
 
-import json
-
-from context import available
-from selection import select
+from .context import available
+from .selection import select
 
 
 class View:
@@ -46,14 +44,6 @@ class View:
     def __getattr__(self, name):
         # only reached for attributes View does not have: the machinery
         return getattr(self.conversation, name)
-
-    def __setattr__(self, name, value):
-        # `messages` is the view's own; anything else a component writes is real state and
-        # belongs on the conversation the runtime is carrying
-        if name == "messages":
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.conversation, name, value)
 
 
 def to_messages(items):
@@ -108,35 +98,6 @@ def to_messages(items):
     return messages
 
 
-def current_pass(items, conversation):
-    """This pass of the loop: the standing request, and results produced since the last decision.
-
-    A boundary, not a score. `Observe` exists to phrase the result of the call that just
-    happened, and that call is in `conversation.pending`, not in `messages`. So what it needs
-    from the conversation is almost nothing: the request, so it can name the entity correctly,
-    and anything that came back since the decision it is reporting on -- which in a live loop is
-    nothing at all, because `Observe` runs immediately after `Act`.
-
-    Two deliberate exclusions, and they are the point:
-
-      - **the rules**, even though they are pinned. Pinning means "this must reach the component
-        that answers the user", not "every component in the loop". The milliseconds rule is
-        exactly what made chapter 2's `Observe` convert 2.9 s into 2900 ms. Dropping a pinned
-        item has to be a decision somebody makes on purpose, which is what this function is.
-      - **everything older**, including the agent's own past answers and its plan. A scored
-        selection cannot express this: given weights it will always trade part of this pass for
-        something older that scored well.
-    """
-    last_decision = max((n for n, m in enumerate(conversation.messages)
-                         if m.get("role") == "decision"), default=-1)
-    # `tool_result` is excluded deliberately: the raw body already reaches Observe through
-    # `pending`, and keeping the item as well puts the same JSON in the prompt twice. Measured
-    # at 146 tokens of pure duplication on this session's metrics call.
-    keep = [i for i in items if i.kind in ("request", "decision")
-            or (i.turn > last_decision and i.kind == "observation")]
-    return sorted(keep, key=lambda i: i.turn)
-
-
 class Focus:
     """One component, given a context chosen for it.
 
@@ -146,8 +107,8 @@ class Focus:
         Focus(Think(tools=tools), budget=800)
         Focus(Observe(), kinds=("request", "observation"), budget=120)
 
-    `prepare(items, conversation)` is for everything selection cannot say: a boundary like
-    `current_pass`, a compression, a retrieval. It runs per call, which is the point -- what a
+    `prepare(items, conversation)` is for everything selection cannot say: a boundary like the
+    cookbook's `current_pass`, a compression, a retrieval. It runs per call, which is the point -- what a
     component gets is decided when it runs, not when the loop is declared. With no `policy`,
     selection is skipped entirely and `prepare` sees everything `available()` found:
 
@@ -175,9 +136,3 @@ class Focus:
         chosen = self.items(conversation)
         self.last = chosen
         return self.component.run(View(conversation, to_messages(chosen)))
-
-
-def sizes(focused):
-    """{component name: tokens it was last given} -- what each part of a loop actually cost."""
-    from context import tokens
-    return {type(f.component).__name__: tokens(f.last) for f in focused if f.last is not None}

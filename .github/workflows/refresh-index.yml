@@ -1,5 +1,5 @@
 # Bring the index up to date with the cookbook's latest commit. Run by hand from the Actions tab: no schedule.
-# It only runs refresh_index.py, the same script that runs locally; the commit it makes goes straight to main.
+# It only runs ask_the_cookbook.refresh, the same one that runs locally; the commit it makes goes straight to main.
 #
 # Set in the repo's Settings > Secrets and variables > Actions:
 #   secret   GEMINI_API_KEY   the embeddings
@@ -43,20 +43,20 @@ jobs:
       - name: Refresh
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python refresh_index.py
+        run: python -m ask_the_cookbook.refresh
 
       # Nothing to commit when the cookbook had no new commit. A commit pushed with this workflow's token does
       # not trigger other workflows, so the Space sync on push to main will not see it: the next step pushes it.
       - name: Commit
         id: commit
         run: |
-          git add -A corpus 08_frameworks/05_llamaindex/store/index README.md
+          git add -A data/corpus data/index README.md
           if git diff --cached --quiet; then
             echo "Nothing changed."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          commit=$(jq -r .commit 08_frameworks/05_llamaindex/store/index/cookbook.json | cut -c1-7)
+          commit=$(jq -r .commit data/index/cookbook.json | cut -c1-7)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Refresh the index to cookbook $commit"

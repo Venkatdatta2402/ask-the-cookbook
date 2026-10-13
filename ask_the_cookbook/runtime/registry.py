@@ -1,7 +1,7 @@
 import copy
 import re
 
-from tools import Tool
+from .tools import Tool
 
 # What the API accepts as a tool name: letters, digits, underscore, hyphen, up to 64 characters.
 # Checked when a tool is registered rather than when a request is sent, because the API rejects
@@ -66,12 +66,6 @@ class Registry:
         self._tags[name] = set(tags or ())
         return tool
 
-    def merge(self, other, prefix=None):
-        """Take everything from another registry, optionally under a prefix."""
-        for name, tool in other._tools.items():
-            self.add(tool, name=name, prefix=prefix, tags=other._tags[name])
-        return self
-
     @property
     def tools(self):
         """The JSON the model reads -- for chapter 2's `Think(tools=...)`."""
@@ -87,58 +81,6 @@ class Registry:
         """Name -> the Pydantic model that checks arguments -- for `Act(schemas=...)`."""
         return {name: tool.args for name, tool in self._tools.items()}
 
-    def invokers(self, timeout=None, max_tokens=None):
-        """Name -> the tool wrapped by `invoke`, ready for `Act(functions=...)`.
-
-        Pass `schemas=None` to Act alongside this, so the arguments are checked once, here,
-        rather than once by Act and again by invoke.
-        """
-        from invoke import invoker  # imported here so tools.py/registry.py stay standalone
-
-        return {name: invoker(tool, timeout=timeout, max_tokens=max_tokens)
-                for name, tool in self._tools.items()}
-
     @property
     def names(self):
         return list(self._tools)
-
-    def tags(self, name):
-        return self._tags[name]
-
-    def subset(self, names=None, tags=None):
-        """A smaller registry, holding the same tools.
-
-        Every tool in a registry is described to the model on every single turn, so what an agent
-        is given decides what it pays and how much it has to choose between. Handing over the
-        whole registry is a decision, not a default.
-        """
-        wanted = list(names or [])
-        if tags:
-            tags = set(tags)
-            wanted += [n for n in self._tools if self._tags[n] & tags and n not in wanted]
-        missing = [n for n in wanted if n not in self._tools]
-        if missing:
-            # Quietly returning a smaller registry would produce an agent that is simply missing
-            # a tool, and the run only goes wrong later, somewhere else, for reasons that look
-            # nothing like a typo in a name.
-            raise KeyError(f"no tool named {', '.join(repr(n) for n in missing)} is registered")
-
-        smaller = Registry()
-        for name in wanted:
-            smaller.add(self._tools[name], tags=self._tags[name])
-        return smaller
-
-    def __getitem__(self, name):
-        return self._tools[name]
-
-    def __contains__(self, name):
-        return name in self._tools
-
-    def __iter__(self):
-        return iter(self._tools.values())
-
-    def __len__(self):
-        return len(self._tools)
-
-    def __repr__(self):
-        return f"<Registry {len(self._tools)} tools: {', '.join(self._tools)}>"

@@ -1,21 +1,21 @@
 """Bring the index up to date with the cookbook's latest commit on main.
 
-    python refresh_index.py             count, then refresh: embed new and changed files, remove deleted ones
-    python refresh_index.py --dry-run   count only: which files differ and how many chunks they would embed.
-                                        Needs no key and writes nothing
+    python -m ask_the_cookbook.refresh             count, then refresh: embed new and changed files, remove deleted ones
+    python -m ask_the_cookbook.refresh --dry-run   count only: which files differ and how many chunks they would
+                                                   embed. Needs no key and writes nothing
 
 Run by hand, or by the GitHub Action, which only runs this. The steps:
-    1. the cookbook commit the index was built at, from store/index/cookbook.json
+    1. the cookbook commit the index was built at, from data/index/cookbook.json
     2. the cookbook's latest commit on main, by `git ls-remote` -- nothing downloaded. Same commit: stop
     3. the cookbook fetched at that commit into a temp folder, and compared FILE BY FILE against the index by
        document hash -- not by git diff, which also flags what nothing indexed sees, such as notebook code cells
-    4. corpus/ rewritten as exactly what is indexed, then new and changed files embedded and deleted ones removed
-       (ask_index.refresh does both; LlamaIndex's refresh_ref_docs alone never removes a file)
-    5. the commit written into store/index/cookbook.json and the README
+    4. data/corpus rewritten as exactly what is indexed, then new and changed files embedded and deleted ones
+       removed (search.refresh does both; LlamaIndex's refresh_ref_docs alone never removes a file)
+    5. the commit written into data/index/cookbook.json and the README
 
-corpus/ is where the app reads the cookbook's text from -- the agent's open_file, a passage's line numbers: every
-indexed file at its path in the cookbook, a notebook cut to its markdown cells. The index is built from it, so the
-two cannot disagree.
+data/corpus is where the app reads the cookbook's text from -- the agent's open_file, a passage's line numbers:
+every indexed file at its path in the cookbook, a notebook cut to its markdown cells. The index is built from it,
+so the two cannot disagree.
 """
 
 import argparse
@@ -25,21 +25,17 @@ import re
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / "08_frameworks" / "05_llamaindex"))
-
-import ask_index as AI  # noqa: E402
-import cookbook as CB  # noqa: E402
+from . import corpus as CB
+from . import search as AI
 
 URL = "https://github.com/Venkatdatta2402/agentic-forge-cookbook"
-CORPUS = ROOT / "corpus"
+CORPUS = CB.REPO
 COMMIT_FILE = AI.INDEX_DIR / "cookbook.json"
-README = ROOT / "README.md"
+README = AI.ROOT / "README.md"
 README_MARK = re.compile(r"(<!-- index-commit -->).*?(<!-- /index-commit -->)", re.S)
 
 # Gemini's free tier embeds 1,000 texts a day per Google project, and the day's visitor questions draw on the same
@@ -69,9 +65,8 @@ def fetch(commit, into):
 
 
 def point_at(repo):
-    """cookbook.py reads the repo it sits in (REPO = parents[2]); this points it at another. SELF moves with it:
-    it is how 05_llamaindex leaves itself out, and left at this repo's copy the fetched one would be indexed."""
-    CB.REPO, CB.SELF = repo, repo / "08_frameworks" / "05_llamaindex"
+    """corpus.py reads data/corpus; this points it at another copy of the cookbook -- a fetched one -- and back."""
+    CB.REPO = repo
 
 
 def compare(index, documents):
@@ -87,7 +82,7 @@ def compare(index, documents):
 
 
 def snapshot(files, source, to=CORPUS):
-    """corpus/ as exactly what is indexed: each file at its path, a notebook as its markdown cells alone.
+    """data/corpus as exactly what is indexed: each file at its path, a notebook as its markdown cells alone.
     Rewritten whole, so a file deleted from the cookbook goes from here too."""
     if to.exists():
         shutil.rmtree(to)
@@ -169,7 +164,7 @@ def main():
     point_at(CORPUS)
     from_corpus = CB.documents()
     if [(d.id_, d.hash) for d in from_corpus] != [(d.id_, d.hash) for d in documents]:
-        raise SystemExit("corpus/ does not reproduce the cookbook's documents; the index was not touched")
+        raise SystemExit("data/corpus does not reproduce the cookbook's documents; the index was not touched")
     stats = AI.refresh(index, from_corpus)
     note(head, stats)
     print(f"Done: {stats['files']} files, {stats['chunks']:,} chunks, at {head[:7]}.")

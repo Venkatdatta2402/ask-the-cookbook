@@ -2,7 +2,7 @@ import json
 import os
 
 from dotenv import load_dotenv
-from openai import AsyncOpenAI, BadRequestError, OpenAI
+from openai import BadRequestError, OpenAI
 from pydantic import ValidationError
 
 load_dotenv()
@@ -22,55 +22,15 @@ client = OpenAI(
     max_retries=8,
 )
 
-async_client = AsyncOpenAI(
-    api_key=os.environ["GROQ_API_KEY"],
-    base_url="https://api.groq.com/openai/v1",
-    max_retries=8,
-)
 
-
-def chat(messages, model=DEFAULT_MODEL, **kwargs):
-    response = client.chat.completions.create(
+def chat(messages, model=DEFAULT_MODEL, using=None, **kwargs):
+    # `using`: a client of the caller's own -- one agent run's key -- instead of the shared one above
+    response = (using or client).chat.completions.create(
         model=model,
         messages=messages,
         **kwargs,
     )
     return response.choices[0].message.content
-
-
-def stream_chat(messages, model=DEFAULT_MODEL, **kwargs):
-    stream = client.chat.completions.create(
-        model=model,
-        messages=messages,
-        stream=True,
-        **kwargs,
-    )
-    for chunk in stream:
-        delta = chunk.choices[0].delta.content
-        if delta:
-            yield delta
-
-
-async def async_stream_chat(messages, model=DEFAULT_MODEL, **kwargs):
-    stream = await async_client.chat.completions.create(
-        model=model,
-        messages=messages,
-        stream=True,
-        **kwargs,
-    )
-    async for chunk in stream:
-        delta = chunk.choices[0].delta.content
-        if delta:
-            yield delta
-
-
-def stream_and_print(messages, model=DEFAULT_MODEL, **kwargs):
-    full = []
-    for delta in stream_chat(messages, model=model, **kwargs):
-        print(delta, end="", flush=True)
-        full.append(delta)
-    print()
-    return "".join(full)
 
 
 def _response_format(schema):
@@ -84,7 +44,7 @@ def _response_format(schema):
             "json_schema": {"name": schema.__name__.lower(), "schema": schema.model_json_schema()}}
 
 
-def extract(prompt, schema, retries=3, model=DEFAULT_MODEL):
+def extract(prompt, schema, retries=3, model=DEFAULT_MODEL, using=None):
     """Get a validated Pydantic object back from the model.
 
     Two lines of defence, and the second is not redundant.
@@ -107,11 +67,11 @@ def extract(prompt, schema, retries=3, model=DEFAULT_MODEL):
     response_format = _response_format(schema)
     for _ in range(retries):
         try:
-            reply = chat(messages, model=model, response_format=response_format)
+            reply = chat(messages, model=model, using=using, response_format=response_format)
         except BadRequestError:
             # this model cannot enforce schemas -- ask for plain JSON and lean on validation
             response_format = {"type": "json_object"}
-            reply = chat(messages, model=model, response_format=response_format)
+            reply = chat(messages, model=model, using=using, response_format=response_format)
         messages.append({"role": "assistant", "content": reply})
         try:
             return schema.model_validate_json(reply)
@@ -176,31 +136,3 @@ def execute_tool_call(tool_call, functions, schemas=None):
         args = schemas[name].model_validate(args).model_dump()
     result = functions[name](**args)
     return str(result)
-
-
-def resolve_tools(messages, tools, functions, schemas=None, retries=3, model=DEFAULT_MODEL):
-    messages = list(messages)
-    for _ in range(retries):
-        try:
-            response = client.chat.completions.create(model=model, messages=messages, tools=tools)
-        except BadRequestError as e:
-            messages.append({
-                "role": "user",
-                "content": tool_call_failure(e) or "That tool call could not be processed. Try again, calling one of the available tools correctly.",
-            })
-            continue
-
-        message = response.choices[0].message
-        messages.append(message)
-
-        if not message.tool_calls:
-            return message.content
-
-        for tool_call in message.tool_calls:
-            try:
-                content = execute_tool_call(tool_call, functions, schemas)
-            except Exception as e:
-                content = f"Error: {e}"
-            messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": content})
-
-    raise ValueError(f"Failed to get a final answer after {retries} attempts")

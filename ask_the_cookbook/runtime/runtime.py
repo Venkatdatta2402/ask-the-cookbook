@@ -1,12 +1,9 @@
-import concurrent.futures
 import difflib
 import json
 import time
 
-from act import pending_decision
-from chat import count_tokens
-from llm import chat
-from think import latest_plan, render, resolve_args, step_dependencies
+from .act import pending_decision
+from .chat import count_tokens
 
 
 def _similar_args(a, b, threshold=0.8):
@@ -58,10 +55,6 @@ class Runtime:
         self._position = 0
         self._iterations = 0
         self._started_at = None
-
-    def add(self, component):
-        self.loop.append(component)
-        return self
 
     @property
     def finished(self):
@@ -261,118 +254,3 @@ class Runtime:
             "stopped": reason,
         })
         return conversation
-
-
-class Loop:
-    # a bounded inner cycle: repeats a full pass through `components` until `until(conversation)`
-    # is true after a pass, then hands control back silently (no message appended) -- unlike
-    # Runtime's own stop conditions, this is a normal handoff, not a doom/abnormal stop, so it
-    # never explains itself in the conversation. Also stops immediately, mid-pass, the moment any
-    # component produces a final assistant message -- that can happen before `until` would ever
-    # fire (e.g. a decision to respond, which has nothing to do with `until`'s own condition).
-    # Doesn't get Runtime's budget/doom-loop protection -- that stays the outer Runtime's job.
-    # `until` is content-driven -- a predicate over the conversation, for when the number of
-    # passes depends on what actually happens. `count` is a plain fixed number, for when it
-    # doesn't. Either works alone; how many rounds a task deserves is the caller's call, which
-    # is the whole reason this is a parameter and not a constant inside some pattern.
-    def __init__(self, components, until=None, count=None, max_iterations=50):
-        assert until is not None or count is not None, "Loop needs either `until` or `count`"
-        self.components = list(components)
-        self.until = until
-        self.count = count
-        self.max_iterations = max_iterations
-
-    def run(self, conversation):
-        passes = 0
-        for _ in range(self.max_iterations):
-            for component in self.components:
-                output = component.run(conversation)
-                if output is not None:
-                    conversation.messages.append(output)
-                if conversation.messages and conversation.messages[-1].get("role") == "assistant":
-                    return None
-            passes += 1
-            if self.count is not None and passes >= self.count:
-                return None
-            if self.until is not None and self.until(conversation):
-                return None
-        return None
-
-
-class Graph:
-    # runs a DAG-shaped plan (see think.step_dependencies): each step starts the instant its
-    # own dependencies finish, never gated behind a "wave" of unrelated steps that just happen
-    # to be ready around the same time. Unlike Runtime/Loop, this one genuinely needs multiple
-    # steps in flight at once, so it's the one place in this chapter that imports from think.py
-    # -- it's inherently plan-specific, not a general primitive like Loop.
-    def __init__(self, act, extractors=None, max_workers=8):
-        self.act = act
-        self.extractors = extractors or {}
-        self.max_workers = max_workers
-
-    def run(self, conversation):
-        # Deciding to answer is itself an Act -- a graph of exactly one. Without this the loop
-        # could never finish: the planner would conclude "done, here is the answer", nothing
-        # would turn that decision into an assistant message, and control would come back here
-        # to re-run an already-finished plan until the budget stopped it.
-        last = pending_decision(conversation)
-        if last is not None and last.get("type") == "respond":
-            return self.act.run(conversation)
-
-        steps = latest_plan(conversation)["steps"]
-        deps = [step_dependencies(step) for step in steps]
-
-        # $stepN is numbered globally, across every round -- a replan continues the count rather
-        # than restarting it (see PlannerThink._continue_or_finish, which tells the planner
-        # exactly which index to carry on from). So earlier rounds' outputs are seeded here as
-        # already-satisfied dependencies, and this round's steps take the indices after them.
-        # Resolving against a fresh per-round dict instead would silently make "$step0" mean
-        # this round's first step, and a replan referring back to round one would read the
-        # wrong value.
-        step_outputs = getattr(conversation, "step_outputs", None)
-        if step_outputs is None:
-            step_outputs = conversation.step_outputs = []
-        base = len(step_outputs)
-        results = dict(enumerate(step_outputs))
-        step_outputs.extend([None] * len(steps))
-        started = set()
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as pool:
-            in_flight = {}
-
-            def launch_ready():
-                for i, step in enumerate(steps):
-                    if i in started or not (deps[i] <= results.keys()):
-                        continue
-                    started.add(i)
-                    args = resolve_args(step, results)
-                    future = pool.submit(self.act.execute, step["tool"], json.dumps(args))
-                    in_flight[future] = i
-
-            launch_ready()
-            while in_flight:
-                finished = next(concurrent.futures.as_completed(in_flight))
-                i = in_flight.pop(finished)
-                effect = finished.result()
-                results[base + i] = effect["content"]
-                step_outputs[base + i] = effect["content"]  # by index: completion order varies
-                conversation.messages.append({"role": "tool", "content": self._phrase(effect, conversation)})
-                launch_ready()
-
-        return None
-
-    def _phrase(self, effect, conversation):
-        extractor = self.extractors.get(effect["tool"])
-        if extractor is not None:
-            return extractor(effect)
-        return chat([{
-            "role": "user",
-            "content": (
-                f"Conversation so far:\n{render(conversation)}\n\n"
-                f"The tool `{effect['tool']}` was just called and returned:\n{effect['content']}\n\n"
-                "State this result as one plain factual sentence, using the conversation only to "
-                "phrase it correctly (e.g. which units, which entity). Do not speculate about why "
-                "it matters, what happens next, or how it will be used. No preamble, no "
-                "commentary -- the fact only."
-            ),
-        }])

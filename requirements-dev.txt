@@ -1,0 +1,3 @@
+# What a local copy needs on top of the app's packages: the tests. The Space installs requirements.txt alone.
+-r requirements.txt
+pytest==9.1.1

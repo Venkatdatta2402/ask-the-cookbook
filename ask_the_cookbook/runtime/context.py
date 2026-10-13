@@ -20,7 +20,7 @@ message can be a request, a constraint, or small talk; all three arrive as `role
 
 from dataclasses import dataclass
 
-from chat import count_tokens
+from .chat import count_tokens
 
 # What kind of thing an item is. The distinctions are the ones a selection actually acts on:
 #
@@ -193,8 +193,11 @@ def available(conversation, scratchpad=None, constraints=(), profile=None, catal
         items.append(Item("decision", f"{tool}({args})", at, about=f"{tool} {args}"))
 
     now = len(messages)
+    # Notes come in at the START of the run, not the end. In the cookbook they were facts gathered as a run went;
+    # here they are what a compaction kept of a chat's OLDEST turns. At the current turn they counted as the newest
+    # items -- recency scored them highest, and `select(keep_last=)` guaranteed them in place of the previous answer.
     for note in getattr(conversation, "notes", None) or []:
-        items.append(Item("fact", note, now, source="notes"))
+        items.append(Item("fact", note, 0, source="notes"))
     if scratchpad is not None:
         for key, value in scratchpad.entries.items():
             items.append(Item("state", f"{key}: {value}", now, about=f"scratchpad:{key}",

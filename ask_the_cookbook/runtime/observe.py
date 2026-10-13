@@ -1,5 +1,5 @@
-from llm import chat
-from think import branch_label, render, transcript
+from .llm import chat
+from .think import branch_label, render, transcript
 
 
 class Observe:

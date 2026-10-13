@@ -1,2 +1,2 @@
 # Hugging Face refuses a file over 10 MB that is not in Git LFS; the vector store passes that once refreshed
-08_frameworks/05_llamaindex/store/index/default__vector_store.json filter=lfs diff=lfs merge=lfs -text
+data/index/default__vector_store.json filter=lfs diff=lfs merge=lfs -text

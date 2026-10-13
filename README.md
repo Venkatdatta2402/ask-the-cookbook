@@ -19,6 +19,16 @@ scratch agent finds its chapters the way it does there:
 | `05_context` | what each model call is sent |
 | `06_orchestration/supervisor.py` | `Think` and `verbatim` |
 
+## The index
+
+<!-- index-commit -->
+Built from the cookbook at commit [`fb39ada`](https://github.com/Venkatdatta2402/agentic-forge-cookbook/tree/fb39adac66b77dcd2a6ed4f17300e6b415632b63): 124 files, 1,015 chunks.
+<!-- /index-commit -->
+
+`refresh_index.py` brings it up to date with the cookbook's latest commit: it embeds only new or changed
+files, removes deleted ones, and writes `corpus/`, the cookbook's text exactly as indexed (notebooks as their
+markdown cells), which the app reads files from.
+
 ## Setup
 
 ```

@@ -1,0 +1,17 @@
+# The one list of packages. Hugging Face Spaces installs from this file; environment.yml points here too.
+# Versions are the ones the cookbook's 05_llamaindex project was built and measured with.
+
+# chapter 1's client, on Groq's OpenAI-compatible API
+openai==2.46.0
+pydantic==2.13.4
+python-dotenv==1.2.2
+tiktoken==0.13.0
+
+# the index, its hybrid search, and Groq and Gemini through LlamaIndex
+llama-index-core==0.14.25
+llama-index-llms-openai-like==0.8.0
+llama-index-embeddings-google-genai==0.6.0
+llama-index-retrievers-bm25==0.8.0
+
+# CodeSplitter parses .py files with tree-sitter: only refreshing the index needs it
+tree-sitter-language-pack==1.21.0

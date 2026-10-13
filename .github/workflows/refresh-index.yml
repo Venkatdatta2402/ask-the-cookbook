@@ -1,0 +1,72 @@
+# Bring the index up to date with the cookbook's latest commit. Run by hand from the Actions tab: no schedule.
+# It only runs refresh_index.py, the same script that runs locally; the commit it makes goes straight to main.
+#
+# Set in the repo's Settings > Secrets and variables > Actions:
+#   secret   GEMINI_API_KEY   the embeddings
+#   secret   HF_TOKEN         a Hugging Face token with write access to the Space
+#   variable HF_SPACE         the Space, as <hf-user>/ask-the-cookbook
+# Without HF_TOKEN and HF_SPACE the refresh still runs and commits; it just isn't pushed to the Space.
+
+name: Refresh the index
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# two refreshes at once would embed the same files twice and race to push
+concurrency:
+  group: refresh-index
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # whether the Space push can run, without handing the token itself to every step
+      CAN_PUSH_TO_SPACE: ${{ secrets.HF_TOKEN != '' && vars.HF_SPACE != '' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true           # the vector store is in LFS: without this the script would read a pointer file
+          fetch-depth: 0      # the Space is pushed whole history; a shallow clone cannot be pushed
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Refresh
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python refresh_index.py
+
+      # Nothing to commit when the cookbook had no new commit. A commit pushed with this workflow's token does
+      # not trigger other workflows, so the Space sync on push to main will not see it: the next step pushes it.
+      - name: Commit
+        id: commit
+        run: |
+          git add -A corpus 08_frameworks/05_llamaindex/store/index README.md
+          if git diff --cached --quiet; then
+            echo "Nothing changed."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          commit=$(jq -r .commit 08_frameworks/05_llamaindex/store/index/cookbook.json | cut -c1-7)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh the index to cookbook $commit"
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # --force: GitHub is the source and the Space a copy of it, which starts with a commit of HF's own
+      - name: Push to the Space
+        if: steps.commit.outputs.changed == 'true' && env.CAN_PUSH_TO_SPACE == 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: git push --force "https://${HF_SPACE%%/*}:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" HEAD:main

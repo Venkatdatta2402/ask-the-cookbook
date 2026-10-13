@@ -7,7 +7,7 @@ from openai.types.chat import ChatCompletion
 
 from ask_the_cookbook.runtime import llm as shared
 from ask_the_cookbook.runtime.selection import select
-from ask_the_cookbook.session import KEEP_RECENT, Session
+from ask_the_cookbook.session import COMPACT_WORTH, KEEP_RECENT, Session
 
 
 def completion(content, model="m"):
@@ -32,10 +32,11 @@ class Compactor:
 
 
 def chat_of(exchanges):
+    """A chat whose answers are the size of real ones (~400 tokens): three old exchanges are worth compacting."""
     session = Session()
     for n in range(exchanges):
         session.add(f"Question {n} about chapter {n} and its memory store, at some length to have weight?",
-                    f"Answer {n}: chapter {n} explains it, with a few sentences of detail about how it works. " * 3)
+                    f"Answer {n}: chapter {n} explains it, with a few sentences of detail about how it works. " * 20)
     return session
 
 
@@ -121,8 +122,9 @@ def test_a_follow_up_turned_away_points_to_ask_about(app, ask, monkeypatch):
 
 
 def test_the_page_carries_the_ask_about_parts(app):
+    import gradio as gr
     import httpx
-    app.demo.launch(prevent_thread_lock=True, quiet=True, js=app.ASK_ABOUT_JS, css=app.ASK_ABOUT_CSS)
+    app.demo.launch(prevent_thread_lock=True, quiet=True, js=app.ASK_ABOUT_JS, css=app.CSS, theme=gr.themes.Soft())
     try:
         assert httpx.get(app.demo.local_url).status_code == 200
         config = httpx.get(app.demo.local_url.rstrip("/") + "/config").text
@@ -147,7 +149,52 @@ def test_numbered_citations_are_kept_as_file_and_lines(app, monkeypatch):
         "refused": False, "answer": "Compared on values [1].", "response": response})
     shown, kept = app.ask_engine("How are calls compared?", "gsk_x", Session())
     assert kept == f"Compared on values [02_agent_runtime/runtime.py, lines {start}-{start + 4}]."
-    assert "Compared on values [1]." in shown and "**Sources**" in shown
+    at = f"{app.blob('02_agent_runtime/runtime.py')}#L{start}-L{start + 4}"
+    assert f"Compared on values [[1]]({at})." in shown                       # the citation opens the lines
+    assert f"1. [02_agent_runtime/runtime.py, lines {start}-{start + 4}]({at})" in shown
+
+
+def passage(file, text):
+    from llama_index.core.schema import TextNode
+    return TextNode(text=f"Source 1:\n{text}", metadata={"file": file})
+
+
+def test_a_readme_source_opens_at_its_lines_named_by_its_heading(app):
+    from ask_the_cookbook import corpus
+    file = "04_memory/README.md"
+    lines = (corpus.REPO / file).read_text(encoding="utf-8").splitlines()
+    heading = next(n for n, line in enumerate(lines) if line.startswith("## "))
+    start = next(n for n, line in enumerate(lines, 1) if n > heading + 1 and len(line.strip()) >= 30
+                 and not line.startswith("#"))
+    name, url = app.source(passage(file, "\n".join(lines[start - 1:start + 2])))
+    assert name == f"{file}, lines {start}-{start + 2} § {lines[heading][3:].strip()}"
+    assert url == f"{app.blob(file)}?plain=1#L{start}-L{start + 2}"
+
+
+def test_a_module_source_opens_at_its_lines(app):
+    from ask_the_cookbook import corpus
+    file = "04_memory/stores.py"
+    lines = (corpus.REPO / file).read_text(encoding="utf-8").splitlines()
+    start = next(n for n, line in enumerate(lines, 1) if len(line.strip()) >= 30)
+    assert app.source(passage(file, "\n".join(lines[start - 1:start + 2]))) == (
+        f"{file}, lines {start}-{start + 2}", f"{app.blob(file)}#L{start}-L{start + 2}")
+
+
+def test_a_notebook_source_opens_on_github_named_by_its_heading(app):
+    from ask_the_cookbook import corpus
+    file = "02_agent_runtime/notebooks/02_the_agent_loop.ipynb"
+    prose = corpus._notebook_prose(corpus.REPO / file).splitlines()
+    at = prose.index("## `act.py`: executing a decision already made")
+    text = next(line for line in prose[at + 1:] if len(line.strip()) >= 30)
+    node = passage(file, text)
+    assert app.source(node) == (f"{file} § `act.py`: executing a decision already made", app.blob(file))
+    assert app.where(node).startswith(f"{file}, lines ")          # the chat still keeps its lines, for the agent
+
+
+def test_a_comment_in_a_code_example_is_not_a_heading(app, monkeypatch):
+    text = "## Setup\nRun this:\n```bash\n# install the packages\npip install x\n```\nThen go on."
+    monkeypatch.setattr(app.A, "file_text", lambda file: text)
+    assert app.heading_above("any.md", 7) == "Setup"
 
 
 def test_every_message_on_the_demo_key_counts(app, ask, monkeypatch):
@@ -189,16 +236,70 @@ def test_compaction_keeps_the_recent_turns_and_summarises_the_rest(no_shared_cal
 def test_a_short_chat_has_nothing_to_compact(app):
     session = chat_of(KEEP_RECENT // 2)
     assert not session.can_compact()
-    *_, status = list(app.compact_now("", session))[-1]
-    assert "Nothing to compact yet" in status
+    _, _, status, _ = list(app.compact_now("", session))[-1]
+    assert "Not worth compacting yet: 0 tokens" in status
     assert app.DAILY.left() == app.DAILY_LIMIT              # nothing spent, nothing counted
+
+
+def test_small_old_turns_are_not_worth_compacting(app, no_shared_calls):
+    """The live case: old turns too small for a summary and facts to come out any smaller."""
+    session = Session()
+    for n in range(5):
+        session.add(f"Short question {n}?", f"Short answer {n}.")
+    assert 0 < session.compactable() < COMPACT_WORTH and not session.can_compact()
+    _, _, status, _ = list(app.compact_now("", session))[-1]
+    assert "Not worth compacting yet" in status and no_shared_calls == []
+    assert app.DAILY.left() == app.DAILY_LIMIT
+
+
+def test_a_compaction_that_comes_out_larger_is_undone(app, monkeypatch):
+    class Verbose(Compactor):
+        def create(self, **kwargs):
+            self.calls.append(kwargs)
+            if "response_format" in kwargs:
+                facts = [{"kind": "fact", "text": f"A long fact number {n}, restating the chat at length. " * 10}
+                         for n in range(30)]
+                return completion(json.dumps({"facts": facts}))
+            return completion("A summary far longer than what it replaces. " * 200)
+
+    monkeypatch.setattr(app, "client", lambda key: Verbose())
+    session = chat_of(6)
+    history, held = list(session.history), session.held()
+    shown, session, status, _ = list(app.compact_now("gsk_visitor", session))[-1]
+    assert session.history == history and session.notes == [] and session.held() == held
+    assert "would not have made the chat any smaller" in status
+    assert not any("compacted" in m["content"] for m in shown)
+
+
+@pytest.mark.parametrize("answer, kept", [
+    ("Ranked [1].", "Ranked [a.py, lines 1-5]."),
+    ("Ranked [1][2].", "Ranked [a.py, lines 1-5][b.md, lines 7-9]."),
+    ("Ranked [1, 2].", "Ranked [a.py, lines 1-5; b.md, lines 7-9]."),
+    ("Ranked [Source 2].", "Ranked [b.md, lines 7-9]."),
+    ("Ranked [Source 1, commentary in the same file].", "Ranked [a.py, lines 1-5, commentary in the same file]."),
+    ("Exact facts【1†L9-L15】【2†L13-L20】.", "Exact facts[a.py, lines 1-5][b.md, lines 7-9]."),
+    ("A list [3] and [0.5] stay.", "A list [3] and [0.5] stay."),
+])
+def test_every_citation_form_gpt_oss_writes_is_kept_as_file_and_lines(app, answer, kept):
+    assert app.cited(answer, {1: "a.py, lines 1-5", 2: "b.md, lines 7-9"}) == kept
+
+
+@pytest.mark.parametrize("answer, shown", [
+    ("Ranked [1].", "Ranked [[1]](u1)."),
+    ("Ranked [Source 2].", "Ranked [[2]](u2)."),
+    ("Ranked [1, 2].", "Ranked [[1]](u1)[[2]](u2)."),
+    ("Exact facts【1†L9-L15】.", "Exact facts[[1]](u1)."),
+    ("A list [3] stays.", "A list [3] stays."),
+])
+def test_every_citation_form_is_shown_as_a_link(app, answer, shown):
+    assert app.linked(answer, {1: "u1", 2: "u2"}) == shown
 
 
 def test_compact_now_on_a_visitors_key_uses_their_key(app, monkeypatch, no_shared_calls):
     visitor = Compactor()
     monkeypatch.setattr(app, "client", lambda key: visitor)
     session = chat_of(6)
-    shown, session, status = list(app.compact_now("gsk_visitor", session))[-1]
+    shown, session, status, _ = list(app.compact_now("gsk_visitor", session))[-1]
     assert "Older turns compacted" in shown[-1]["content"]
     assert visitor.calls and no_shared_calls == []
     assert app.DAILY.left() == app.DAILY_LIMIT
@@ -246,6 +347,6 @@ def test_a_compactions_notes_count_as_the_oldest_items():
 
 
 def test_new_chat_starts_empty(app):
-    shown, session, status = app.new_chat()
+    shown, session, status, _ = app.new_chat()
     assert shown == [] and session.history == [] and session.notes == []
     assert "Chat holds **0 tokens**. The agent can take up to **5,000** per model call." in status

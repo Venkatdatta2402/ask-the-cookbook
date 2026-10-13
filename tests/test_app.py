@@ -34,7 +34,7 @@ def test_the_engine_answers_with_linked_sources(app, ask, engine_offline):
     reply, status = ask("What counts as a doom loop?")
     assert "**Sources**" in reply
     assert f"/blob/{app.BUILT['commit']}/" in reply
-    assert f"**{app.DAILY_LIMIT - 1} of {app.DAILY_LIMIT}**" in status
+    assert f"**{app.DAILY_LIMIT - 1} of {app.DAILY_LIMIT}**" in app.allowance()
 
 
 def test_with_the_floor_a_question_nothing_is_near_is_turned_away(app, ask, monkeypatch):
@@ -83,6 +83,11 @@ def test_errors_reach_the_visitor_as_words(app, ask, fake_client, monkeypatch, s
     error = kind("refused", response=httpx.Response(status, request=httpx.Request("POST", "https://x")), body=None)
     monkeypatch.setattr(app, "client", lambda key: fake_client(key, fail=error))
     assert says in ask("q", key="gsk_visitor", mode=app.AGENTIC)[0]
+
+
+def test_an_example_clicked_in_the_empty_chat_fills_the_question_box(app):
+    from types import SimpleNamespace
+    assert app.example(SimpleNamespace(value={"text": app.EXAMPLES[0]})) == app.EXAMPLES[0]
 
 
 def test_the_page_loads(app):

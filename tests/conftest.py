@@ -45,7 +45,7 @@ def ask(app):
     def one(question, key="", mode=app.RAG, session=None, quote=""):
         session = session if session is not None else Session()
         before = len(session.shown)
-        shown, _, status, _, _ = list(app.respond(question, quote, key, mode, session))[-1]
+        shown, _, status, _, _, _ = list(app.respond(question, quote, key, mode, session))[-1]
         return (shown[-1]["content"] if len(shown) > before else status), status
     return one
 

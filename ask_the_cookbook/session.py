@@ -21,10 +21,13 @@ from dataclasses import dataclass, field
 from . import agent
 from .runtime.chat import count_tokens
 from .runtime.compression import compact, compressible
-from .runtime.context import Item
+from .runtime.context import Item, tokens
 
 AGENT_CALL = agent.CONTEXT_TOKENS      # what one agent model call may carry, the chat included
 KEEP_RECENT = 6                        # messages compaction leaves word for word: the last three exchanges
+# Tokens that must be old enough to replace before compacting is worth its calls. Measured live: two short exchanges
+# (~70 tokens) came back as a summary and facts of ~190, and the chat grew from 227 tokens to 343.
+COMPACT_WORTH = 1000
 QUOTE_LIMIT = 1000                     # characters a selection may be: a few sentences, ~250 tokens
 
 
@@ -59,16 +62,23 @@ class Session:
         turns = [Item("message", f"{m['role']}: {m['content']}", n) for n, m in enumerate(self.history, 1)]
         return notes + turns
 
+    def compactable(self):
+        """Tokens compaction would replace: everything older than the last KEEP_RECENT messages."""
+        return tokens(compressible(self.items(), keep_recent=KEEP_RECENT))
+
     def can_compact(self):
-        return bool(compressible(self.items(), keep_recent=KEEP_RECENT))
+        return self.compactable() >= COMPACT_WORTH
 
     def compact(self, client=None):
         """Replace everything older than the last KEEP_RECENT messages with a summary and facts. Returns the tokens
-        held before and after. `client`: whose key the 2-3 model calls go on (None: chapter 1's shared one)."""
-        before = self.held()
+        held before and after; if the result is no smaller, the chat is left as it was (after == before).
+        `client`: whose key the 2-3 model calls go on (None: chapter 1's shared one)."""
+        before, kept = self.held(), (list(self.history), list(self.notes))
         result = compact(self.items(), keep_recent=KEEP_RECENT, using=client)
         self.history = [self.history[i.turn - 1] for i in result.items if i.kind == "message"]
         # the summary first: it tells the story the facts belong to
         self.notes = ([i.content for i in result.items if i.kind == "summary"]
                       + [i.content for i in result.items if i.kind in ("fact", "constraint")])
+        if self.held() >= before:
+            self.history, self.notes = kept
         return before, self.held()

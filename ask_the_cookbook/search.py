@@ -16,6 +16,7 @@ offline against stand-ins (tests/) before any token is spent.
 """
 
 import os
+import re
 import time
 from pathlib import Path
 
@@ -49,6 +50,8 @@ class Budget:
         self.calls = self.prompt = self.completion = 0
         self.largest = 0        # the biggest single request sent, in prompt tokens: Groq's free tier refuses >8,000
         self.per_call = []      # each call's tokens, in + out
+        self.in_out = []        # each call's (in, out): Groq refuses a request on its INPUT; its output only counts
+        #                         against the minute's tokens, so the two are worth seeing apart
         self.retried = 0        # requests sent again after Groq could not parse the model's output
 
     @property
@@ -67,6 +70,7 @@ class Budget:
             self.prompt += usage.prompt_tokens
             self.largest = max(self.largest, usage.prompt_tokens)
             self.per_call.append(usage.prompt_tokens + usage.completion_tokens)
+            self.in_out.append((usage.prompt_tokens, usage.completion_tokens))
             self.completion += usage.completion_tokens
             self._log()
 
@@ -77,7 +81,7 @@ class Budget:
     def summary(self):
         return {"calls": self.calls, "prompt": self.prompt, "completion": self.completion, "total": self.spent,
                 "largest request": self.largest, "largest call (in + out)": max(self.per_call, default=0),
-                "per call": list(self.per_call), "retried": self.retried}
+                "per call": list(self.per_call), "per call (in, out)": list(self.in_out), "retried": self.retried}
 
     def _log(self, note=""):
         STORE.mkdir(exist_ok=True)
@@ -424,6 +428,42 @@ def excerpt(text, query, size=PASSAGE_CHARS):
     return i, j - 1, "\n".join(lines[i:j])[:size]
 
 
+# The words a search is ABOUT: lower case, without small words, and with the commonest endings off -- "waiting" is
+# "wait", "hazards" is "hazard". Retrieval matches by meaning and by words (BM25 counts them; the embedding barely
+# notices order), so two searches with the same words find the same passages, whatever order they come in.
+_QUERY_STOPWORDS = frozenset(
+    "a an and are as at be by can do does for from has how in into is it its of on or that the their them then "
+    "there these this to was what when where which who why will with".split())
+
+
+def query_words(query):
+    words = set()
+    for word in re.findall(r"[a-z0-9_]+", query.lower()):
+        if word in _QUERY_STOPWORDS:
+            continue
+        for ending in ("ing", "ed", "es", "s"):
+            if len(word) > len(ending) + 3 and word.endswith(ending):
+                word = word[: -len(ending)]
+                break
+        words.add(word)
+    return frozenset(words)
+
+
+def near_duplicate(query, earlier):
+    """The earlier search this one repeats in other words, or None: the same words, all its words within an earlier
+    search's, or four in five shared. Live, every run of a two-sided LangGraph question spent its second call on its
+    first one reworded -- "LangGraph desk wait for a person" and "waiting for a person LangGraph desk" -- and the
+    exact-repeat guard let it through."""
+    mine = query_words(query)
+    if not mine:
+        return None
+    for previous in earlier:
+        theirs = query_words(previous)
+        if mine <= theirs or len(mine & theirs) / len(mine | theirs) >= 0.8:
+            return previous
+    return None
+
+
 def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None):
     """The agent's two tools as plain functions: LlamaIndex's agent and the scratch agent both get these.
     `wrap`, if given, is applied to each (07_langsmith passes LangSmith's `traceable`).
@@ -439,6 +479,7 @@ def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None):
     # the same arguments again is refused. Live, on a two-sided question, the agent searched "hazard" twice
     # running and drifted until its budget ran out. One set of calls per `tools()`, so one per question.
     made = set()
+    searched = []           # this question's searches, for near_duplicate()
 
     def again(*call):
         key = tuple(" ".join(str(part).lower().split()) for part in call)
@@ -455,6 +496,13 @@ def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None):
         repeated = again("search", query)
         if repeated:
             return repeated
+        earlier = near_duplicate(query, searched)
+        if earlier is not None:
+            return (f'You already searched for nearly this: "{earlier}". Search matches by meaning and by words, not '
+                    "their order, so the same words find the same passages -- what it found is above, or listed by "
+                    "label in the calls already made. Search for a part of the question you have not covered yet, or "
+                    "open_file a passage you already found to read more of it.")
+        searched.append(query)
         nodes = retriever.retrieve(query)
         if not nodes:
             return "Nothing in the cookbook is close to that."

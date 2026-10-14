@@ -20,11 +20,42 @@ from . import search as A
 
 CONTEXT_TOKENS = 5000      # what one Think call may be sent: 8,000 is the request limit, and tool schemas,
 KEEP_LAST = 2              # the system prompt and the model's own output fit in what is left
+# What the step-limit answer's call may be sent. It carries no tool schemas, and Groq's 8,000 is checked against a
+# request's INPUT -- calls of ~5,000 with max_tokens=4096 reserved were never refused -- so it can take more: 8,000
+# less the instructions and stop notice (~500) and a margin for chapter 5 counting in cl100k, gpt-oss in o200k.
+# Live, a step-limit answer written from 5,000 of ~10,000 read got three facts wrong that the reading had right.
+FINAL_TOKENS = 7000
 # Every kind but `tool_result`: Observe passes a result through verbatim, so the observation IS the tool's
 # result, and chapter 5 lists the raw result again as its own item. Measured offline: 6,538 tokens of
 # observations and 6,413 of the same text again as raw results.
 THINK_SEES = ("instruction", "request", "constraint", "message", "observation", "decision", "state",
               "fact", "memory", "summary")
+
+
+def calls_note(conversation):
+    """Every tool call this run has made, each with the LABELS of what it returned -- file, section, lines -- as one
+    pinned item. None before the first call.
+
+    Selection keeps each call within CONTEXT_TOKENS by dropping older results whole, and the record that a call was
+    made went with them: live, on a two-sided LangGraph question, the agent searched "double_send LangGraph" twice,
+    the second time refused by the repeat guard -- one of its eight calls spent on nothing. With this note it always
+    sees what it has asked and where the findings are, ~30 tokens a call, and open_file reads any of them again.
+    The cookbook's LlamaIndex agent cut old results to their labels for the same reason (search.fit)."""
+    from .runtime.context import Item
+    made = [m for m in conversation.messages if m.get("role") == "decision" and m.get("type") == "tool_call"]
+    if not made:
+        return None
+    lines = []
+    for n, call in enumerate(made, 1):
+        returned = str(call.get("result", ""))
+        labels = [line for line in returned.splitlines() if line.startswith("[")]
+        what = "; ".join(labels) if labels else (returned[:100] + ("..." if len(returned) > 100 else ""))
+        lines.append(f"{n}. {call['tool']} {call['content']} -> {what or '(nothing yet)'}")
+    note = ("Tool calls already made in this run, with what each returned (by label; open_file reads any of it "
+            "again). Do not repeat a call, and do not search again with mostly the same words: search matches by "
+            "meaning and words, not their order, so it finds the same passages. Search for a part of the question "
+            "not covered yet.\n" + "\n".join(lines))
+    return Item("state", note, len(conversation.messages), about="calls made", source="run", pinned=True)
 
 
 class metered:
@@ -59,9 +90,12 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
           max_tool_calls=A.MAX_TOOL_CALLS, client=None):
     """The loop, and the context system that chooses what its Think is sent. `client`: the OpenAI client its
     Think calls the model through; chapter 1's shared one if not given."""
+    from dataclasses import replace
+
     from llama_index.core.llms import MockLLM
 
     from .runtime.act import Act
+    from .runtime.context import available
     from .runtime.focus import Focus, View, to_messages
     from .runtime.observe import Observe
     from .runtime.registry import Registry
@@ -80,7 +114,11 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
         """
 
         def finish(self, conversation, reason):
-            return self.component.finish(View(conversation, to_messages(self.items(conversation))), reason)
+            # the answer's own context: FINAL_TOKENS, and no calls note -- it is for choosing the next call, and
+            # there is none; left in, its labels let the answer cite files whose text it no longer sees
+            chosen = prepare(available(conversation), conversation, final=True)
+            self.last = chosen
+            return self.component.finish(View(conversation, to_messages(chosen)), reason)
 
     # the retriever's fusion step takes an LLM it never calls (one query, no variants): LlamaIndex's MockLLM
     # says so plainly, and keeps the scratch agent's model calls all on chapter 1's client
@@ -88,7 +126,26 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
     context = ContextSystem()
     think = Think(model=model, tools=registry.tools, allow_fork=False, explain=False, max_tokens=4096, client=client)
     policy = Policy(budget=context_tokens, keep_last=keep_last, kinds=THINK_SEES)
-    focused = FocusedThink(think, prepare=lambda items, conversation: context.apply(items, conversation, policy))
+
+    def prepare(items, conversation, final=False):
+        """Chapter 5's selection within the budget, with the calls note added after it -- out of the same budget, so
+        a request is no larger than before. For the step-limit answer (`final`): FINAL_TOKENS, and no note."""
+        if final:
+            return context.apply(items, conversation, replace(policy, budget=FINAL_TOKENS))
+        note = calls_note(conversation)
+        if note is None:
+            return context.apply(items, conversation, policy)
+        try:
+            chosen = context.apply(items, conversation, replace(policy, budget=policy.budget - note.tokens))
+        except ValueError as error:
+            # the question and the last two results must go in, and when two long reads leave no room for the note
+            # beside them, selection refuses -- and the run with it. The results come first: this call goes without
+            if "Selection can leave things out" not in str(error):
+                raise
+            return context.apply(items, conversation, policy)
+        return chosen + [note]
+
+    focused = FocusedThink(think, prepare=prepare)
     runtime = Runtime(loop=[focused,
                             Act(functions=registry.functions, schemas=registry.schemas, client=client),
                             Observe(extractors={name: verbatim for name in registry.names})],
@@ -97,7 +154,7 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
     return runtime, context
 
 
-def run(index, question, budget, client=None, history=(), notes=(), **settings):
+def run(index, question, budget, client=None, history=(), notes=(), watch=None, **settings):
     """One question: the answer, every tool call, why it stopped if it did, and what each call was sent.
 
     `client`: an OpenAI client for this run alone -- its own key and address -- so runs at once on different keys
@@ -105,13 +162,18 @@ def run(index, question, budget, client=None, history=(), notes=(), **settings):
 
     `history` and `notes`: a chat's earlier turns ({"role", "content"}) and what a compaction kept of older ones.
     They become `message` and `fact` items beside the question, and chapter 5's selection decides, call by call,
-    how much of them fits."""
+    how much of them fits.
+
+    `watch(conversation)`, if given, is handed the run's conversation before it starts: the page reads it as it
+    grows, to say which step the agent is on."""
     from .runtime.chat import Conversation
     runtime, context = build(index, client=client, **settings)
     conversation = Conversation(system=A.AGENT_PROMPT)
     conversation.messages.extend(dict(m) for m in history)
     conversation.notes = list(notes)
     conversation.messages.append({"role": "user", "content": question})
+    if watch is not None:
+        watch(conversation)
     answer, stopped = None, None
     with metered(budget, client):
         try:
@@ -135,4 +197,16 @@ def run(index, question, budget, client=None, history=(), notes=(), **settings):
              if m.get("role") == "decision" and m.get("type") == "tool_call"]
     return {"question": question, "answer": answer, "stopped": stopped, "calls": calls,
             "context per call": [str(t) for t in context.traces],
+            "last call": seen(runtime.loop[0].last),
             "usage": {**budget.summary(), "refused request": A.refused_size(stopped)}}
+
+
+def seen(items):
+    """What one model call was given, item by item, without the text: its kind, tokens, and what it is -- the
+    labels of a search result, the call a result came from -- enough to tell which findings reached it."""
+    out = []
+    for item in items or []:
+        labels = [line for line in item.content.splitlines() if line.startswith("[")][:3]
+        what = item.about or "; ".join(labels) or item.content.splitlines()[0][:70]
+        out.append(f"{item.kind:<12}{item.tokens:>6}t  {what}")
+    return out

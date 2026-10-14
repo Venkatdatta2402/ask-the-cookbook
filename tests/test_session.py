@@ -62,8 +62,8 @@ def rag_offline(app, monkeypatch):
     from llama_index.core.llms import MockLLM
     monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
     monkeypatch.setattr(app.A, "FLOOR", -1)
-    searched, real_ask = [], app.A.ask
-    monkeypatch.setattr(app.A, "ask", lambda engine, q: searched.append(q) or real_ask(engine, q))
+    searched, real_rag = [], app.rag
+    monkeypatch.setattr(app, "rag", lambda q, key, stage: searched.append(q) or real_rag(q, key, stage))
     return searched
 
 
@@ -145,7 +145,7 @@ def test_numbered_citations_are_kept_as_file_and_lines(app, monkeypatch):
     response = SimpleNamespace(source_nodes=[SimpleNamespace(node=node)])
     monkeypatch.setattr(app, "chat_model", lambda key: None)
     monkeypatch.setattr(app.A, "engine", lambda index, llm: None)
-    monkeypatch.setattr(app.A, "ask", lambda engine, q: {
+    monkeypatch.setattr(app, "rag", lambda q, key, stage: {
         "refused": False, "answer": "Compared on values [1].", "response": response})
     shown, kept = app.ask_engine("How are calls compared?", "gsk_x", Session())
     assert kept == f"Compared on values [02_agent_runtime/runtime.py, lines {start}-{start + 4}]."
@@ -284,6 +284,61 @@ def test_every_citation_form_gpt_oss_writes_is_kept_as_file_and_lines(app, answe
     assert app.cited(answer, {1: "a.py, lines 1-5", 2: "b.md, lines 7-9"}) == kept
 
 
+def test_code_is_never_read_as_citations(app):
+    """Live, inside a table: `pairs[0] == pairs[2] and pairs[1] == pairs[3]` had [2], [1], [3] linked to sources."""
+    code = "`pairs[0] == pairs[2] and pairs[1] == pairs[3] and pairs[0] != pairs[1]`"
+    links = {1: "u1", 2: "u2", 3: "u3"}
+    assert app.linked(f"| Oscillation | {code} |", links) == f"| Oscillation | {code} |"
+    fenced = "```python\nif seen[1] == seen[2]:\n    stop()\n```"
+    assert app.linked(f"Like this [1]:\n{fenced}", links) == f"Like this [[1]](u1):\n{fenced}"
+    assert app.linked("an index pairs[2] outside code", links) == "an index pairs[2] outside code"
+    assert app.cited(f"See {code} [2].", {2: "a.py, lines 1-5"}) == f"See {code} [a.py, lines 1-5]."
+    assert app.link_files("`[04_memory/recall.py]` is code") == "`[04_memory/recall.py]` is code"
+
+
+def test_a_bare_source_n_in_prose_is_a_citation_too(app):
+    """Live: "The retry implementation in `Act.execute` is shown in Source 1." """
+    assert app.linked("It is shown in Source 1.", {1: "u1"}) == "It is shown in [[1]](u1)."
+    assert app.cited("It is shown in Source 1.", {1: "a.py, lines 1-5"}) == "It is shown in [a.py, lines 1-5]."
+    assert app.linked("**Sources**", {1: "u1"}) == "**Sources**"                     # a heading, no number
+
+
+def test_the_models_own_sources_list_is_dropped(app):
+    answer = ("No, the retries are internal.\n\n**Sources**  \n- The retry implementation is shown in Source 1.\n"
+              "- The definition of a decision is in Source 2.")
+    assert app.without_own_sources(answer) == "No, the retries are internal."
+
+
+def test_a_sources_heading_followed_by_prose_is_kept(app):
+    answer = "### Sources\nThe two notebooks disagree here, and the code settles it."
+    assert app.without_own_sources(answer) == answer
+
+
+def test_passages_from_one_section_are_one_source_and_renumbered(app, monkeypatch):
+    """Live: sources 2 and 4 were the same notebook section, listed twice. Merged, the answer's [4] becomes [2]."""
+    from types import SimpleNamespace
+    from ask_the_cookbook import corpus
+    notebook = "02_agent_runtime/notebooks/02_the_agent_loop.ipynb"
+    prose = corpus._notebook_prose(corpus.REPO / notebook).splitlines()
+    at = prose.index("## `act.py`: executing a decision already made")
+    first, second = [line for line in prose[at + 1:at + 40] if len(line.strip()) >= 30][:2]
+    module = "02_agent_runtime/runtime.py"
+    code = (corpus.REPO / module).read_text(encoding="utf-8").splitlines()
+    start = next(n for n, line in enumerate(code, 1) if line.startswith("def _similar_args"))
+    nodes = [passage(module, "\n".join(code[start - 1:start + 2])), passage(notebook, first),
+             passage(module, "\n".join(code[start + 4:start + 6])), passage(notebook, second)]
+    response = SimpleNamespace(source_nodes=[SimpleNamespace(node=node) for node in nodes])
+    monkeypatch.setattr(app, "chat_model", lambda key: None)
+    monkeypatch.setattr(app.A, "engine", lambda index, llm: None)
+    monkeypatch.setattr(app, "rag", lambda q, key, stage: {
+        "refused": False, "answer": "Code [1], notebook [2], more code [3], notebook again [4].", "response": response})
+    shown, kept = app.ask_engine("How?", "gsk_x", Session())
+    listed = shown.split("**Sources**")[1].strip().splitlines()
+    assert len(listed) == 3                                         # the notebook section once
+    assert "notebook again [[2]](" in shown and "[[4]]" not in shown
+    assert kept.count(notebook) == 2                                # the chat keeps each passage's own lines
+
+
 @pytest.mark.parametrize("answer, shown", [
     ("Ranked [1].", "Ranked [[1]](u1)."),
     ("Ranked [Source 2].", "Ranked [[2]](u2)."),
@@ -347,6 +402,6 @@ def test_a_compactions_notes_count_as_the_oldest_items():
 
 
 def test_new_chat_starts_empty(app):
-    shown, session, status, _ = app.new_chat()
+    shown, session, status, _ = app.new_chat("")
     assert shown == [] and session.history == [] and session.notes == []
     assert "Chat holds **0 tokens**. The agent can take up to **5,000** per model call." in status

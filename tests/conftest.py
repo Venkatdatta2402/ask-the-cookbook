@@ -6,6 +6,9 @@ import os
 os.environ["GROQ_API_KEY"] = "gsk_placeholder_owner"     # set before .env is read: load_dotenv does not override
 os.environ["GEMINI_API_KEY"] = "placeholder"
 os.environ.pop("GOOGLE_API_KEY", None)                    # Google's library prefers it to GEMINI_API_KEY
+# the tests' daily count in a file of its own, never the real app's
+import tempfile  # noqa: E402
+os.environ["DAILY_FILE"] = os.path.join(tempfile.mkdtemp(prefix="ask-tests-"), "daily_count.json")
 
 import json  # noqa: E402
 

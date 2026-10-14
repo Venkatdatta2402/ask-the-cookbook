@@ -19,3 +19,5 @@ tree-sitter-language-pack==1.21.0
 
 # the app (app.py). The Space's sdk_version in README.md must match
 gradio==6.30.0
+# the Space runs on ZeroGPU, the only Gradio hardware a free account gets: it needs this imported (app.py)
+spaces==0.51.3

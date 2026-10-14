@@ -1,4 +1,4 @@
-"""The chat: follow-ups, the meter, Compact now, and what each costs the demo key's day."""
+"""The chat: follow-ups, the meter, and Compact now."""
 
 import json
 
@@ -97,7 +97,6 @@ def test_a_selection_over_the_limit_is_refused_before_any_call(app, ask):
     from ask_the_cookbook.session import QUOTE_LIMIT
     reply, _ = ask("Why?", quote="x" * (QUOTE_LIMIT + 1))
     assert f"at most {QUOTE_LIMIT:,} characters" in reply
-    assert app.DAILY.left() == app.DAILY_LIMIT
 
 
 def test_agentic_rag_has_the_passage_pinned_in_its_context(app, ask, fake_client, monkeypatch):
@@ -197,15 +196,6 @@ def test_a_comment_in_a_code_example_is_not_a_heading(app, monkeypatch):
     assert app.heading_above("any.md", 7) == "Setup"
 
 
-def test_every_message_on_the_demo_key_counts(app, ask, monkeypatch):
-    from llama_index.core.llms import MockLLM
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
-    session = Session()
-    ask("What is a doom loop?", session=session)
-    ask("And how is it detected?", session=session)
-    assert app.DAILY.left() == app.DAILY_LIMIT - 2
-
-
 def test_the_agent_starts_from_the_chat(app, ask, fake_client, monkeypatch):
     made = []
     monkeypatch.setattr(app, "client", lambda key: made.append(fake_client(key, search=False)) or made[-1])
@@ -236,9 +226,8 @@ def test_compaction_keeps_the_recent_turns_and_summarises_the_rest(no_shared_cal
 def test_a_short_chat_has_nothing_to_compact(app):
     session = chat_of(KEEP_RECENT // 2)
     assert not session.can_compact()
-    _, _, status, _ = list(app.compact_now("", session))[-1]
+    _, _, status = list(app.compact_now("", session))[-1]
     assert "Not worth compacting yet: 0 tokens" in status
-    assert app.DAILY.left() == app.DAILY_LIMIT              # nothing spent, nothing counted
 
 
 def test_small_old_turns_are_not_worth_compacting(app, no_shared_calls):
@@ -247,9 +236,8 @@ def test_small_old_turns_are_not_worth_compacting(app, no_shared_calls):
     for n in range(5):
         session.add(f"Short question {n}?", f"Short answer {n}.")
     assert 0 < session.compactable() < COMPACT_WORTH and not session.can_compact()
-    _, _, status, _ = list(app.compact_now("", session))[-1]
+    _, _, status = list(app.compact_now("", session))[-1]
     assert "Not worth compacting yet" in status and no_shared_calls == []
-    assert app.DAILY.left() == app.DAILY_LIMIT
 
 
 def test_a_compaction_that_comes_out_larger_is_undone(app, monkeypatch):
@@ -265,7 +253,7 @@ def test_a_compaction_that_comes_out_larger_is_undone(app, monkeypatch):
     monkeypatch.setattr(app, "client", lambda key: Verbose())
     session = chat_of(6)
     history, held = list(session.history), session.held()
-    shown, session, status, _ = list(app.compact_now("gsk_visitor", session))[-1]
+    shown, session, status = list(app.compact_now("gsk_visitor", session))[-1]
     assert session.history == history and session.notes == [] and session.held() == held
     assert "would not have made the chat any smaller" in status
     assert not any("compacted" in m["content"] for m in shown)
@@ -354,19 +342,17 @@ def test_compact_now_on_a_visitors_key_uses_their_key(app, monkeypatch, no_share
     visitor = Compactor()
     monkeypatch.setattr(app, "client", lambda key: visitor)
     session = chat_of(6)
-    shown, session, status, _ = list(app.compact_now("gsk_visitor", session))[-1]
+    shown, session, status = list(app.compact_now("gsk_visitor", session))[-1]
     assert "Older turns compacted" in shown[-1]["content"]
     assert visitor.calls and no_shared_calls == []
-    assert app.DAILY.left() == app.DAILY_LIMIT
     assert session.notes and f"Chat holds **{session.held():,} tokens**" in status
 
 
-def test_compact_now_on_the_demo_key_counts_as_a_question(app, monkeypatch):
+def test_compact_now_without_a_key_uses_the_demo_key(app, monkeypatch):
     owner = Compactor()
     monkeypatch.setattr(shared.client.chat.completions, "create", owner.create)
     list(app.compact_now("", chat_of(6)))
     assert owner.calls
-    assert app.DAILY.left() == app.DAILY_LIMIT - 1
 
 
 def test_after_compaction_the_agent_gets_the_summary(app, ask, fake_client, monkeypatch, no_shared_calls):
@@ -402,6 +388,6 @@ def test_a_compactions_notes_count_as_the_oldest_items():
 
 
 def test_new_chat_starts_empty(app):
-    shown, session, status, _ = app.new_chat("")
+    shown, session, status = app.new_chat()
     assert shown == [] and session.history == [] and session.notes == []
     assert "Chat holds **0 tokens**. The agent can take up to **5,000** per model call." in status

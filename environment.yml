@@ -2,7 +2,7 @@ name: ask-the-cookbook
 channels:
   - conda-forge
 dependencies:
-  - python=3.13
+  - python=3.12
   - pip
   - pip:
     - -r requirements-dev.txt

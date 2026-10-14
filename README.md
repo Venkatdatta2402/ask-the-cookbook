@@ -1,3 +1,19 @@
+---
+# the Hugging Face Space's settings (https://huggingface.co/docs/hub/spaces-config-reference); GitHub shows them
+# as a table. sdk_version must match gradio in requirements.txt. Python 3.12: the Space runs on ZeroGPU, which
+# takes only 3.12 or 3.10
+title: Ask the Cookbook
+emoji: 🍳
+colorFrom: yellow
+colorTo: green
+sdk: gradio
+sdk_version: 6.30.0
+python_version: "3.12"
+app_file: app.py
+pinned: false
+short_description: Questions on agentic-forge-cookbook, answered with sources
+---
+
 # Ask the Cookbook
 
 Ask questions about [agentic-forge-cookbook](https://github.com/Venkatdatta2402/agentic-forge-cookbook) and get
@@ -6,8 +22,8 @@ answers drawn from its READMEs, notebook prose and code, with the files they cam
 Two modes:
 
 - **RAG**: one retrieval from the cookbook, then one model call that answers from the best five passages and
-  cites them. A few seconds and about 3,200 tokens. Free on the demo's key, up to 50 questions a day across all
-  visitors.
+  cites them. A few seconds and about 4,000 tokens. Free on the demo's key until Groq's daily limit for it is
+  reached (about 50 questions, shared by all visitors), or on your own key.
 - **Agentic RAG**: retrieval is a tool the model calls as many times as the question needs, with a second tool to
   open files and read further, inside an agent loop. For questions that span chapters. A few minutes and 30-40k
   tokens, so it runs on your own [Groq API key](https://console.groq.com/keys) (free), which is used for your
@@ -41,7 +57,7 @@ data/
     index/                 the saved LlamaIndex index (the vector store is in Git LFS)
     corpus/                the cookbook's text exactly as indexed; the app reads files from here
 tests/                     offline tests: stand-in models and fake clients, no keys, no tokens
-.github/workflows/         the index refresh, run by hand from the Actions tab
+.github/workflows/         the sync to the Space, and the index refresh (run by hand from the Actions tab)
 ```
 
 ## The index
@@ -69,7 +85,7 @@ python app.py              # the app, at http://127.0.0.1:7860 (questions spend 
 pytest                     # the tests, offline
 ```
 
-Without conda: `pip install -r requirements-dev.txt` on Python 3.13.
+Without conda: `pip install -r requirements-dev.txt` on Python 3.12 (the Space's).
 
 ## Where the code comes from
 

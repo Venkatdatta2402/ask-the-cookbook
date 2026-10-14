@@ -1,10 +1,9 @@
 """Ask the Cookbook, as a Gradio app: the Hugging Face Space.
 
-    RAG           one retrieval, then one answer with citations (search.engine), on the owner's Groq key:
-                  DAILY_LIMIT questions a day, all visitors together, counted here -- the count starts again if the
-                  Space restarts, and Groq's own daily limit still stands behind it
-    your own key  a Groq key (gsk_...): questions on the visitor's own Groq account and its limits, not counted
-                  here, and agentic RAG -- retrieval as a tool the model calls as
+    RAG           one retrieval, then one answer with citations (search.engine), on the owner's Groq key, until
+                  Groq's own daily limit for it is reached (200k tokens: about 50 questions, all visitors together)
+    your own key  a Groq key (gsk_...): questions on the visitor's own Groq account and its limits, and agentic
+                  RAG -- retrieval as a tool the model calls as
                   often as it decides, in the agent loop (agent: chapter 2's loop, chapter 5's context). The same
                   model either way, gpt-oss-120b, the one the agent was tuned on. Groq only: Hugging Face's router
                   serves the model too, but bills from credit a free account no longer has (402 "no remaining
@@ -14,14 +13,17 @@ It is a chat (session.py), kept for the browser session only. Select text in an 
 appears: the passage goes into the question, which RAG retrieves with and agentic RAG has pinned in its context.
 Without a selection, RAG answers the question as asked; agentic RAG has the earlier turns as candidates for each
 call's context, and chapter 5's selection decides what fits. A meter shows how much the chat holds, and Compact
-now replaces older turns with a summary (chapter 5's compaction). Every message, and every compaction, on the
-owner's key counts against DAILY_LIMIT.
+now replaces older turns with a summary (chapter 5's compaction).
 
 Every question also costs one Gemini embedding (an agent question one per search) on the owner's key, whichever
 key answers it: the index was embedded with Gemini, and a question has to be too.
 
 The cookbook's text is read from data/corpus (ask_the_cookbook.refresh writes it).
 """
+
+# First: on a ZeroGPU Space (the one Gradio hardware a free HF account gets), `spaces` must be imported before
+# anything else. Anywhere else it does nothing.
+import spaces  # noqa: I001
 
 import concurrent.futures
 import html
@@ -31,8 +33,6 @@ import random
 import re
 import threading
 import time
-from datetime import datetime, timezone
-from pathlib import Path
 
 import gradio as gr
 import openai
@@ -45,65 +45,17 @@ from ask_the_cookbook.session import Session
 COOKBOOK = "https://github.com/Venkatdatta2402/agentic-forge-cookbook"
 BUILT = json.loads((A.INDEX_DIR / "cookbook.json").read_text(encoding="utf-8"))
 
-DAILY_LIMIT = 50            # questions a day on the owner's key: ~3,200 Groq tokens each, of 200k a day
 MAX_QUESTION = 500          # characters: a question, not a document to summarise on someone else's key
 
 RAG, AGENTIC = "RAG", "Agentic RAG"
 
+
+@spaces.GPU(duration=1)
+def _zerogpu():
+    """Never called. ZeroGPU refuses to start a Space with no @spaces.GPU function, and this app needs no GPU: its
+    models run on Groq and Gemini."""
+
 INDEX = A.open_index()
-
-
-# --------------------------------------------------------------------------- the daily limit
-
-class Daily:
-    """Questions answered on the owner's key today (UTC), and none past the limit -- one count for every visitor
-    and session. Taken before the question is answered, so visitors asking at once cannot go past it together.
-
-    Kept in a file as well as in memory (`path`): restarting the app kept starting the count again at the limit.
-    A Space's own disk is wiped when the Space restarts (unless it has persistent storage), so there it survives
-    everything but that."""
-
-    def __init__(self, limit, path=None):
-        self.limit, self.day, self.used, self.path = limit, None, 0, path
-        self.lock = threading.Lock()
-        if path is not None and path.exists():
-            try:
-                saved = json.loads(path.read_text(encoding="utf-8"))
-                self.day, self.used = datetime.fromisoformat(saved["day"]).date(), int(saved["used"])
-            except (ValueError, KeyError, TypeError):
-                pass                                    # unreadable: start the day's count again
-
-    def _today(self):
-        today = datetime.now(timezone.utc).date()
-        if today != self.day:
-            self.day, self.used = today, 0
-
-    def _save(self):
-        if self.path is None:
-            return
-        # written beside, then moved into place: a crash mid-write cannot leave half a count
-        partial = self.path.with_suffix(".partial")
-        partial.write_text(json.dumps({"day": self.day.isoformat(), "used": self.used}), encoding="utf-8")
-        os.replace(partial, self.path)
-
-    def take(self):
-        with self.lock:
-            self._today()
-            if self.used >= self.limit:
-                return False
-            self.used += 1
-            self._save()
-            return True
-
-    def left(self):
-        with self.lock:
-            self._today()
-            return self.limit - self.used
-
-
-# on a Space with persistent storage, point DAILY_FILE at it (/data/...); by default, beside the app
-DAILY_FILE = Path(os.environ.get("DAILY_FILE", Path(__file__).resolve().parent / "daily_count.json"))
-DAILY = Daily(DAILY_LIMIT, DAILY_FILE)
 
 
 # --------------------------------------------------------------------------- the models
@@ -389,7 +341,11 @@ def trouble(error, own_key):
     if isinstance(error, openai.RateLimitError):
         if own_key:
             return "Your key has hit its rate limit. Wait a little, or until its daily limit resets."
-        return "The demo's Groq key has reached its daily limit. Paste your own key in the sidebar, or come back tomorrow."
+        # Groq's refusal names the limit: "... on tokens per day (TPD)", or per minute when visitors ask at once
+        if "per day" in str(error):
+            return ("The demo's Groq key has reached its daily limit. Paste your own key in the sidebar, or come back "
+                    "tomorrow.")
+        return "The demo's Groq key is busy (Groq's per-minute limit). Try again in a minute, or paste your own key."
     if isinstance(error, openai.APIStatusError) and status == 413:
         return "That request was too large for the model's limit. Try a shorter or narrower question."
     print(f"error: {type(error).__name__}: {str(error)[:300]}", flush=True)
@@ -403,20 +359,12 @@ def status(session, note=""):
               f"call.")
 
 
-def allowance(mine=False):
-    """The sidebar's line on the demo key, beside the key box it is the alternative to. With a visitor's own key in
-    the box, their questions are not counted -- and the line says so, rather than a count that does not move."""
+def whose(mine=False):
+    """The sidebar's line on which key answers, beside the key box. It follows the box."""
     if mine:
         return ("Your key is in use: your questions go on your own Groq account, under its limits, and don't use "
                 "the shared demo key.")
-    # how much is left, not a number: the count is the app's own, and starts again when the Space restarts
-    left = DAILY.left()
-    state = ("used up for today -- paste your own key above, or come back tomorrow" if left <= 0
-             else "running low" if left <= DAILY_LIMIT * LOW else "plenty left today")
-    return f"Without a key, questions use a shared demo key: **{state}**."
-
-
-LOW = 0.2           # the share of the day's demo-key questions left at which the sidebar says "running low"
+    return "Without a key, RAG questions use a shared demo key, until Groq's daily limit for it is reached."
 
 
 def own(key):
@@ -424,7 +372,7 @@ def own(key):
 
 
 def whose_key(key, mode=None):
-    """(the key to use, own key?, a problem to show instead), taking a daily question when it is the demo key's."""
+    """(the key to use, own key?, a problem to show instead)."""
     key = (key or "").strip()
     if key:
         if not key.startswith("gsk_"):
@@ -432,20 +380,16 @@ def whose_key(key, mode=None):
         return key, True, None
     if mode == AGENTIC:
         return None, False, "Agentic RAG runs on your own key: paste a Groq API key in the sidebar."
-    if not DAILY.take():
-        return None, False, ("Today's free questions are used up. Paste your own Groq API key in the sidebar to keep "
-                             "asking, or come back tomorrow.")
     return os.environ["GROQ_API_KEY"], False, None
 
 
 def respond(question, quote, key, mode, session):
     """One message, from the page: a question, and the passage it is about if the visitor pressed Ask about.
-    Yields (the chat, the session, the status line, the demo key's allowance, the question box, the quote box)."""
+    Yields (the chat, the session, the status line, the question box, the quote box)."""
     question, quote = (question or "").strip(), (quote or "").strip()
-    mine = own(key)
 
     def turned_away(note, keep_question=True):
-        return session.shown, session, status(session, note), allowance(mine), question if keep_question else "", quote
+        return session.shown, session, status(session, note), question if keep_question else "", quote
 
     if not question:
         yield turned_away("Type a question first.", keep_question=False)
@@ -466,7 +410,7 @@ def respond(question, quote, key, mode, session):
     said = doing(mode, stage)
     session.shown += [{"role": "user", "content": chat.showing(question, quote)},
                       {"role": "assistant", "content": working(mode, stage, 0.0, order)}]
-    yield session.shown, session, status(session), allowance(mine), "", ""
+    yield session.shown, session, status(session), "", ""
     # The answer is worked out in the background. Meanwhile the message carries the turning words (CSS, in the
     # browser) and a line on what is really happening -- re-sent only when that line changes. A re-sent message is
     # drawn afresh, so it carries how far into the words' cycle it is, and they go on where they were.
@@ -476,14 +420,14 @@ def respond(question, quote, key, mode, session):
             said = doing(mode, stage)
             session.shown[-1] = {"role": "assistant",
                                  "content": working(mode, stage, time.monotonic() - started, order)}
-            yield session.shown, session, status(session), allowance(mine), "", ""
+            yield session.shown, session, status(session), "", ""
     try:
         shown, kept = job.result()
         session.add(message, kept)
     except Exception as error:  # noqa: BLE001 -- shown to the visitor as words, not a trace
         shown = trouble(error, own_key)
     session.shown[-1] = {"role": "assistant", "content": shown}
-    yield session.shown, session, status(session), allowance(mine), "", ""
+    yield session.shown, session, status(session), "", ""
 
 
 WORKERS = concurrent.futures.ThreadPoolExecutor(max_workers=16)      # answers being worked out, behind the page
@@ -530,38 +474,36 @@ def step(call):
 
 def compact_now(key, session):
     """Compact now: older turns replaced by a summary and facts, by chapter 5's compaction. Yields (the chat, the
-    session, the status line, the demo key's allowance). On the demo key it counts as a question; on a visitor's key
-    the calls go on theirs."""
-    mine = own(key)
+    session, the status line). On the demo key the calls go on the owner's key; on a visitor's key on theirs."""
     if not session.can_compact():
         note = (f"Not worth compacting yet: {session.compactable():,} tokens are older than the last "
                 f"{chat.KEEP_RECENT // 2} exchanges (which are always kept as they are), and a summary is only "
                 f"smaller once at least {chat.COMPACT_WORTH:,} are.")
-        yield session.shown, session, status(session, note), allowance(mine)
+        yield session.shown, session, status(session, note)
         return
     key, own_key, problem = whose_key(key)
     if problem:
-        yield session.shown, session, status(session, problem), allowance(mine)
+        yield session.shown, session, status(session, problem)
         return
-    yield session.shown, session, status(session, "*Compacting older turns...*"), allowance(mine)
+    yield session.shown, session, status(session, "*Compacting older turns...*")
     try:
         before, after = session.compact(client(key) if own_key else None)
     except Exception as error:  # noqa: BLE001 -- shown to the visitor as words, not a trace
-        yield session.shown, session, status(session, trouble(error, own_key)), allowance(mine)
+        yield session.shown, session, status(session, trouble(error, own_key))
         return
     if after >= before:
         note = "Compacting would not have made the chat any smaller, so it was left as it was."
-        yield session.shown, session, status(session, note), allowance(mine)
+        yield session.shown, session, status(session, note)
         return
     note = (f"*Older turns compacted: the chat now holds {after:,} tokens, down from {before:,}. The transcript above "
             "stays; the model gets a summary of the older part.*")
     session.shown.append({"role": "assistant", "content": note})
-    yield session.shown, session, status(session), allowance(mine)
+    yield session.shown, session, status(session)
 
 
-def new_chat(key):
+def new_chat():
     fresh = Session()
-    return fresh.shown, fresh, status(fresh), allowance(own(key))
+    return fresh.shown, fresh, status(fresh)
 
 
 def example(choice: gr.SelectData):
@@ -702,7 +644,7 @@ CSS = COOKING_CSS + TABLE_CSS + """
 /* the chat's state, quiet and on one line with the two things that act on it */
 #chat-state { align-items: center; }
 #meter, #meter p { font-size: var(--text-sm); color: var(--body-text-color-subdued); margin: 0; }
-#allowance, #index { font-size: var(--text-sm); color: var(--body-text-color-subdued); }
+#whose-key, #index { font-size: var(--text-sm); color: var(--body-text-color-subdued); }
 """
 
 with gr.Blocks(title="Ask the Cookbook") as demo:
@@ -718,7 +660,7 @@ with gr.Blocks(title="Ask the Cookbook") as demo:
                          info="Needed for Agentic RAG. With it, every question goes on your own Groq account, under "
                               "its limits, instead of the shared demo key. Used for your questions only, never stored.")
         gr.Markdown("Get one free at [console.groq.com/keys](https://console.groq.com/keys).")
-        allowance_line = gr.Markdown(elem_id="allowance")
+        whose_line = gr.Markdown(elem_id="whose-key")
         gr.Markdown(f"Index: the cookbook at [`{BUILT['commit'][:7]}`]({COOKBOOK}/tree/{BUILT['commit']}), "
                     f"{BUILT['files']} files. The chat lasts for this browser session; nothing is stored.",
                     elem_id="index")
@@ -740,18 +682,16 @@ with gr.Blocks(title="Ask the Cookbook") as demo:
                           submit_btn=True, elem_id="question")
     ask_about = gr.Button("Ask about", elem_id="ask-about-trigger")
 
-    # private: not offered to API clients, so the demo key's daily questions are asked through this page
-    question.submit(respond, [question, quote, key, mode, session],
-                    [conversation, session, meter, allowance_line, question, quote],
+    # private: not offered to API clients, so the demo key is used through this page only
+    question.submit(respond, [question, quote, key, mode, session], [conversation, session, meter, question, quote],
                     concurrency_limit=8, api_visibility="private")
     ask_about.click(None, None, quote, js="() => window.askAboutText || ''", api_visibility="private")
     conversation.example_select(example, None, question, api_visibility="private")
-    compact.click(compact_now, [key, session], [conversation, session, meter, allowance_line], concurrency_limit=8,
+    compact.click(compact_now, [key, session], [conversation, session, meter], concurrency_limit=8,
                   api_visibility="private")
-    clear.click(new_chat, key, [conversation, session, meter, allowance_line], api_visibility="private")
-    key.change(lambda k: allowance(own(k)), key, allowance_line, api_visibility="private")
-    demo.load(lambda s, k: (status(s), allowance(own(k))), [session, key], [meter, allowance_line],
-              api_visibility="private")
+    clear.click(new_chat, None, [conversation, session, meter], api_visibility="private")
+    key.change(lambda k: whose(own(k)), key, whose_line, api_visibility="private")
+    demo.load(lambda s, k: (status(s), whose(own(k))), [session, key], [meter, whose_line], api_visibility="private")
 
 demo.queue(max_size=32)
 

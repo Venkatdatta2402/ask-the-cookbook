@@ -1,4 +1,4 @@
-"""The page's answers: what is checked before a model is called, the daily limit, the engine's sources, the agent,
+"""The page's answers: what is checked before a model is called, whose key answers, the engine's sources, the agent,
 and errors in words. A stand-in LLM answers the engine; a fake client answers the agent."""
 
 import os
@@ -28,14 +28,12 @@ def engine_offline(app, monkeypatch):
 def test_turned_away_before_any_model_call(app, ask, question, key, mode, says):
     reply, _ = ask(question, key, app.AGENTIC if mode == "agent" else app.RAG)
     assert says in reply
-    assert app.DAILY.left() == app.DAILY_LIMIT
 
 
 def test_the_engine_answers_with_linked_sources(app, ask, engine_offline):
     reply, status = ask("What counts as a doom loop?")
     assert "**Sources**" in reply
     assert f"/blob/{app.BUILT['commit']}/" in reply
-    assert app.DAILY.left() == app.DAILY_LIMIT - 1
 
 
 def test_with_the_floor_a_question_nothing_is_near_is_turned_away(app, ask, monkeypatch):
@@ -44,52 +42,19 @@ def test_with_the_floor_a_question_nothing_is_near_is_turned_away(app, ask, monk
     assert reply.startswith(app.A.NOT_COVERED)
 
 
-def test_the_days_count_survives_a_restart(app, tmp_path):
-    """Visitor A takes 10; the app restarts; visitor B, in a new session, sees 40 -- not 50."""
-    path = tmp_path / "daily_count.json"
-    before = app.Daily(50, path)
-    for _ in range(10):
-        before.take()
-    after = app.Daily(50, path)                                     # the restarted app reads the file
-    assert after.left() == 40
+def test_the_sidebar_says_whose_key_answers(app):
+    """A line on which key is used, following the key box -- no count: the demo key's only limit is Groq's own."""
+    assert app.whose(app.own("")).startswith("Without a key, RAG questions use a shared demo key")
+    assert app.whose(app.own("gsk_visitor")).startswith(
+        "Your key is in use: your questions go on your own Groq account, under its limits")
 
 
-def test_a_new_day_starts_the_count_again_and_a_bad_file_is_not_fatal(app, tmp_path):
-    path = tmp_path / "daily_count.json"
-    path.write_text('{"day": "2020-01-01", "used": 49}', encoding="utf-8")
-    assert app.Daily(50, path).left() == 50                         # yesterday's count is not today's
-    path.write_text("not json", encoding="utf-8")
-    assert app.Daily(50, path).left() == 50
-
-
-def test_the_sidebar_says_when_a_visitors_own_key_is_in_use(app, monkeypatch):
-    """With a key in the box nothing is counted, so a count that never moved looked broken: the line says why."""
-    from llama_index.core.llms import MockLLM
-    from ask_the_cookbook.session import Session
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
-    assert "plenty left today" in app.allowance(app.own(""))
-    *_, line, _, _ = list(app.respond("What is a doom loop?", "", "gsk_visitor", app.RAG, Session()))[-1]
-    assert line.startswith("Your key is in use: your questions go on your own Groq account, under its limits")
-    assert app.DAILY.left() == app.DAILY_LIMIT                           # and nothing was counted
-    *_, line, _, _ = list(app.respond("What is a doom loop?", "", "", app.RAG, Session()))[-1]
-    assert "plenty left today" in line and app.DAILY.left() == app.DAILY_LIMIT - 1   # the demo key's is counted
-    assert app.new_chat("gsk_visitor")[-1].startswith("Your key is in use")
-
-
-def test_the_daily_limit_stops_the_demo_key_but_not_a_visitors(app, ask, engine_offline):
-    for _ in range(app.DAILY_LIMIT):
-        assert app.DAILY.take()
-    assert "free questions are used up" in ask("What counts as a doom loop?")[0]
-    assert "**Sources**" in ask("What counts as a doom loop?", key="gsk_visitor")[0]
-
-
-def test_the_count_starts_again_on_a_new_day(app):
-    for _ in range(app.DAILY_LIMIT):
-        app.DAILY.take()
-    assert not app.DAILY.take()
-    app.DAILY.day = app.DAILY.day.replace(year=app.DAILY.day.year - 1)
-    assert app.DAILY.take()
-    assert app.DAILY.left() == app.DAILY_LIMIT - 1
+def test_a_visitors_key_answers_rag_too(app, ask, monkeypatch):
+    used = []
+    monkeypatch.setattr(app, "chat_model", lambda key: used.append(key) or MockLLM(max_tokens=20))
+    ask("What counts as a doom loop?", key="gsk_visitor")
+    ask("What counts as a doom loop?")
+    assert used == ["gsk_visitor", "gsk_placeholder_owner"]
 
 
 def test_the_engine_key_swap_puts_the_owners_key_back(app):
@@ -116,6 +81,17 @@ def test_errors_reach_the_visitor_as_words(app, ask, fake_client, monkeypatch, s
     error = kind("refused", response=httpx.Response(status, request=httpx.Request("POST", "https://x")), body=None)
     monkeypatch.setattr(app, "client", lambda key: fake_client(key, fail=error))
     assert says in ask("q", key="gsk_visitor", mode=app.AGENTIC)[0]
+
+
+@pytest.mark.parametrize("groq_says, says", [
+    ("Rate limit reached ... on tokens per day (TPD): Limit 200000", "reached its daily limit"),
+    ("Rate limit reached ... on tokens per minute (TPM): Limit 8000", "busy (Groq's per-minute limit)"),
+])
+def test_the_demo_keys_refusal_names_which_limit(app, groq_says, says):
+    """With no count of its own, Groq's refusal is how the demo key's day ends: per day and per minute told apart."""
+    error = openai.RateLimitError(groq_says, response=httpx.Response(429, request=httpx.Request("POST", "https://x")),
+                                  body=None)
+    assert says in app.trouble(error, own_key=False)
 
 
 @pytest.mark.parametrize("cited, link", [
@@ -219,15 +195,6 @@ def test_a_resent_message_carries_on_where_the_words_were(app):
     assert 'style="--phase: -0.00s"' in app.working(app.RAG, {})
     assert 'style="--phase: -4.50s"' in app.working(app.RAG, {}, elapsed=4.5)
     assert 'style="--phase: -1.00s"' in app.working(app.RAG, {}, elapsed=app._CYCLE + 1)      # round the cycle
-
-
-@pytest.mark.parametrize("taken, says", [(0, "plenty left today"), (39, "plenty left today"),
-                                         (40, "running low"), (49, "running low"), (50, "used up for today")])
-def test_the_allowance_says_how_much_is_left_not_a_number(app, taken, says):
-    for _ in range(taken):
-        app.DAILY.take()
-    line = app.allowance()
-    assert says in line and str(app.DAILY_LIMIT) not in line
 
 
 def test_the_words_gradient_survives_gradios_rewrite_of_the_css(app):

@@ -1,0 +1,40 @@
+# Copy main to the Hugging Face Space on every push, so the Space runs what GitHub has. The Space rebuilds on each
+# copy. A run by hand (Actions tab) copies main again.
+#
+# Uses Hugging Face's own action: it uploads the files (not a git push), so the vector store needs no LFS on the
+# Space's side, files deleted here are deleted there, and .github/ is left out.
+#
+# Set in the repo's Settings > Secrets and variables > Actions (the refresh workflow uses the same two):
+#   secret   HF_TOKEN   a Hugging Face token with write access to the Space
+#   variable HF_SPACE   the Space, as <hf-user>/ask-the-cookbook
+# Without HF_SPACE the job is skipped.
+#
+# Pushes made by the refresh workflow do not start this one (GitHub's rule for its own token): that workflow
+# copies to the Space itself.
+
+name: Sync to the Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# a newer push copies everything anyway: an older copy still running can stop
+concurrency:
+  group: sync-to-space
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    if: vars.HF_SPACE != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true           # the vector store is in LFS: without this the Space would get a pointer file
+
+      - uses: huggingface/hub-sync@v0.3.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: ${{ vars.HF_SPACE }}
+          hf_token: ${{ secrets.HF_TOKEN }}

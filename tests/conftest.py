@@ -6,9 +6,6 @@ import os
 os.environ["GROQ_API_KEY"] = "gsk_placeholder_owner"     # set before .env is read: load_dotenv does not override
 os.environ["GEMINI_API_KEY"] = "placeholder"
 os.environ.pop("GOOGLE_API_KEY", None)                    # Google's library prefers it to GEMINI_API_KEY
-# the tests' daily count in a file of its own, never the real app's
-import tempfile  # noqa: E402
-os.environ["DAILY_FILE"] = os.path.join(tempfile.mkdtemp(prefix="ask-tests-"), "daily_count.json")
 
 import json  # noqa: E402
 
@@ -33,11 +30,6 @@ def index(app):
     return app.INDEX
 
 
-@pytest.fixture(autouse=True)
-def fresh_day(app):
-    app.DAILY.day, app.DAILY.used = None, 0
-
-
 @pytest.fixture
 def ask(app):
     """What the page finally shows for one message: (the reply, the status line). The reply is the chat's new last
@@ -48,7 +40,7 @@ def ask(app):
     def one(question, key="", mode=app.RAG, session=None, quote=""):
         session = session if session is not None else Session()
         before = len(session.shown)
-        shown, _, status, _, _, _ = list(app.respond(question, quote, key, mode, session))[-1]
+        shown, _, status, _, _ = list(app.respond(question, quote, key, mode, session))[-1]
         return (shown[-1]["content"] if len(shown) > before else status), status
     return one
 

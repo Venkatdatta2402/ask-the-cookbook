@@ -3,7 +3,7 @@ name = "ask-the-cookbook"
 version = "0.1.0"
 description = "Question answering over agentic-forge-cookbook, with the files it used cited"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 # The packages are listed in requirements.txt, the one list: Hugging Face Spaces installs from it.
 
 [tool.pytest.ini_options]

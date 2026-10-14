@@ -3,7 +3,8 @@
 
 # chapter 1's client, on Groq's OpenAI-compatible API
 openai==2.46.0
-pydantic==2.13.4
+# not 05's 2.13.4: a Gradio Space installs gradio[oauth,mcp], and its mcp extra takes pydantic 2.11.10-2.12.5
+pydantic==2.12.5
 python-dotenv==1.2.2
 tiktoken==0.13.0
 

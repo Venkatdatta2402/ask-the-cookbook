@@ -364,7 +364,8 @@ def whose(mine=False):
     if mine:
         return ("Your key is in use: your questions go on your own Groq account, under its limits, and don't use "
                 "the shared demo key.")
-    return "Without a key, RAG questions use a shared demo key, until Groq's daily limit for it is reached."
+    return ("Without a key, RAG questions use a shared demo key, until Groq's daily limit for it is reached. "
+            "[Get a free key](https://console.groq.com/keys).")
 
 
 def own(key):
@@ -644,26 +645,24 @@ CSS = COOKING_CSS + TABLE_CSS + """
 /* the chat's state, quiet and on one line with the two things that act on it */
 #chat-state { align-items: center; }
 #meter, #meter p { font-size: var(--text-sm); color: var(--body-text-color-subdued); margin: 0; }
-#whose-key, #index { font-size: var(--text-sm); color: var(--body-text-color-subdued); }
+#whose-key, #whose-key p, #index, #index p { font-size: var(--text-sm); color: var(--body-text-color-subdued); }
+#index { text-align: center; }
 """
 
 with gr.Blocks(title="Ask the Cookbook") as demo:
     session = gr.State(Session())
 
     with gr.Sidebar(width=320):
+        # kept short: at 1366x768, a common laptop screen, the sidebar must fit without a scrollbar
         gr.Markdown(f"## Ask the Cookbook\nQuestions about [agentic-forge-cookbook]({COOKBOOK}), answered from its "
-                    "READMEs, notebooks and code, with the files cited.")
+                    "READMEs, notebooks and code, with sources.")
         mode = gr.Radio([RAG, AGENTIC], value=RAG, label="Mode",
-                        info="RAG: one search, an answer in seconds. Agentic RAG: searches as many times as the "
-                             "question needs and reads files, for questions that span chapters; a few minutes.")
+                        info="RAG: one search, an answer in seconds. Agentic RAG: searches and reads files as often "
+                             "as needed, for questions across chapters; a few minutes.")
         key = gr.Textbox(label="Your Groq API key", type="password", placeholder="gsk_...",
-                         info="Needed for Agentic RAG. With it, every question goes on your own Groq account, under "
-                              "its limits, instead of the shared demo key. Used for your questions only, never stored.")
-        gr.Markdown("Get one free at [console.groq.com/keys](https://console.groq.com/keys).")
+                         info="Needed for Agentic RAG. With it, all your questions go on your own Groq account, under "
+                              "its limits. Never stored.")
         whose_line = gr.Markdown(elem_id="whose-key")
-        gr.Markdown(f"Index: the cookbook at [`{BUILT['commit'][:7]}`]({COOKBOOK}/tree/{BUILT['commit']}), "
-                    f"{BUILT['files']} files. The chat lasts for this browser session; nothing is stored.",
-                    elem_id="index")
 
     conversation = gr.Chatbot(show_label=False, height="62vh", elem_id="chat",
                               examples=[{"text": q} for q in EXAMPLES],
@@ -680,6 +679,9 @@ with gr.Blocks(title="Ask the Cookbook") as demo:
             gr.ClearButton(quote, value="✕", size="sm", scale=0, min_width=40)
     question = gr.Textbox(show_label=False, placeholder="Ask about the cookbook...", lines=1, max_lines=6,
                           submit_btn=True, elem_id="question")
+    gr.Markdown(f"Index: the cookbook at [`{BUILT['commit'][:7]}`]({COOKBOOK}/tree/{BUILT['commit']}), "
+                f"{BUILT['files']} files. The chat lasts for this browser session; nothing is stored.",
+                elem_id="index")
     ask_about = gr.Button("Ask about", elem_id="ask-about-trigger")
 
     # private: not offered to API clients, so the demo key is used through this page only

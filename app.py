@@ -639,6 +639,8 @@ CSS = COOKING_CSS + TABLE_CSS + """
   color: var(--button-primary-text-color); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 #ask-about-trigger { display: none !important; }
+/* the chat's own bin (no setting turns it off): it cleared the screen but not what the model gets; New chat does both */
+#chat button[aria-label="Clear"] { display: none !important; }
 /* the passage being asked about shows only once there is one */
 #quote-box:has(textarea:placeholder-shown) { display: none !important; }
 #quote-box { border-left: 3px solid var(--color-accent); }
@@ -664,7 +666,8 @@ with gr.Blocks(title="Ask the Cookbook") as demo:
                               "its limits. Never stored.")
         whose_line = gr.Markdown(elem_id="whose-key")
 
-    conversation = gr.Chatbot(show_label=False, height="62vh", elem_id="chat",
+    # no corner buttons (share, copy all): only a copy button under each message
+    conversation = gr.Chatbot(show_label=False, height="62vh", elem_id="chat", buttons=["copy"],
                               examples=[{"text": q} for q in EXAMPLES],
                               placeholder="**Ask anything about the cookbook.** To follow up on part of an answer, "
                                           "select it and press **Ask about**.")

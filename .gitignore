@@ -4,3 +4,5 @@ __pycache__/
 .DS_Store
 # ask_index's token log
 progress.log
+# the project notes for Claude Code: kept local
+CLAUDE.md

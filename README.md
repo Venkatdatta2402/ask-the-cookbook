@@ -212,7 +212,7 @@ tests/                     offline tests
 ## Keeping the index current
 
 <!-- index-commit -->
-Built from the cookbook at commit [`fb39ada`](https://github.com/Venkatdatta2402/agentic-forge-cookbook/tree/fb39adac66b77dcd2a6ed4f17300e6b415632b63): 124 files, 1,015 chunks.
+Built from the cookbook at commit [`43c7bf5`](https://github.com/Venkatdatta2402/agentic-forge-cookbook/tree/43c7bf5e3ac6f8db886a81790b45e9f71febbf04): 124 files, 1,063 chunks.
 <!-- /index-commit -->
 
 ```bash

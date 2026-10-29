@@ -45,6 +45,7 @@ own agent runtime**. The project asks the cookbook questions with the agent the 
 - [Concurrency and performance](#concurrency-and-performance)
 - [Designed for a free tier](#designed-for-a-free-tier)
 - [Measured results](#measured-results)
+- [Evaluation](#evaluation)
 - [Getting started](#getting-started)
 - [Project structure](#project-structure)
 - [Keeping the index current](#keeping-the-index-current)
@@ -318,6 +319,42 @@ From live runs against the real models:
 | The same question, after the ledger and guards | **14,503** | minutes | **4 tool calls**, every part answered correctly |
 | Compact now | 1,941 | 17.6 s | Two model calls: a summary and the facts |
 
+## Evaluation
+
+Retrieval is measured against a **hand-graded golden set**, offline, on every push.
+
+**The golden set.** 30 questions (24 RAG, 6 agentic). Every chunk in the index (1,063 of them) was read once,
+with no search involved, and graded against all 30 questions: 3 states the answer, 2 is a needed part of it,
+1 helps a little, 0 is not relevant. Searching for candidates first would only have graded what the search
+found, which is the thing being measured. That gave 510 graded passages, each with a quote from the chunk and
+the reason for its grade. Tests check that every passage is a real chunk and every quote is in it.
+
+**The metrics**, on the search RAG answers from (k = 5):
+
+| | Precision@5 | Recall@5 | MRR | NDCG@5 |
+|---|---|---|---|---|
+| All 30 questions | 0.773 | 0.421 | 0.967 | 0.731 |
+| RAG questions (24) | 0.800 | 0.471 | 0.958 | 0.760 |
+| Agentic questions (6), as one search | 0.667 | 0.225 | 1.000 | 0.615 |
+
+Precision counts any relevant passage (grade 1+), recall counts the passages an answer needs (grade 2+), and
+NDCG uses every grade. Each question's embedding is kept with the golden set, so the run calls no API and gives
+the same numbers every time.
+
+**The gate.** These numbers are the committed baseline. The test suite fails if any of them drops, so a change to
+the search, the splitter or the floor that loses relevant passages can't be merged unnoticed. Breaking the search
+on purpose (a stricter floor, a weaker keyword search) failed it both times.
+
+**Checks on answers.** Plain code, no model: an answer must cite, every citation must point to a source it was
+given, every source must be real lines of a real file, and at least one cited source must be a passage graded 3.
+
+```bash
+python -m evals.run_evals                         # retrieval against the baseline (free)
+python -m evals.generation.collect_answers        # real RAG answers to check: spends about 90k Groq tokens
+```
+
+[evals/README.md](evals/README.md) has the details.
+
 ## Getting started
 
 **Requirements:** Python 3.12, a [Groq API key](https://console.groq.com/keys) and a
@@ -364,6 +401,7 @@ data/
     index/                 the saved LlamaIndex index (the vector store is in Git LFS)
     corpus/                the cookbook's text exactly as indexed; answers link to these lines
 tests/                     offline tests
+evals/                     the golden set, retrieval metrics and their baseline, checks on answers
 benchmarks/                the load test
 .github/workflows/         the tests, the sync to the Space, and the index refresh
 ```

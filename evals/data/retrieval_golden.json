@@ -1,0 +1,5323 @@
+{
+ "index_commit": "43c7bf5",
+ "chunks": 1063,
+ "method": "Every indexed chunk (1,063, all 124 files) read once, with no search involved, and judged against all 30 questions. A chunk is listed for a question only if it is relevant (grade 1-3); every other chunk is grade 0. Each entry quotes the chunk's own text (checked by tests) and says why.",
+ "grades": {
+  "3": "states the answer, or a core part of it, directly",
+  "2": "a needed supporting part of the answer",
+  "1": "related: says something about the topic that helps a little",
+  "0": "not relevant, including text that only names the topic"
+ },
+ "questions": [
+  {
+   "id": "Q1",
+   "kind": "rag",
+   "question": "The README says extract() asks the API to enforce the schema first. If the API enforces it, why validate as well?",
+   "relevant": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      75,
+      80
+     ],
+     "grade": 3,
+     "quote": "Validation is still needed when",
+     "why": "the whole answer: schema enforces names and types, not meaning; validation and the retry stay"
+    },
+    {
+     "file": "01_foundations/llm.py",
+     "lines": [
+      87,
+      123
+     ],
+     "grade": 3,
+     "quote": "What no schema can constrain is SENSE.",
+     "why": "extract(): shape vs sense, the measured schema-valid nonsense, the fallback, the real error fed back"
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      69,
+      90
+     ],
+     "grade": 3,
+     "quote": "A schema constrains *shape*. It cannot constrain *sense*.",
+     "why": "the direct answer, with the measured schema-valid nonsense"
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      49,
+      67
+     ],
+     "grade": 2,
+     "quote": "tell the model *exactly* what was wrong",
+     "why": "the validate-and-retry loop with the real error fed back"
+    },
+    {
+     "file": "03_tools/notebooks/01_what_is_a_tool.ipynb",
+     "lines": [
+      136,
+      144
+     ],
+     "grade": 2,
+     "quote": "There is no way to write \"b must not be zero\" in JSON, so the model can still ask for it.",
+     "why": "a schema cannot carry every rule, so the validator still has to check"
+    },
+    {
+     "file": "08_frameworks/01_langchain/claims_assistant.ipynb",
+     "lines": [
+      133,
+      174
+     ],
+     "grade": 2,
+     "quote": "the first live run got a 400 `output_parse_failed` with an empty `failed_generation`",
+     "why": "provider-enforced schema failing live, so JSON mode with pydantic checking is the fallback"
+    },
+    {
+     "file": "08_frameworks/01_langchain/claims_assistant.ipynb",
+     "lines": [
+      558,
+      565
+     ],
+     "grade": 2,
+     "quote": "**Schema mode can fail with nothing to show for it.**",
+     "why": "provider enforcement fails with an empty failed_generation; extract()'s order: schema, JSON mode with validation, another model"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 2,
+     "quote": "A schema controls an answer's *shape*, never whether it makes sense, so you still validate",
+     "why": "chapter 1's one-line answer to why validate"
+    },
+    {
+     "file": "01_foundations/llm.py",
+     "lines": [
+      4,
+      84
+     ],
+     "grade": 1,
+     "quote": "Ask the API to enforce the shape, if this model can.",
+     "why": "_response_format: what json_schema mode enforces; both paths kept"
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      20,
+      27
+     ],
+     "grade": 1,
+     "quote": "**\"Valid JSON\" isn't \"matches my schema.\"**",
+     "why": "what JSON mode does not guarantee: related"
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      41,
+      45
+     ],
+     "grade": 1,
+     "quote": "JSON mode would happily accept this",
+     "why": "validation catching what JSON mode lets through"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      57,
+      76
+     ],
+     "grade": 1,
+     "quote": "any domain-specific rule a JSON schema can't express",
+     "why": "the same principle for tool arguments"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      365,
+      407
+     ],
+     "grade": 1,
+     "quote": "because `extract()` feeds each validation error back",
+     "why": "a model's JSON failing validation, and extract() retrying with the error"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      1050,
+      1116
+     ],
+     "grade": 1,
+     "quote": "names (e.g. a list of scored items) and only recovers via extract()'s",
+     "why": "a model's JSON failing the schema and extract() retrying"
+    },
+    {
+     "file": "03_tools/notebooks/01_what_is_a_tool.ipynb",
+     "lines": [
+      146,
+      177
+     ],
+     "grade": 1,
+     "quote": "JSON Schema has no way to say *these four, except in production, where only two*",
+     "why": "a rule between two fields only a validator can hold"
+    },
+    {
+     "file": "03_tools/notebooks/01_what_is_a_tool.ipynb",
+     "lines": [
+      181,
+      191
+     ],
+     "grade": 1,
+     "quote": "`extract()` in `llm.py` does the same thing for structured output.",
+     "why": "raise and retry with the real message, as extract() does"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      319,
+      339
+     ],
+     "grade": 1,
+     "quote": "`extract()` catches the `ValidationError`, hands the model the real message, and lets it try again",
+     "why": "a validator rule enforced by extract()'s retry"
+    },
+    {
+     "file": "08_frameworks/01_langchain/claims_assistant.ipynb",
+     "lines": [
+      170,
+      197
+     ],
+     "grade": 1,
+     "quote": "JSON mode, with the\n    shape in the prompt and pydantic checking it",
+     "why": "the fallback order of chapter 1's extract()"
+    },
+    {
+     "file": "08_frameworks/01_langchain/claims_assistant.ipynb",
+     "lines": [
+      302,
+      353
+     ],
+     "grade": 1,
+     "quote": "on this path the *provider* no longer enforces the fields' shape; code checks it",
+     "why": "validation in code when schema mode is unavailable"
+    },
+    {
+     "file": "08_frameworks/01_langchain/claims_chain.py",
+     "lines": [
+      97,
+      161
+     ],
+     "grade": 1,
+     "quote": "JSON mode, with the\n    shape in the prompt and pydantic checking it",
+     "why": "the fallback chain in code"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      382,
+      434
+     ],
+     "grade": 1,
+     "quote": "`extract()` asks the provider to enforce the form's schema, so the reply IS the form, and validates\n    # and retries behind that",
+     "why": "extract(): provider enforcement with validation and retry behind it"
+    },
+    {
+     "file": "08_frameworks/04_autogen/team_scratch.py",
+     "lines": [
+      155,
+      218
+     ],
+     "grade": 1,
+     "quote": "`extract()` asks the provider to enforce the form's schema, so the reply IS the form, and validates\n        # and retries behind that",
+     "why": "extract(): enforcement plus validation and retry"
+    }
+   ]
+  },
+  {
+   "id": "Q2",
+   "kind": "rag",
+   "question": "What counts as a doom loop, and what does the runtime do when it detects one?",
+   "relevant": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      94,
+      98
+     ],
+     "grade": 3,
+     "quote": "**doom-loop detection**: the same tool call repeated",
+     "why": "what counts and what happens, in brief"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      435,
+      474
+     ],
+     "grade": 3,
+     "quote": "Detecting a loop that's stuck before the budget runs out",
+     "why": "the four shapes, the code and why each check is there"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      476,
+      512
+     ],
+     "grade": 3,
+     "quote": "So a stopped run now gets one more turn:",
+     "why": "what the runtime does on a stop: one more turn with no tools, only facts from the results"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      181,
+      218
+     ],
+     "grade": 3,
+     "quote": "return \"the same tool call with identical arguments repeated\"",
+     "why": "the four doom-loop conditions: identical call, same error, oscillation, same question reworded with same result"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      220,
+      263
+     ],
+     "grade": 3,
+     "quote": "with no tools, and answers from what is there, saying what it could not find.",
+     "why": "what the runtime does on a doom-loop stop"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      138,
+      179
+     ],
+     "grade": 2,
+     "quote": "return self._doom_loop(conversation)",
+     "why": "the doom-loop check runs as a stop reason before every step"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      462,
+      519
+     ],
+     "grade": 2,
+     "quote": "Called by Runtime._end_gracefully, never declared in a loop.",
+     "why": "the stopped run's last answer: no tools, only facts from the tool results"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      489,
+      507
+     ],
+     "grade": 2,
+     "quote": "Chapter 2's `Runtime` stops on the *second identical call* — doom-loop detection — and gives the agent one turn without tools",
+     "why": "the doom loop and what the runtime does"
+    },
+    {
+     "file": "02_agent_runtime/act.py",
+     "lines": [
+      17,
+      85
+     ],
+     "grade": 1,
+     "quote": "Runtime's doom-loop check does exactly that",
+     "why": "the real result kept on the call so the doom-loop check can compare results"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      1,
+      13
+     ],
+     "grade": 1,
+     "quote": "a graceful stop that says what actually happened",
+     "why": "names doom-loop detection and the graceful stop"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      406,
+      433
+     ],
+     "grade": 1,
+     "quote": "return self._doom_loop(conversation)",
+     "why": "the budgets, ending in the doom-loop check"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      472,
+      474
+     ],
+     "grade": 1,
+     "quote": "A detector that fired on two different tool calls would break every real agent",
+     "why": "the detector checked not to fire on healthy runs"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      510,
+      520
+     ],
+     "grade": 1,
+     "quote": "rather than a guess at 37.8",
+     "why": "what a stopped run's last answer looks like"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      522,
+      540
+     ],
+     "grade": 1,
+     "quote": "four doom-loop shapes verified against hand-seeded conversations",
+     "why": "summary: four shapes and a stop that answers from what was gathered"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/03_retries_and_reflection.ipynb",
+     "lines": [
+      84,
+      92
+     ],
+     "grade": 1,
+     "quote": "notebook 2's `_doom_loop` watches for the same tool call repeating",
+     "why": "why repairs stay out of messages: they would trip the doom-loop check"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      1,
+      37
+     ],
+     "grade": 1,
+     "quote": "compared on the argument VALUES, not the JSON text",
+     "why": "the similarity check the doom-loop test uses for reworded arguments"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      40,
+      136
+     ],
+     "grade": 1,
+     "quote": "return self._end_gracefully(conversation, reason, self._drain(conversation))",
+     "why": "a stop reason ends the run through _end_gracefully"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      298,
+      316
+     ],
+     "grade": 1,
+     "quote": "calls `recall` again with slightly different words until the runtime stops it for repeating itself",
+     "why": "a reworded repeat stopped by the runtime"
+    }
+   ]
+  },
+  {
+   "id": "Q3",
+   "kind": "rag",
+   "question": "What is the difference between a tool that refuses and one that is broken, and which does the model get to see?",
+   "relevant": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      77,
+      84
+     ],
+     "grade": 3,
+     "quote": "A refusal is written *for the model*.",
+     "why": "the direct answer: refusal for the model, broken ours to fix, model gets 'could not be completed'"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      1,
+      86
+     ],
+     "grade": 3,
+     "quote": "The difference that matters is not how bad the failure is, it is who can do something about",
+     "why": "ToolError vs anything else, and for_the_model False only for broken"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      59,
+      83
+     ],
+     "grade": 3,
+     "quote": "It is **who can do something about it**",
+     "why": "the direct answer: refused is information for the model, broken stays out"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      62,
+      74
+     ],
+     "grade": 2,
+     "quote": "| `broken` | A bug in the tool itself: a missing key, a bad import | **No**, only that it couldn't be done |",
+     "why": "the six result kinds and which the model sees"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      89,
+      154
+     ],
+     "grade": 2,
+     "quote": "return Result(tool.name, \"refused\", str(e), repeatable=tool.repeatable)",
+     "why": "invoke() sorting ToolError into refused and other exceptions into broken"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      157,
+      181
+     ],
+     "grade": 2,
+     "quote": "return replace(result, content=f\"{result.tool} could not be completed.\",",
+     "why": "what the model is shown for a broken result"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      138,
+      158
+     ],
+     "grade": 2,
+     "quote": "wrong arguments and a tool that says no both go to the model, while a bug in the tool does not",
+     "why": "summary of who sees which failure"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      107,
+      136
+     ],
+     "grade": 1,
+     "quote": "the refusal arrived as an ordinary tool result",
+     "why": "a refusal reaching the model as a normal result"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      40,
+      50
+     ],
+     "grade": 1,
+     "quote": "**The dead host is a genuine grey area**",
+     "why": "the refused/broken rule meeting real network failures"
+    },
+    {
+     "file": "03_tools/toolbox.py",
+     "lines": [
+      1,
+      57
+     ],
+     "grade": 1,
+     "quote": "So it goes back as a ToolError",
+     "why": "http_get's failures as refusals, and the grey area"
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      156,
+      176
+     ],
+     "grade": 1,
+     "quote": "A bug in the tool is ours to fix and the model is not told about it.",
+     "why": "restates chapter 3's distinction"
+    }
+   ]
+  },
+  {
+   "id": "Q4",
+   "kind": "rag",
+   "question": "Why is recall injected into the loop while remembering is a tool the agent calls?",
+   "relevant": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      125,
+      146
+     ],
+     "grade": 3,
+     "quote": "### Recall is injected; remembering is a tool",
+     "why": "the direct answer: 7 of 15 decide-questions consulted memory; writing is a judgement"
+    },
+    {
+     "file": "04_memory/memory_tools.py",
+     "lines": [
+      1,
+      48
+     ],
+     "grade": 3,
+     "quote": "**Why reading is injected and writing is a tool.**",
+     "why": "the measurement: recall as a tool missed one in five, fluently; writing is a judgement"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      23,
+      41
+     ],
+     "grade": 3,
+     "quote": "**Asked to decide something, it often does not.**",
+     "why": "the measurement: past questions looked 15 of 15, decide-questions missed the paging rule; the failure is invisible"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      82,
+      99
+     ],
+     "grade": 3,
+     "quote": "Reading is injected because skipping it is invisible. Writing is the opposite",
+     "why": "why writing is a tool: not writing costs nothing and keeping is a judgement"
+    },
+    {
+     "file": "04_memory/memory_tools.py",
+     "lines": [
+      51,
+      137
+     ],
+     "grade": 2,
+     "quote": "A loop component that puts memory in front of `Think` before it thinks.",
+     "why": "Retrieve as the injected component, remember as the tool"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      1,
+      19
+     ],
+     "grade": 2,
+     "quote": "- **Reading is injected.** It happens before the model thinks, every turn, whether or not anyone asked for it.",
+     "why": "the split stated"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      180,
+      202
+     ],
+     "grade": 2,
+     "quote": "Measured why reading is injected rather than offered",
+     "why": "summary: four of five, a fluent answer that consulted nothing"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      60,
+      68
+     ],
+     "grade": 1,
+     "quote": "recall by injection, writing by tool, and why",
+     "why": "notebook 5's row"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      43,
+      65
+     ],
+     "grade": 1,
+     "quote": "A component is anything with `.run(conversation)`",
+     "why": "Retrieve as the injecting component"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      137,
+      143
+     ],
+     "grade": 1,
+     "quote": "Memory was injected without being asked for",
+     "why": "the whole loop with injection and tools"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      161,
+      178
+     ],
+     "grade": 1,
+     "quote": "**Recall is not a tool either**, for the reason measured at the top of this notebook.",
+     "why": "the routes into the prompt"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 1,
+     "quote": "RECALL BY INJECTION, WRITE BY TOOL",
+     "why": "chapter 4's split applied"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      139,
+      177
+     ],
+     "grade": 1,
+     "quote": "**recall by injection, write by tool**",
+     "why": "chapter 4's split applied"
+    }
+   ]
+  },
+  {
+   "id": "Q5",
+   "kind": "rag",
+   "question": "What does compaction leave untouched, and why?",
+   "relevant": [
+    {
+     "file": "05_context/compression.py",
+     "lines": [
+      258,
+      331
+     ],
+     "grade": 3,
+     "quote": "What is never touched, and why:",
+     "why": "the direct answer: pinned, task state, last turns, anything not from the run, each with its reason"
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      84,
+      91
+     ],
+     "grade": 3,
+     "quote": "Two kinds of item are never handed to a summarizer, and the reasons differ:",
+     "why": "constraints and task state, and why"
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      93,
+      114
+     ],
+     "grade": 3,
+     "quote": "| the last `keep_recent` turns | untouched | what the next step builds on, verbatim |",
+     "why": "the table of what is untouched and why"
+    },
+    {
+     "file": "05_context/compression.py",
+     "lines": [
+      1,
+      77
+     ],
+     "grade": 2,
+     "quote": "recent turns, task state\nand pinned items left untouched",
+     "why": "what compact() leaves alone"
+    },
+    {
+     "file": "05_context/compression.py",
+     "lines": [
+      182,
+      255
+     ],
+     "grade": 2,
+     "quote": "everything in it is either pinned, task state, or inside the\n    recent window that `compact()` leaves alone",
+     "why": "compressible(): what compaction would actually replace"
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      144,
+      156
+     ],
+     "grade": 2,
+     "quote": "conversation compression that never touches pinned items, task state or recent turns",
+     "why": "summary of compact()"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ],
+     "grade": 1,
+     "quote": "`compact()` took the session from\n2,219 to 858 tokens and kept 8 of 9 facts",
+     "why": "what compaction measured"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      44,
+      63
+     ],
+     "grade": 1,
+     "quote": "untouched, because compaction never rewrites task state",
+     "why": "a compaction leaving task state alone"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      123,
+      140
+     ],
+     "grade": 1,
+     "quote": "because everything in it was pinned, task state, or inside the recent window `compact()` leaves alone",
+     "why": "what compaction leaves alone, seen in a loop"
+    }
+   ]
+  },
+  {
+   "id": "Q6",
+   "kind": "rag",
+   "question": "What is the difference between handing off a conversation and delegating to another agent?",
+   "relevant": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      80,
+      86
+     ],
+     "grade": 3,
+     "quote": "A **handoff** moves the conversation itself",
+     "why": "the direct answer: delegation keeps one agent in charge; handoff moves the conversation"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      139,
+      163
+     ],
+     "grade": 3,
+     "quote": "A **handoff** moves the conversation instead.",
+     "why": "the full comparison: who stays in charge, cost 2.5x, what each saw, what each suits"
+    },
+    {
+     "file": "06_orchestration/supervisor.py",
+     "lines": [
+      111,
+      170
+     ],
+     "grade": 3,
+     "quote": "Delegation keeps one agent in charge: it asks another and relays the answer",
+     "why": "the difference stated in Chat's docstring, and how a handoff works"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      165,
+      170
+     ],
+     "grade": 2,
+     "quote": "**Delegation costs more than a handoff per turn of a conversation**",
+     "why": "the cost difference and why"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      172,
+      182
+     ],
+     "grade": 2,
+     "quote": "**Delegation keeps the supervisor in charge; a handoff gives the conversation away.**",
+     "why": "summary of the difference"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      168,
+      195
+     ],
+     "grade": 1,
+     "quote": "A branch gets system messages, if any, and its own goal. Nothing else.",
+     "why": "a delegated agent gets only its goal, not the conversation"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      552,
+      572
+     ],
+     "grade": 1,
+     "quote": "fixed it by giving branches only a system message plus a self-contained goal",
+     "why": "a delegated branch gets a self-contained goal, not the conversation"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      536,
+      588
+     ],
+     "grade": 1,
+     "quote": "it will not see this conversation or any other branch's",
+     "why": "a delegated branch sees only its goal"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      42,
+      51
+     ],
+     "grade": 1,
+     "quote": "**Delegation vs handoff**: who stays in charge of the conversation",
+     "why": "names the difference"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      120,
+      129
+     ],
+     "grade": 1,
+     "quote": "`Chat` (a conversation one agent at a time owns and can hand off)",
+     "why": "where handoffs live in code"
+    },
+    {
+     "file": "06_orchestration/messages.py",
+     "lines": [
+      1,
+      71
+     ],
+     "grade": 1,
+     "quote": "`submit` is the same trick `Chat` uses for handoffs",
+     "why": "how a handoff stops the current agent"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      1,
+      16
+     ],
+     "grade": 1,
+     "quote": "Compared delegating with handing a conversation over, on the same customer chat",
+     "why": "names the comparison"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      26,
+      37
+     ],
+     "grade": 1,
+     "quote": "| **nb2** handoff (`Chat`) | peer-to-peer, after the transfer | whoever holds the conversation | sequential |",
+     "why": "the handoff placed against the supervisor"
+    },
+    {
+     "file": "06_orchestration/supervisor.py",
+     "lines": [
+      1,
+      82
+     ],
+     "grade": 1,
+     "quote": "A handoff is an ordinary tool whose effect is\nto change who answers next.",
+     "why": "what a handoff is in code"
+    },
+    {
+     "file": "06_orchestration/supervisor.py",
+     "lines": [
+      85,
+      107
+     ],
+     "grade": 1,
+     "quote": "the agent being asked sees nothing but this",
+     "why": "delegation: the asked agent sees only the request"
+    }
+   ]
+  },
+  {
+   "id": "Q7",
+   "kind": "rag",
+   "question": "Does running an MCP server as a separate process sandbox it? Could it read my API keys?",
+   "relevant": [
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      99,
+      110
+     ],
+     "grade": 3,
+     "quote": "**The process boundary and the trust boundary are not the same line.**",
+     "why": "the direct answer: not a sandbox; env={**os.environ} leaks keys; inherit=False"
+    },
+    {
+     "file": "07_mcp/client.py",
+     "lines": [
+      1,
+      76
+     ],
+     "grade": 3,
+     "quote": "Passing `env={**os.environ}` overrides that allowlist with everything, API keys included.",
+     "why": "how a stdio server comes to hold every secret"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      17,
+      25
+     ],
+     "grade": 3,
+     "quote": "**Its separateness bought isolation of failures, not isolation of authority**",
+     "why": "the measurement: the server read back the planted key"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      27,
+      43
+     ],
+     "grade": 3,
+     "quote": "The protocol did not hand the server our keys. We did, in one line that looks like housekeeping.",
+     "why": "the SDK allowlist, undone by env={**os.environ}"
+    },
+    {
+     "file": "07_mcp/client.py",
+     "lines": [
+      79,
+      146
+     ],
+     "grade": 2,
+     "quote": "`inherit` decides what the child receives",
+     "why": "the switch in code"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      1,
+      11
+     ],
+     "grade": 2,
+     "quote": "A stdio server is a separate process, which sounds like containment and is not.",
+     "why": "states the answer up front"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      45,
+      51
+     ],
+     "grade": 2,
+     "quote": "**Everything down to 18 variables**, and the key is gone",
+     "why": "the fix: inherit=False, nothing crosses implicitly"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      77,
+      97
+     ],
+     "grade": 2,
+     "quote": "**HTTP is not safer. Being started by someone else is.**",
+     "why": "where the inheritance problem comes from"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      119,
+      130
+     ],
+     "grade": 2,
+     "quote": "a stdio server **starts with your authority**, not merely in your process tree",
+     "why": "summary of the security finding"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      47,
+      54
+     ],
+     "grade": 1,
+     "quote": "Why a separate process is **not** a sandbox, and the one line that leaks your API keys",
+     "why": "names the answer"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      56,
+      65
+     ],
+     "grade": 1,
+     "quote": "The process boundary vs the trust boundary",
+     "why": "notebook 5's row"
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      63,
+      82
+     ],
+     "grade": 1,
+     "quote": "| What a crash in it takes down | your agent | itself |",
+     "why": "a separate process isolates failures"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      116,
+      130
+     ],
+     "grade": 1,
+     "quote": "a stdio server we launched inherits our environment, including every key in it",
+     "why": "sets up the trust-boundary point"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      314,
+      352
+     ],
+     "grade": 1,
+     "quote": "chapter 7's lesson that a process you launch starts with whatever you hand it",
+     "why": "restates chapter 7's finding"
+    },
+    {
+     "file": "08_frameworks/04_autogen/team_scratch.py",
+     "lines": [
+      1,
+      68
+     ],
+     "grade": 1,
+     "quote": "chapter 7's lesson that a process you launch starts with whatever you hand it",
+     "why": "restates chapter 7's finding"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 1,
+     "quote": "that program is not a sandbox",
+     "why": "chapter 7's one-line answer"
+    }
+   ]
+  },
+  {
+   "id": "Q8",
+   "kind": "agentic",
+   "question": "How is chapter 6's shared board different from chapter 4's memory stores? When would you use each?",
+   "relevant": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      131,
+      141
+     ],
+     "grade": 3,
+     "quote": "**Not to be confused with chapter 4's memory.**",
+     "why": "the direct contrast: one case for minutes in an object vs what must outlive a run, on disk"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      50,
+      76
+     ],
+     "grade": 3,
+     "quote": "Some things are neither a message nor a memory.",
+     "why": "the board: the state of one case, owned fields, read by injection, written by tool"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      125,
+      134
+     ],
+     "grade": 3,
+     "quote": "It is not memory (`04_memory`) and not a log",
+     "why": "the board is the working state of one case, read by injection, written by tool"
+    },
+    {
+     "file": "06_orchestration/state.py",
+     "lines": [
+      1,
+      28
+     ],
+     "grade": 3,
+     "quote": "This is not memory. `04_memory` keeps what should outlive a run, in a store on disk",
+     "why": "the direct contrast: one case's working state, alive for minutes, in an object"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      16,
+      44
+     ],
+     "grade": 2,
+     "quote": "**What decides where a memory goes is the question that will be asked of it later.**",
+     "why": "chapter 4's stores and what each is asked"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      88,
+      100
+     ],
+     "grade": 2,
+     "quote": "- **A shared board.** Each field has one owner.",
+     "why": "what the board is: owned fields, reading injected, writing a tool"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      78,
+      86
+     ],
+     "grade": 2,
+     "quote": "**Ownership is a design decision, not a runtime one.**",
+     "why": "owned fields on the board"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      171,
+      182
+     ],
+     "grade": 1,
+     "quote": "`06_orchestration` (contrasted\nwith a shared board)",
+     "why": "says chapter 6 contrasts the board with these stores"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      3,
+      34
+     ],
+     "grade": 1,
+     "quote": "**what will be asked of it.**",
+     "why": "chapter 4's stores chosen by the question asked"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      1,
+      71
+     ],
+     "grade": 1,
+     "quote": "One thing decides it, and it is decided when a memory is *written*: **what will be asked of it",
+     "why": "chapter 4's stores in one table"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      42,
+      51
+     ],
+     "grade": 1,
+     "quote": "a **shared board** with an owner per field",
+     "why": "names the board"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      1,
+      18
+     ],
+     "grade": 1,
+     "quote": "Put what the team has established on a shared board",
+     "why": "introduces the board"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      1,
+      22
+     ],
+     "grade": 1,
+     "quote": "**shared state never decides who runs next.**",
+     "why": "what the board is not"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      155,
+      163
+     ],
+     "grade": 1,
+     "quote": "**Shared state never decides who runs next.**",
+     "why": "what the board does not do"
+    },
+    {
+     "file": "06_orchestration/notebooks/05_build_a_multi_agent_system.ipynb",
+     "lines": [
+      152,
+      158
+     ],
+     "grade": 1,
+     "quote": "**Shared state says where information lives and never who runs next.**",
+     "why": "chapter summary of the board"
+    },
+    {
+     "file": "06_orchestration/state.py",
+     "lines": [
+      31,
+      87
+     ],
+     "grade": 1,
+     "quote": "A small board several agents read, and a declared few write.",
+     "why": "the board in code"
+    }
+   ]
+  },
+  {
+   "id": "Q9",
+   "kind": "agentic",
+   "question": "In chapter 8's LangGraph project, compare how the LangGraph desk and the from-scratch case file wait for a person, and what can go wrong with each.",
+   "relevant": [
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      1,
+      77
+     ],
+     "grade": 3,
+     "quote": "a resumed node runs again from its first line -- and a case-file step does not",
+     "why": "the list of what goes wrong, and double_send reproduced in both builds"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      80,
+      150
+     ],
+     "grade": 3,
+     "quote": "Mira answers it -- in each build.",
+     "why": "answers matched by position vs by owned field; wrong person accepted vs refused"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      88,
+      136
+     ],
+     "grade": 3,
+     "quote": "the node runs again **from its first line**",
+     "why": "how the LangGraph desk waits, and why send and wait are two nodes"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      302,
+      350
+     ],
+     "grade": 3,
+     "quote": "## The same desk, from scratch: a case file, not a graph",
+     "why": "the case file: owned fields, every write a row, steps that return a Wait"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      348,
+      392
+     ],
+     "grade": 3,
+     "quote": "**Asking ends a step.**",
+     "why": "how the case file waits: nothing re-run, answers in owned fields"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      489,
+      507
+     ],
+     "grade": 3,
+     "quote": "**A resumed node runs again from its first line.**",
+     "why": "what goes wrong: double send, answers by position, anyone can answer, interrupt loops"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      513,
+      536
+     ],
+     "grade": 3,
+     "quote": "| waiting for a person | `interrupt()`; resuming **re-runs the node** from its first line | a `Wait` **ends** the step; the answer starts the next one |",
+     "why": "the side-by-side table"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      537,
+      543
+     ],
+     "grade": 3,
+     "quote": "a resumed node runs again from its first line, so a side effect never shares a node with an `interrupt()` after it",
+     "why": "what you have to know before production"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/case.py",
+     "lines": [
+      1,
+      58
+     ],
+     "grade": 3,
+     "quote": "a `Wait` ENDS its step.",
+     "why": "the full contrast with LangGraph: nothing re-run, answers as owned fields"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      69,
+      85
+     ],
+     "grade": 3,
+     "quote": "a\n  step that needs a person *ends* rather than being re-run",
+     "why": "summary: both builds' waiting and the five LangGraph behaviours"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      153,
+      233
+     ],
+     "grade": 2,
+     "quote": "A vendor who keeps sending the same wrong invoice, with the round counter taken away.",
+     "why": "a loop through interrupt() that recursion_limit never stops"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      1,
+      35
+     ],
+     "grade": 2,
+     "quote": "What makes this a job for LangGraph is **waiting**.",
+     "why": "the two builds: graph with interrupt() vs a case file"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      392,
+      444
+     ],
+     "grade": 2,
+     "quote": "Sending to the vendor and waiting for the reply is one step, which is safe here and would be a bug in the graph",
+     "why": "the contrast in code"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_graph.py",
+     "lines": [
+      252,
+      316
+     ],
+     "grade": 2,
+     "quote": "A node that is resumed runs again from\n        # its first line, so a send placed before this interrupt would go out twice.",
+     "why": "the graph's waiting nodes, and why send and wait are split"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_scratch.py",
+     "lines": [
+      156,
+      199
+     ],
+     "grade": 2,
+     "quote": "the email is sent and this step is over; the reply starts `read_reply`, so nothing is sent twice",
+     "why": "the case file's wait in code"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/case.py",
+     "lines": [
+      61,
+      142
+     ],
+     "grade": 2,
+     "quote": "case.set(party, field, value)                       # only the field's owner gets past this",
+     "why": "answering is the owner writing the field"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      244,
+      300
+     ],
+     "grade": 1,
+     "quote": "a thread is a run you can come back to by name, from anywhere that can reach the same checkpointer",
+     "why": "how the graph's waiting run is kept"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      479,
+      483
+     ],
+     "grade": 1,
+     "quote": "The run crossed processes; **the payment did not.**",
+     "why": "resuming a waiting run from another process"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_scratch.py",
+     "lines": [
+      1,
+      60
+     ],
+     "grade": 1,
+     "quote": "chapter 6's shared board, every write a row in chapter 4's `Records`",
+     "why": "the scratch desk's design"
+    }
+   ]
+  },
+  {
+   "id": "Q10",
+   "kind": "agentic",
+   "question": "How does chapter 2's runtime stop an agent that keeps calling the same tool, and how does LangGraph's limit compare in chapter 8's LangGraph project?",
+   "relevant": [
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      489,
+      507
+     ],
+     "grade": 3,
+     "quote": "**The default step limit is 10,007.**",
+     "why": "5,004 model calls before LangGraph stopped it; chapter 2 stops on the second identical call"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      513,
+      536
+     ],
+     "grade": 3,
+     "quote": "| a runaway agent | a step count, default **10,007**; held after 9 calls at our limit | chapter 2's doom-loop check; held after **3** |",
+     "why": "the direct comparison"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      94,
+      98
+     ],
+     "grade": 2,
+     "quote": "The Think gets one more turn without tools",
+     "why": "the chapter 2 half: doom-loop detection and the graceful stop"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      435,
+      474
+     ],
+     "grade": 2,
+     "quote": "Detecting a loop that's stuck before the budget runs out",
+     "why": "how chapter 2 recognises a repeating agent"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      476,
+      512
+     ],
+     "grade": 2,
+     "quote": "So a stopped run now gets one more turn:",
+     "why": "chapter 2's graceful stop after detection"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      181,
+      218
+     ],
+     "grade": 2,
+     "quote": "return \"the same tool call with identical arguments repeated\"",
+     "why": "chapter 2's half: the doom-loop checks (LangGraph half elsewhere)"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      153,
+      233
+     ],
+     "grade": 2,
+     "quote": "An investigator that calls lookup_po with the same argument forever, in both builds.",
+     "why": "the runaway agent: LangGraph's recursion_limit against the scratch build"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      169,
+      217
+     ],
+     "grade": 2,
+     "quote": "LangGraph's own default is 10,007 steps.",
+     "why": "the investigator's own limit of 17 against LangGraph's default"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_graph.py",
+     "lines": [
+      1,
+      92
+     ],
+     "grade": 2,
+     "quote": "LangGraph's own default is 10,007 steps -- measured in notebook 1,\n# an agent that never hands in ran 5,004 model calls before it tripped",
+     "why": "the limit, in code"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      69,
+      85
+     ],
+     "grade": 2,
+     "quote": "the default step limit is **10,007**;",
+     "why": "LangGraph's limit, and the interrupt loop it never stops"
+    },
+    {
+     "file": "02_agent_runtime/act.py",
+     "lines": [
+      17,
+      85
+     ],
+     "grade": 1,
+     "quote": "Runtime's doom-loop check does exactly that",
+     "why": "supporting detail of chapter 2's repeat check"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      1,
+      13
+     ],
+     "grade": 1,
+     "quote": "a graceful stop that says what actually happened",
+     "why": "names chapter 2's stop: doom-loop detection and a graceful stop"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      406,
+      433
+     ],
+     "grade": 1,
+     "quote": "return self._doom_loop(conversation)",
+     "why": "chapter 2's stop reasons: budgets, then the doom-loop check"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      522,
+      540
+     ],
+     "grade": 1,
+     "quote": "four doom-loop shapes verified against hand-seeded conversations",
+     "why": "summary of chapter 2's stop"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      220,
+      263
+     ],
+     "grade": 1,
+     "quote": "with no tools, and answers from what is there, saying what it could not find.",
+     "why": "how chapter 2 ends a stopped run"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      462,
+      519
+     ],
+     "grade": 1,
+     "quote": "the doom-loop check fires on a repeated call the",
+     "why": "chapter 2's stop: the repeated call is dropped and the run answers from results"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      1,
+      77
+     ],
+     "grade": 1,
+     "quote": "runaway_agent        the default step limit, and what each build does with an agent that never stops",
+     "why": "names the comparison"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      214,
+      242
+     ],
+     "grade": 1,
+     "quote": "except GraphRecursionError:",
+     "why": "what the desk does when the step limit trips"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      392,
+      444
+     ],
+     "grade": 1,
+     "quote": "is stopped by chapter 2's doom-loop check",
+     "why": "the scratch investigator stopped by chapter 2"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      537,
+      543
+     ],
+     "grade": 1,
+     "quote": "the default step limit is ten thousand, so every agent loop needs its own",
+     "why": "the step-limit lesson"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_graph.py",
+     "lines": [
+      252,
+      316
+     ],
+     "grade": 1,
+     "quote": "except GraphRecursionError:",
+     "why": "the step limit tripping, held for a person"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      158,
+      171
+     ],
+     "grade": 1,
+     "quote": "A\n   count can't tell an agent working hard from one going round in circles.",
+     "why": "step counts against loop detection"
+    }
+   ]
+  },
+  {
+   "id": "Q11",
+   "kind": "agentic",
+   "question": "Why does trimming the oldest turns to fit a token budget go wrong, and how does chapter 5 fix it?",
+   "relevant": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      70,
+      73
+     ],
+     "grade": 3,
+     "quote": "trimming by age throws away rules given at the start",
+     "why": "states why trimming the oldest turns goes wrong, and that chapter 5 deals with it"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ],
+     "grade": 3,
+     "quote": "**Recency alone drops the rules.**",
+     "why": "the direct answer: turn 1's rules dropped, answer broke both; pinned items and refusing"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      32,
+      48
+     ],
+     "grade": 3,
+     "quote": "**The t1 message was dropped for being old.**",
+     "why": "trim_to_budget's recency drops the rules: seconds, a restart, an invented baseline"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      50,
+      62
+     ],
+     "grade": 3,
+     "quote": "Once marked, a constraint is **pinned**. It goes into every selection, ahead of any scoring.",
+     "why": "the fix: pinned constraints, and refusing when they can't fit"
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      133,
+      145
+     ],
+     "grade": 2,
+     "quote": "Trimming by age throws away whichever facts happen to be old",
+     "why": "why trimming the oldest turns goes wrong: the early fact was the one dropped"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      154,
+      173
+     ],
+     "grade": 2,
+     "quote": "recency alone drops the rules and the answer breaks them",
+     "why": "the chapter's table: the failure and what fixed it"
+    },
+    {
+     "file": "01_foundations/chat.py",
+     "lines": [
+      1,
+      73
+     ],
+     "grade": 1,
+     "quote": "turns.pop(0)",
+     "why": "trim_to_budget itself: drops whole turns from the oldest"
+    },
+    {
+     "file": "01_foundations/chat.py",
+     "lines": [
+      76,
+      155
+     ],
+     "grade": 1,
+     "quote": "def trim(self, max_tokens, reserve_turns=2, remember=False):",
+     "why": "chapter 1's own mitigation: facts from dropped turns kept in notes"
+    },
+    {
+     "file": "01_foundations/notebooks/03_tokens_and_context.ipynb",
+     "lines": [
+      32,
+      53
+     ],
+     "grade": 1,
+     "quote": "drop the oldest turns",
+     "why": "how trimming works: oldest turns dropped, the system message kept"
+    },
+    {
+     "file": "01_foundations/notebooks/03_tokens_and_context.ipynb",
+     "lines": [
+      47,
+      89
+     ],
+     "grade": 1,
+     "quote": "def trim_to_budget(messages, max_tokens, reserve_turns=2):",
+     "why": "trim_to_budget's code: whole turns dropped from the oldest"
+    },
+    {
+     "file": "01_foundations/notebooks/09_build_an_agent.ipynb",
+     "lines": [
+      151,
+      184
+     ],
+     "grade": 1,
+     "quote": "dropping turns outright still means losing whatever they contained permanently",
+     "why": "what trimming loses, and chapter 1's notes as a partial fix"
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      147,
+      157
+     ],
+     "grade": 1,
+     "quote": "`Conversation.trim(remember=True)` reads the turns it is about to drop",
+     "why": "keeping facts from trimmed turns"
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      173,
+      201
+     ],
+     "grade": 1,
+     "quote": "watched it drop the only turn that said something durable about the user",
+     "why": "summary of the trimming failure"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      1,
+      14
+     ],
+     "grade": 1,
+     "quote": "A rule from turn 1 drops out of a recency window",
+     "why": "names the recency failure"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      128,
+      145
+     ],
+     "grade": 1,
+     "quote": "chapter 1's `trim_to_budget()` (recency selection, generalised)",
+     "why": "trimming is what selection generalises"
+    },
+    {
+     "file": "05_context/context.py",
+     "lines": [
+      1,
+      82
+     ],
+     "grade": 1,
+     "quote": "`pinned` means preserved: this item goes into every context built from this list,",
+     "why": "pinning, chapter 5's guarantee for rules"
+    },
+    {
+     "file": "05_context/notebooks/01_context_basics.ipynb",
+     "lines": [
+      134,
+      140
+     ],
+     "grade": 1,
+     "quote": "a rule said once in turn 1, which anything choosing by recency will drop first",
+     "why": "names the risk"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      98,
+      106
+     ],
+     "grade": 1,
+     "quote": "That's right for chatter and exactly wrong for a rule, which is why rules are pinned and not scored.",
+     "why": "recency's weight on a rule"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      118,
+      128
+     ],
+     "grade": 1,
+     "quote": "Recency is a weight, not a promise",
+     "why": "recency weighting does not keep the latest items either"
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      1,
+      76
+     ],
+     "grade": 1,
+     "quote": "pinned items go in, always. If they alone overflow the budget, selection\n                  refuses",
+     "why": "pinning as the guarantee"
+    }
+   ]
+  },
+  {
+   "id": "Q12",
+   "kind": "rag",
+   "question": "Why is TaskGroup safer than asyncio.gather when one of several concurrent calls fails, and how do you limit how many run at once?",
+   "relevant": [
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      35,
+      41
+     ],
+     "grade": 3,
+     "quote": "a failure cancels every sibling task immediately",
+     "why": "why TaskGroup is safer: gather leaves the other calls running, TaskGroup cancels them"
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      43,
+      47
+     ],
+     "grade": 3,
+     "quote": "A `Semaphore(n)` caps how many tasks can be *in progress* at once",
+     "why": "how to limit how many run at once, with the measured example"
+    },
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      92,
+      95
+     ],
+     "grade": 2,
+     "quote": "why `TaskGroup` is safer than `gather` when one call",
+     "why": "says TaskGroup is safer and a Semaphore limits how many run; not why"
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      55,
+      71
+     ],
+     "grade": 2,
+     "quote": "Proved `TaskGroup` cancels sibling tasks on failure where `gather` lets them run to waste",
+     "why": "summary stating both parts"
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      3,
+      11
+     ],
+     "grade": 1,
+     "quote": "Throttled concurrency with a `Semaphore`",
+     "why": "names both: a measurable reason TaskGroup is safer, a Semaphore to throttle"
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      27,
+      33
+     ],
+     "grade": 1,
+     "quote": "`asyncio.gather()` is what actually runs them concurrently",
+     "why": "what gather does: context for the comparison"
+    }
+   ]
+  },
+  {
+   "id": "Q13",
+   "kind": "rag",
+   "question": "What are the two ways a tool call can fail in chapter 1, and what catches each?",
+   "relevant": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      82,
+      90
+     ],
+     "grade": 3,
+     "quote": "- **The API rejects the call**",
+     "why": "the two ways and what catches each: Groq server-side, Pydantic for domain rules"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      57,
+      76
+     ],
+     "grade": 3,
+     "quote": "Two different things can go wrong, and both are real",
+     "why": "both failures in full: Groq's 400 for an undeclared tool, Pydantic for the arguments"
+    },
+    {
+     "file": "01_foundations/llm.py",
+     "lines": [
+      126,
+      206
+     ],
+     "grade": 2,
+     "quote": "def tool_call_failure(error):",
+     "why": "the two failures in code: Groq's rejection turned into a message, arguments checked against schemas"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      1,
+      19
+     ],
+     "grade": 2,
+     "quote": "Split tool-calling failure into two real categories",
+     "why": "names both failures and what catches each, briefly"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      74,
+      88
+     ],
+     "grade": 2,
+     "quote": "args = schemas[name].model_validate(args).model_dump()",
+     "why": "execute_tool_call: where the argument check runs"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      92,
+      112
+     ],
+     "grade": 2,
+     "quote": "1. **API-level rejection**",
+     "why": "how each failure is handled on retry"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      138,
+      156
+     ],
+     "grade": 2,
+     "quote": "Split failure into two genuinely different categories",
+     "why": "summary stating both and what handles each"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      1,
+      22
+     ],
+     "grade": 2,
+     "quote": "`resolve_tools` wraps the call in `except Exception as e: content = f\"Error: {e}\"`",
+     "why": "what catches a failing tool in chapter 1"
+    },
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      118,
+      130
+     ],
+     "grade": 1,
+     "quote": "Groq's error says exactly what was malformed",
+     "why": "tool_call_failure: handling the API's rejection of a call"
+    },
+    {
+     "file": "01_foundations/notebooks/06_function_calling.ipynb",
+     "lines": [
+      112,
+      136
+     ],
+     "grade": 1,
+     "quote": "when a fix exists, the specific validation error lets the model find it directly",
+     "why": "the two failures recovering differently"
+    },
+    {
+     "file": "01_foundations/notebooks/09_build_an_agent.ipynb",
+     "lines": [
+      13,
+      62
+     ],
+     "grade": 1,
+     "quote": "Two different failure branches, both looping back rather than giving up",
+     "why": "the two failure categories inside the agent loop"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      654,
+      692
+     ],
+     "grade": 1,
+     "quote": "Groq rejects a malformed tool call and tells you exactly why",
+     "why": "a malformed tool call rejected by the API and retried with the reason"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      1212,
+      1256
+     ],
+     "grade": 1,
+     "quote": "Fix the arguments to match this JSON schema",
+     "why": "repairing a tool call whose arguments failed"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      111,
+      134
+     ],
+     "grade": 1,
+     "quote": "| `except Exception: \"Error: {e}\"` (ch. 1) | Split by who can act on it: the model, or us |",
+     "why": "how chapter 1 caught a failing tool"
+    },
+    {
+     "file": "03_tools/notebooks/01_what_is_a_tool.ipynb",
+     "lines": [
+      30,
+      50
+     ],
+     "grade": 1,
+     "quote": "Chapter 1's `execute_tool_call()` then checks those arguments against `WeatherArgs`",
+     "why": "chapter 1's argument check before the call"
+    },
+    {
+     "file": "03_tools/notebooks/01_what_is_a_tool.ipynb",
+     "lines": [
+      124,
+      134
+     ],
+     "grade": 1,
+     "quote": "the same way it corrected a wrong type in chapter 1's notebook 6",
+     "why": "a model correcting rejected arguments, as in chapter 1"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      59,
+      83
+     ],
+     "grade": 1,
+     "quote": "Chapter 1 turned every failure into `f\"Error: {e}\"` and sent it back.",
+     "why": "chapter 1's single catch-all"
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      169,
+      217
+     ],
+     "grade": 1,
+     "quote": "Chapter 1's `tool_call_failure()` is borrowed to hand Groq's reason back",
+     "why": "a refused tool call handled with chapter 1's helper"
+    },
+    {
+     "file": "08_frameworks/03_crewai/crew_questionnaire.py",
+     "lines": [
+      48,
+      109
+     ],
+     "grade": 1,
+     "quote": "in the spirit of chapter 1's `tool_call_failure()`",
+     "why": "a provider-refused tool call handed back for correction"
+    },
+    {
+     "file": "08_frameworks/03_crewai/security_questionnaire.ipynb",
+     "lines": [
+      189,
+      223
+     ],
+     "grade": 1,
+     "quote": "`GroqLLM` is that step, in the spirit of chapter 1's `tool_call_failure()`",
+     "why": "a refused tool call handed back for correction"
+    }
+   ]
+  },
+  {
+   "id": "Q14",
+   "kind": "rag",
+   "question": "What is the difference between ReWOO and LLM Compiler?",
+   "relevant": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      77,
+      86
+     ],
+     "grade": 3,
+     "quote": "**ReWOO is LLM Compiler with the loop back removed.**",
+     "why": "the difference stated directly: same parts and cost, only LLM Compiler can replan"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      116,
+      132
+     ],
+     "grade": 3,
+     "quote": "| LLM Compiler | `llm_compiler` | ReWOO plus a loop back: plan → graph → replan → answer |",
+     "why": "both loops side by side: answer once with no replanning, against a loop back to replan"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      166,
+      208
+     ],
+     "grade": 3,
+     "quote": "Strip the loop and this is **ReWOO**",
+     "why": "LLM Compiler built as plan, graph, replan; ReWOO is the same without the loop back"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      211,
+      250
+     ],
+     "grade": 3,
+     "quote": "- **LLM Compiler** — ReWOO's up-front call plan, but run as a graph",
+     "why": "the three patterns on their two axes: ReWOO blind until the end, LLM Compiler overlapping and replanning"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/06_agent_patterns.ipynb",
+     "lines": [
+      85,
+      112
+     ],
+     "grade": 3,
+     "quote": "What differs is the **third role**.",
+     "why": "the direct answer: solver vs joiner, ReWOO terminates by construction, same cost, parallelism not the difference"
+    },
+    {
+     "file": "02_agent_runtime/patterns.py",
+     "lines": [
+      108,
+      160
+     ],
+     "grade": 3,
+     "quote": "The only difference from llm_compiler below is that this cannot replan.",
+     "why": "both factories side by side: planner, graph, solver vs plan, graph, replan or finish"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/06_agent_patterns.ipynb",
+     "lines": [
+      272,
+      316
+     ],
+     "grade": 2,
+     "quote": "One is the loop unrolled to two rounds, the other is the loop.",
+     "why": "same three components; only LLM Compiler can notice it isn't finished"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      100,
+      103
+     ],
+     "grade": 1,
+     "quote": "Those references\n*are* the edges of a graph",
+     "why": "the plan-as-graph both patterns run"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      3,
+      16
+     ],
+     "grade": 1,
+     "quote": "Run the full compiler loop, plan → graph → replan",
+     "why": "names the compiler loop with its replan step"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      93,
+      141
+     ],
+     "grade": 1,
+     "quote": "`Graph` executes against that structure instead of the ordering:",
+     "why": "the graph both patterns' plans run on"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      155,
+      162
+     ],
+     "grade": 1,
+     "quote": "that is what the replanning round is for",
+     "why": "a graph commits to its plan; only replanning reconsiders"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      288,
+      304
+     ],
+     "grade": 1,
+     "quote": "Placed Plan & Execute, ReWOO and LLM Compiler against each other",
+     "why": "summary naming the comparison"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/06_agent_patterns.ipynb",
+     "lines": [
+      65,
+      82
+     ],
+     "grade": 1,
+     "quote": "The planner writes **goals**, not calls",
+     "why": "what separates Plan & Execute from ReWOO and LLM Compiler, which plan calls"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      902,
+      915
+     ],
+     "grade": 1,
+     "quote": "goals=False (default): a plan of TOOL CALLS, every argument decided up front",
+     "why": "the planner both ReWOO and LLM Compiler share"
+    },
+    {
+     "file": "02_agent_runtime/think.py",
+     "lines": [
+      988,
+      1018
+     ],
+     "grade": 1,
+     "quote": "All previously planned tool calls have finished running. Decide whether the",
+     "why": "the joiner's continue-or-finish step that only LLM Compiler has"
+    }
+   ]
+  },
+  {
+   "id": "Q15",
+   "kind": "rag",
+   "question": "Why does Observe turn raw tool results into observations, and what must it never do to a value?",
+   "relevant": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      89,
+      92
+     ],
+     "grade": 3,
+     "quote": "It copies values exactly, keeps what the tool said about what to do next, and converts nothing.",
+     "why": "why raw output is turned into an observation, and the rules it keeps"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      162,
+      218
+     ],
+     "grade": 3,
+     "quote": "## `observe.py`: an effect is not an observation",
+     "why": "why raw output is kept out of messages, how Observe phrases it, and that it reports without deciding"
+    },
+    {
+     "file": "02_agent_runtime/observe.py",
+     "lines": [
+      25,
+      89
+     ],
+     "grade": 3,
+     "quote": "Copy every value exactly as the tool gave it, in the units the tool gave it.",
+     "why": "Observe's code: one plain factual sentence, never convert, calculate or round a value"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      111,
+      134
+     ],
+     "grade": 3,
+     "quote": "`Observe` keeps what\nthe tool said to do next, and converts or calculates nothing.",
+     "why": "the two Observe bugs: dropped a refusal's advice, converted 20 C itself"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      107,
+      136
+     ],
+     "grade": 3,
+     "quote": "Chapter 2's `Observe` turns a raw tool result into an observation",
+     "why": "Observe dropped a refusal's suggestion; the prompt now keeps what the tool said to do next"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      136,
+      161
+     ],
+     "grade": 3,
+     "quote": "so the conversion had happened — inside `Observe`.",
+     "why": "Observe converted 20 C to 68 F; the prompt now forbids changing a value"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      81,
+      108
+     ],
+     "grade": 3,
+     "quote": "**4 of 4 against 0 of 4.** Fisher's exact test, one-sided: **p = 0.014**.",
+     "why": "Observe must never convert a value; narrowing its context stops it"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      147,
+      163
+     ],
+     "grade": 2,
+     "quote": "| `Observe` must not change a value | `03_tools` |",
+     "why": "the two bugs behind Observe's rules: a dropped suggestion, a converted value"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      212,
+      239
+     ],
+     "grade": 2,
+     "quote": "keep everything the tool said, add nothing of your own",
+     "why": "the dropped-suggestion bug that set Observe's rule about the tool's own words"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      163,
+      173
+     ],
+     "grade": 2,
+     "quote": "An extractor is a plain Python function that turns a raw tool result into an observation, with no model involved.",
+     "why": "the guaranteed version: an extractor cannot change a value"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      101,
+      135
+     ],
+     "grade": 2,
+     "quote": "**The ids are what `Observe` drops.**",
+     "why": "Observe's restating damages memory results; extractors mean 'already final'"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ],
+     "grade": 2,
+     "quote": "`Observe` prompt converted `2.9` seconds into `2900 ms` **4 times out of 4**",
+     "why": "Observe changing a value, fixed by narrowing its context"
+    },
+    {
+     "file": "05_context/focus.py",
+     "lines": [
+      111,
+      183
+     ],
+     "grade": 2,
+     "quote": "The milliseconds rule is\n        exactly what made chapter 2's `Observe` convert 2.9 s into 2900 ms.",
+     "why": "Observe given only the current pass so it cannot convert a value"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      26,
+      34
+     ],
+     "grade": 2,
+     "quote": "**A component that cannot see the request cannot be tempted by it.**",
+     "why": "why Observe converted 20 C to 68 F"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      110,
+      131
+     ],
+     "grade": 2,
+     "quote": "For a result that is *already* the artefact — a memory listing, a document fetched by id — it is damage",
+     "why": "when Observe should not rewrite a result at all"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      154,
+      173
+     ],
+     "grade": 2,
+     "quote": "chapter 2's original `Observe` converted 2.9 s to 2900 ms **4/4** with the whole conversation, **0/4** focused",
+     "why": "Observe changing a value, and the fix"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      16,
+      51
+     ],
+     "grade": 1,
+     "quote": "Turns a user message or a raw tool result into something the conversation can read",
+     "why": "Observe's one job, and that it never decides"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      1,
+      13
+     ],
+     "grade": 1,
+     "quote": "seen why a tool's raw output deliberately never lands in `messages`",
+     "why": "names that raw output never lands in the conversation"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      522,
+      540
+     ],
+     "grade": 1,
+     "quote": "Kept raw tool output out of `messages` entirely",
+     "why": "summary: why raw output stays out"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      209,
+      232
+     ],
+     "grade": 1,
+     "quote": "the merge is a labelled concatenation",
+     "why": "Observe turning a fork's results into one labelled observation"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/06_agent_patterns.ipynb",
+     "lines": [
+      19,
+      30
+     ],
+     "grade": 1,
+     "quote": "a raw effect turned into a readable observation",
+     "why": "Observe's role, and what it never does"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      308,
+      378
+     ],
+     "grade": 1,
+     "quote": "State this result as one plain factual sentence",
+     "why": "Graph phrases each result as an observation the same way"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      138,
+      158
+     ],
+     "grade": 1,
+     "quote": "caught `Observe` summarizing the useful half out of a carefully worded refusal",
+     "why": "summary of the Observe fix"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      116,
+      130
+     ],
+     "grade": 1,
+     "quote": "`Observe` rephrases a raw tool result into an observation, and it kept both facts",
+     "why": "Observe keeping a verification message intact"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      1,
+      19
+     ],
+     "grade": 1,
+     "quote": "Caught the observation step doing the agent's arithmetic for it",
+     "why": "names the Observe arithmetic bug"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      175,
+      201
+     ],
+     "grade": 1,
+     "quote": "Caught `Observe` converting 20 °C to 68 °F inside its phrasing call",
+     "why": "summary of the Observe fix"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      125,
+      146
+     ],
+     "grade": 1,
+     "quote": "**`Observe` rewrites tool results through a model**, which drops the `#ids`",
+     "why": "Observe's rewriting damaging memory results"
+    },
+    {
+     "file": "04_memory/memory_tools.py",
+     "lines": [
+      1,
+      48
+     ],
+     "grade": 1,
+     "quote": "For anything memory returns it is damage",
+     "why": "Observe restating results loses ids"
+    },
+    {
+     "file": "04_memory/memory_tools.py",
+     "lines": [
+      140,
+      153
+     ],
+     "grade": 1,
+     "quote": "this tool's result is the\n# artifact, not a report about one, so hand it over untouched",
+     "why": "extractors that skip Observe's rewrite"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      298,
+      316
+     ],
+     "grade": 1,
+     "quote": "By default `Observe` has a model restate each tool result as one plain sentence.",
+     "why": "Observe's restating dropped the id"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      316,
+      336
+     ],
+     "grade": 1,
+     "quote": "A listing is already written for the model to read; there is nothing to restate.",
+     "why": "results passed word for word instead of restated"
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      180,
+      202
+     ],
+     "grade": 1,
+     "quote": "Found `Observe` discarding the detail `open_memory` had just fetched",
+     "why": "summary of the Observe fix for memory tools"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      55,
+      79
+     ],
+     "grade": 1,
+     "quote": "**the rules, even though they are pinned.**",
+     "why": "Observe's narrowed context"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      143,
+      157
+     ],
+     "grade": 1,
+     "quote": "It drops the pinned rules on purpose, which is what stops the unit conversion.",
+     "why": "summary of current_pass"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      170,
+      175
+     ],
+     "grade": 1,
+     "quote": "a component that cannot see the request cannot be tempted by it",
+     "why": "the lesson from Observe's conversion"
+    }
+   ]
+  },
+  {
+   "id": "Q16",
+   "kind": "rag",
+   "question": "Why do Graph and forking use threads instead of asyncio.gather?",
+   "relevant": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      105,
+      108
+     ],
+     "grade": 3,
+     "quote": "Notebooks already run an event loop, and library\ncode that starts its own conflicts with it.",
+     "why": "the direct answer: the notebook's event loop, and blocking I/O loses nothing on threads"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      143,
+      147
+     ],
+     "grade": 3,
+     "quote": "notebooks already run inside an event loop, and library code that starts its own conflicts with it",
+     "why": "the direct answer: the notebook's event loop, and blocking I/O releases the GIL so nothing is lost"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      126,
+      166
+     ],
+     "grade": 2,
+     "quote": "Same `ThreadPoolExecutor` reasoning as notebook 4",
+     "why": "forking runs branches on threads, for the same reason as Graph"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      89,
+      154
+     ],
+     "grade": 2,
+     "quote": "Threads, not asyncio, for the same reason chapter 2 used them: notebooks are already",
+     "why": "restates chapter 2's reason for threads"
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      227,
+      276
+     ],
+     "grade": 2,
+     "quote": "Threads rather than asyncio for the same reason as chapter 2's `Graph`: a notebook already\n    runs an event loop, and this work is blocking I/O.",
+     "why": "restates the reason for threads"
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      136,
+      145
+     ],
+     "grade": 1,
+     "quote": "`execute()` is pure, so `Graph` can call it from several threads",
+     "why": "why Act can run on Graph's threads"
+    },
+    {
+     "file": "02_agent_runtime/act.py",
+     "lines": [
+      171,
+      230
+     ],
+     "grade": 1,
+     "quote": "with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as pool:",
+     "why": "forking running branches on a thread pool: the what, not the why"
+    },
+    {
+     "file": "02_agent_runtime/act.py",
+     "lines": [
+      332,
+      369
+     ],
+     "grade": 1,
+     "quote": "safe to call from several\n        # threads at once",
+     "why": "execute() is pure so Graph can run it from several threads"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/03_retries_and_reflection.ipynb",
+     "lines": [
+      84,
+      92
+     ],
+     "grade": 1,
+     "quote": "several tool calls run at the same time in different threads",
+     "why": "execute() kept pure because Graph runs calls on threads"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      93,
+      141
+     ],
+     "grade": 1,
+     "quote": "with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as pool:",
+     "why": "Graph on a thread pool, with the measured overlap: the what, not the why"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      149,
+      153
+     ],
+     "grade": 1,
+     "quote": "runs the *same* `Act` object from several threads at once",
+     "why": "what running on threads required of Act"
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      517,
+      546
+     ],
+     "grade": 1,
+     "quote": "Threads cannot be killed, but a `Runtime` checks `cancel` every iteration",
+     "why": "what running branches on threads means for stopping them"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      308,
+      378
+     ],
+     "grade": 1,
+     "quote": "with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as pool:",
+     "why": "Graph's steps run on a thread pool"
+    },
+    {
+     "file": "08_frameworks/04_autogen/a_checks.py",
+     "lines": [
+      1,
+      89
+     ],
+     "grade": 1,
+     "quote": "A Jupyter kernel's thread already runs an event loop, and one loop\n    cannot be run inside another",
+     "why": "the notebook event loop, the same constraint behind chapter 2's threads"
+    }
+   ]
+  },
+  {
+   "id": "Q17",
+   "kind": "rag",
+   "question": "Why does chapter 3 add a per-call timeout when the runtime already has max_seconds, and when is retrying after a timeout unsafe?",
+   "relevant": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      86,
+      89
+     ],
+     "grade": 3,
+     "quote": "`Runtime(max_seconds=...)` is checked *between* components, so a tool that hangs inside `Act`",
+     "why": "the direct answer: max_seconds can't stop a hung call; not-repeatable tools unsafe to retry"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      1,
+      86
+     ],
+     "grade": 3,
+     "quote": "A timeout is the one case where nobody knows whether the tool ran.",
+     "why": "when retrying after a timeout is unsafe: a tool that sends an email"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      26,
+      57
+     ],
+     "grade": 3,
+     "quote": "So the budget is looked at *between* components, and never while one is running.",
+     "why": "the direct answer: max_seconds can't interrupt a hung tool; invoke's thread timeout"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      97,
+      105
+     ],
+     "grade": 3,
+     "quote": "For a tool that sends, pays, or deletes, calling it again is a second email.",
+     "why": "the direct answer to when retrying after a timeout is unsafe"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      89,
+      154
+     ],
+     "grade": 2,
+     "quote": "It may or may not have gone through. Do not call it again -- check first.",
+     "why": "the per-call timeout and its advice for a tool that must not repeat"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      138,
+      158
+     ],
+     "grade": 2,
+     "quote": "saw why chapter 2's `max_seconds` cannot stop it",
+     "why": "summary: budget checked between components; repeatable=False after a timeout"
+    },
+    {
+     "file": "03_tools/tools.py",
+     "lines": [
+      60,
+      119
+     ],
+     "grade": 2,
+     "quote": "Tools\n        # that only read are safe; anything that sends, pays, or deletes is not.",
+     "why": "the repeatable flag, read only on a timeout"
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      61,
+      75
+     ],
+     "grade": 2,
+     "quote": "And **giving up is not cancelling.**",
+     "why": "a timeout leaves work in flight, which is why repeatable matters"
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      138,
+      179
+     ],
+     "grade": 1,
+     "quote": "if self.max_seconds is not None and time.monotonic() - self._started_at >= self.max_seconds:",
+     "why": "max_seconds is checked only between steps"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      52,
+      60
+     ],
+     "grade": 1,
+     "quote": "A tool that hangs (and why chapter 2's time budget can't stop it)",
+     "why": "notebook 3's row: the hang and the must-not-run-twice timeout"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      1,
+      22
+     ],
+     "grade": 1,
+     "quote": "a call times out, gets retried, and the email goes twice",
+     "why": "names both halves of the question"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      65,
+      91
+     ],
+     "grade": 1,
+     "quote": "That is why `safe_to_retry` treats it like a timeout rather than like a refusal",
+     "why": "retry safety after a timeout follows repeatable"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      62,
+      92
+     ],
+     "grade": 1,
+     "quote": "Writing twice is not writing once.",
+     "why": "write_file marked not repeatable"
+    },
+    {
+     "file": "03_tools/toolbox.py",
+     "lines": [
+      60,
+      138
+     ],
+     "grade": 1,
+     "quote": "after a timeout\n    # there is no way to tell which case you are in",
+     "why": "write_file not repeatable after a timeout"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      112,
+      115
+     ],
+     "grade": 1,
+     "quote": "a non-repeatable tool must not be retried after a timeout",
+     "why": "the same rule over MCP"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      66,
+      74
+     ],
+     "grade": 1,
+     "quote": "`repeatable` is only ever read *after a timeout*",
+     "why": "retry safety after a timeout, for a remote tool"
+    },
+    {
+     "file": "07_mcp/remote.py",
+     "lines": [
+      128,
+      212
+     ],
+     "grade": 1,
+     "quote": "this flag is only ever read after a timeout",
+     "why": "repeatable from MCP's hints"
+    }
+   ]
+  },
+  {
+   "id": "Q18",
+   "kind": "rag",
+   "question": "How does verified() catch a tool that reports success without doing its job?",
+   "relevant": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      91,
+      95
+     ],
+     "grade": 3,
+     "quote": "with a check that **looks at the world afterwards**",
+     "why": "the direct answer: the truncated note, verified() reads the world back"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      33,
+      41
+     ],
+     "grade": 3,
+     "quote": "A check is worth something only if it looks somewhere the tool is not reporting from.",
+     "why": "why reading the tool's own answer catches nothing"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      43,
+      63
+     ],
+     "grade": 3,
+     "quote": "problem = check(kwargs, value)",
+     "why": "verified(): a copy of the tool with a check on the world after it runs"
+    },
+    {
+     "file": "03_tools/verify.py",
+     "lines": [
+      4,
+      35
+     ],
+     "grade": 3,
+     "quote": "A copy of `tool` that looks at the world after it runs, instead of taking its word.",
+     "why": "verified() and VerificationError in code"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      1,
+      17
+     ],
+     "grade": 2,
+     "quote": "So a tool that runs cleanly, returns a cheerful string, and did not do the job counts as a success.",
+     "why": "the problem verified() solves"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      21,
+      31
+     ],
+     "grade": 2,
+     "quote": "Validation asks *can this call be made*. Nothing so far asks *did it happen*.",
+     "why": "the truncated note coming back ok"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      65,
+      91
+     ],
+     "grade": 2,
+     "quote": "**`unverified`** is a tool that said it *had* done the job.",
+     "why": "the unverified ending a failed check produces"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      93,
+      101
+     ],
+     "grade": 2,
+     "quote": "You need one thing that has to be true afterwards",
+     "why": "the cheaper check: one fact about the world"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      132,
+      148
+     ],
+     "grade": 2,
+     "quote": "the report and the thing reported come from the same place",
+     "why": "summary of how verified() catches a false success"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      52,
+      60
+     ],
+     "grade": 1,
+     "quote": "`verified()`, which checks the world instead of the tool's own answer",
+     "why": "notebook 4's row: the truncated note and verified()"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      111,
+      134
+     ],
+     "grade": 1,
+     "quote": "| A call that returns = success (ch. 1) | `verified()` checks the world |",
+     "why": "verified() replacing return-means-success"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      89,
+      154
+     ],
+     "grade": 1,
+     "quote": "The tool said it worked and a check of the world disagreed.",
+     "why": "a failed verification becomes unverified"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      103,
+      114
+     ],
+     "grade": 1,
+     "quote": "`send_email` cannot be verified.",
+     "why": "the limit of verification"
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      116,
+      130
+     ],
+     "grade": 1,
+     "quote": "Verification does not fix anything — it notices.",
+     "why": "verified() in the loop"
+    },
+    {
+     "file": "03_tools/toolbox.py",
+     "lines": [
+      60,
+      138
+     ],
+     "grade": 1,
+     "quote": "A check for `write_file`, in the shape notebook 4's `verified()` wants.",
+     "why": "a real check that reads the file back"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      93,
+      97
+     ],
+     "grade": 1,
+     "quote": "Run\n`verified()` **on the server**, where the world is",
+     "why": "verified() over MCP"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      80,
+      96
+     ],
+     "grade": 1,
+     "quote": "**the server is the only place it can happen at all.**",
+     "why": "verified() across a process boundary"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      120,
+      174
+     ],
+     "grade": 1,
+     "quote": "The same move as chapter 3's `verified()`: check the artifact, not the report about it.",
+     "why": "verified()'s principle applied to a reviewer"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      399,
+      437
+     ],
+     "grade": 1,
+     "quote": "chapter 3's `verified()` idea, checking the result rather than the report of it",
+     "why": "verified()'s principle reused for memory writes"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 1,
+     "quote": "\"The tool returned\" is not \"the tool worked\"",
+     "why": "chapter 3's one-line finding"
+    }
+   ]
+  },
+  {
+   "id": "Q19",
+   "kind": "rag",
+   "question": "Why is a 50/50 weighting of similarity and recency not really 50/50, and how is it fixed?",
+   "relevant": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      82,
+      95
+     ],
+     "grade": 3,
+     "quote": "**A 50/50 weighting isn't 50/50.**",
+     "why": "the direct answer: ranges 0.115 vs 0.816, fixed by min-max normalising each term"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      205,
+      217
+     ],
+     "grade": 3,
+     "quote": "**Cosine moves across a range of about 0.12. Activation moves across nearly 0.8.**",
+     "why": "the direct answer: seven-eighths recency; min-max rescale each term; floor on raw score first"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      231,
+      243
+     ],
+     "grade": 2,
+     "quote": "**An even split gets two of the six wrong.**",
+     "why": "the weights measured once the terms are normalised"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      461,
+      487
+     ],
+     "grade": 2,
+     "quote": "which made \"fifty-fifty\" seven-eighths recency in practice",
+     "why": "summary of the problem"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      483,
+      507
+     ],
+     "grade": 2,
+     "quote": "found cosine moving `0.115` against decay's `0.816`",
+     "why": "summary of the problem and the measured weights"
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 2,
+     "quote": "min-max each term across the surviving candidates, so a weight is a share of",
+     "why": "the fix in code: floor on raw, then normalise, then weight"
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      210,
+      275
+     ],
+     "grade": 2,
+     "quote": "nrel = unit([rel for rel, _, _, _ in kept])",
+     "why": "both terms min-maxed, then weighted 0.8 / 0.2"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      132,
+      160
+     ],
+     "grade": 1,
+     "quote": "Cosine similarity on real embeddings never uses its theoretical range.",
+     "why": "the narrow similarity range behind the weighting problem"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      180,
+      215
+     ],
+     "grade": 1,
+     "quote": "min-max promotes the least-bad of a bad batch to 1.0",
+     "why": "cosine's narrow band and min-max's trap"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      219,
+      229
+     ],
+     "grade": 1,
+     "quote": "**over-fetch → floor on raw similarity → normalise → weight**",
+     "why": "the order the fix runs in"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      245,
+      256
+     ],
+     "grade": 1,
+     "quote": "| `w_similarity = 0.8` | how much meaning decides |",
+     "why": "the measured weights and floor"
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      87,
+      94
+     ],
+     "grade": 1,
+     "quote": "Min-max to [0, 1].",
+     "why": "the normalising function"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      98,
+      106
+     ],
+     "grade": 1,
+     "quote": "so a weight is a share of the decision and not a share of whatever range a term happens to occupy",
+     "why": "the same min-max fix as chapter 4"
+    }
+   ]
+  },
+  {
+   "id": "Q20",
+   "kind": "rag",
+   "question": "Why shouldn't agent memory start with a vector database?",
+   "relevant": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      16,
+      44
+     ],
+     "grade": 3,
+     "quote": "The usual first move is \"add a vector database\". That's the wrong first move.",
+     "why": "the direct answer: most memories are named facts a dict answers exactly; pick the store by the question"
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      159,
+      171
+     ],
+     "grade": 3,
+     "quote": "reaching for a vector database here makes the answer *approximate* for no benefit",
+     "why": "most memory is a keyed lookup; only 'has this happened before' forces embeddings"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      52,
+      64
+     ],
+     "grade": 3,
+     "quote": "**Most of what an agent needs to remember stops here.**",
+     "why": "a dict answers a named fact exactly; a vector index only approximately"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      3,
+      34
+     ],
+     "grade": 2,
+     "quote": "a vector index answers that same question *approximately*, which is strictly worse",
+     "why": "stores chosen by the question; later is not better"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      500,
+      524
+     ],
+     "grade": 2,
+     "quote": "most long-term memory should stop there, since a store that returns *nearly* is a downgrade",
+     "why": "summary: dict first, no COUNT in vector stores, no 'I don't have that'"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      161,
+      188
+     ],
+     "grade": 2,
+     "quote": "**Semantic → vectors is the trap**",
+     "why": "a nameable fact asked of vectors: two seconds, ranked, and an answer from a journal with no timezone"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      1,
+      71
+     ],
+     "grade": 2,
+     "quote": "\"how many failed last week\"               Records, SQL. No vector database has COUNT.",
+     "why": "which store answers which question"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      74,
+      122
+     ],
+     "grade": 2,
+     "quote": "This is the whole of long-term memory for most of what an agent needs to remember.",
+     "why": "KeyValue: a named fact looked up exactly"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 2,
+     "quote": "most memories are a dict, not a vector database",
+     "why": "chapter 4's one-line answer"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      70,
+      74
+     ],
+     "grade": 1,
+     "quote": "Neither needs a database.",
+     "why": "working and short-term memory need no store"
+    },
+    {
+     "file": "04_memory/memory.py",
+     "lines": [
+      1,
+      97
+     ],
+     "grade": 1,
+     "quote": "That is not a simplification standing in for a\ndatabase: it is what these kinds of memory actually are.",
+     "why": "working memory as a dict, not a store"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      74,
+      84
+     ],
+     "grade": 1,
+     "quote": "Chroma has no `COUNT` and no `GROUP BY`, at any corpus size.",
+     "why": "a question no vector database can answer"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      132,
+      160
+     ],
+     "grade": 1,
+     "quote": "This is the question that genuinely needs embeddings.",
+     "why": "the one question that forces embeddings, and no 'no match'"
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      162,
+      178
+     ],
+     "grade": 1,
+     "quote": "The vector index returns a *different error code*, confidently",
+     "why": "embeddings wrong for identifiers"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      34,
+      56
+     ],
+     "grade": 1,
+     "quote": "**Only the journal ranks.**",
+     "why": "the other stores answer exactly; a retrieve cannot say no"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      68,
+      78
+     ],
+     "grade": 1,
+     "quote": "**later in the list is not better.**",
+     "why": "a fact wants a lookup, not a fancier store"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      218,
+      248
+     ],
+     "grade": 1,
+     "quote": "**semantic memory is not one storage decision.**",
+     "why": "nameable facts belong in a key-value store"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      197,
+      283
+     ],
+     "grade": 1,
+     "quote": "count()   aggregate. No vector database has COUNT, at any size",
+     "why": "a question only SQL answers"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 1,
+     "quote": "Chapter 4 decides where a memory\ngoes by what will be asked of it later",
+     "why": "stores by question, against Mem0's one vector store"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      139,
+      177
+     ],
+     "grade": 1,
+     "quote": "Chapter 4 decides where a memory goes by **what will be asked of it later**",
+     "why": "stores by question, against one vector store"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      769,
+      786
+     ],
+     "grade": 1,
+     "quote": "chapter 4's \"what will be asked decides the store\" pays off here",
+     "why": "the profile shown, not searched, survives a year of memories"
+    }
+   ]
+  },
+  {
+   "id": "Q21",
+   "kind": "rag",
+   "question": "Why does the add / update / ignore write rule work for facts but destroy episodic memory?",
+   "relevant": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      109,
+      118
+     ],
+     "grade": 3,
+     "quote": "The add / update / ignore rule is right for a **semantic** fact and destroys\nan **episodic** history.",
+     "why": "the direct answer: two deploy failures look like duplicates but are two events"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      483,
+      507
+     ],
+     "grade": 3,
+     "quote": "**add / update / ignore** is right for a fact and destroys a run history",
+     "why": "states the answer: two failures look like duplicates and are two events"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      1,
+      20
+     ],
+     "grade": 3,
+     "quote": "Point it at two deploy failures a week apart and it deletes one of them",
+     "why": "measured five of five"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      26,
+      36
+     ],
+     "grade": 3,
+     "quote": "**Facts get replaced. Events accumulate.**",
+     "why": "the reason: a fact is superseded, an event never is"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      190,
+      208
+     ],
+     "grade": 3,
+     "quote": "**The one field that distinguishes the two events is the one field the duplicate check never sees.**",
+     "why": "the full mechanism: the 12th 'updates' the 3rd five of five; fixed by dates in the listing and saying it is an event"
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      103,
+      107
+     ],
+     "grade": 2,
+     "quote": "A write first searches for what's already there, then decides **add / update / ignore**.",
+     "why": "the rule itself and why it exists"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      82,
+      105
+     ],
+     "grade": 2,
+     "quote": "What happens next is a *new row*, not an edit to the old one.",
+     "why": "events are never updated: a store you can update is one whose history you can lose"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      351,
+      367
+     ],
+     "grade": 2,
+     "quote": "So a write is not one operation. It is a search, then a decision, then one of three actions:",
+     "why": "the rule, and update replacing the old text"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      210,
+      216
+     ],
+     "grade": 2,
+     "quote": "An event never needs a duplicate check at all",
+     "why": "routing the write by type"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      218,
+      248
+     ],
+     "grade": 2,
+     "quote": "Destroyed a run history with `03_operations`' own write path: **five times out of five**",
+     "why": "summary of the failure, its cause and fix"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 2,
+     "quote": "two long runs a week apart look like duplicates to a\n                   similarity check and are two events",
+     "why": "the events trap restated: runs are always appended"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      139,
+      177
+     ],
+     "grade": 2,
+     "quote": "chapter 4's types-of-memory notebook showed an add/update/ignore check destroying exactly this kind of history",
+     "why": "the events trap restated, and the append-only run log"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      1,
+      28
+     ],
+     "grade": 1,
+     "quote": "the same fact does not end up in the journal five times",
+     "why": "the write decision introduced"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      369,
+      383
+     ],
+     "grade": 1,
+     "quote": "Then a model classifies the relationship.",
+     "why": "how the decision is made"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      385,
+      398
+     ],
+     "grade": 1,
+     "quote": "**The check is only as good as the search.**",
+     "why": "the rule's limits"
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      54,
+      66
+     ],
+     "grade": 1,
+     "quote": "0.0037 between the best and the worst.",
+     "why": "events look alike to similarity"
+    }
+   ]
+  },
+  {
+   "id": "Q22",
+   "kind": "rag",
+   "question": "How much did separating instructions from data reduce prompt injection, and did labels help?",
+   "relevant": [
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ],
+     "grade": 3,
+     "quote": "**Separating instructions from data stops injection.**",
+     "why": "11 in 24 vs 0 in 37; 7/14 vs 0/16; labels changed nothing, +36% tokens"
+    },
+    {
+     "file": "05_context/construction.py",
+     "lines": [
+      1,
+      73
+     ],
+     "grade": 3,
+     "quote": "the model obeyed it 11 times in\n24. With them separated -- by roles, by the fence, or by both -- 0 times in 37.",
+     "why": "the numbers, and labels off by default for changing nothing"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      1,
+      18
+     ],
+     "grade": 3,
+     "quote": "was obeyed **11 times in 24** when instructions and data were in one undivided message, and **0 times in 37**",
+     "why": "the numbers, and the other experiments came out even"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      79,
+      109
+     ],
+     "grade": 3,
+     "quote": "Fisher's exact test, one-sided: **p = 0.0017**.",
+     "why": "7/14 vs 0/16 on the controlled pair; 11/24 vs 0/37 overall; either separation is enough"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      132,
+      147
+     ],
+     "grade": 3,
+     "quote": "**Labels changed nothing measurable**, in either experiment that tested them",
+     "why": "summary: separation works, labels did not, +36% tokens"
+    },
+    {
+     "file": "05_context/construction.py",
+     "lines": [
+      76,
+      107
+     ],
+     "grade": 2,
+     "quote": "labelling did NOT measurably change an answer in 04's tests",
+     "why": "did labels help: no"
+    },
+    {
+     "file": "05_context/construction.py",
+     "lines": [
+      110,
+      175
+     ],
+     "grade": 2,
+     "quote": "the fence is what stops supplied text being read as instructions, and labels changed\n    nothing measurable for 36% more tokens",
+     "why": "build(): fence on, labels off, on the measured evidence"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      45,
+      59
+     ],
+     "grade": 2,
+     "quote": "**The bug didn't reproduce, and the labelled version did slightly worse.**",
+     "why": "the labels experiment"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      61,
+      71
+     ],
+     "grade": 2,
+     "quote": "**Also even.**",
+     "why": "the second labels experiment: no difference"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      154,
+      173
+     ],
+     "grade": 2,
+     "quote": "an injected log line obeyed **11/24** with instructions and data in one message, **0/37** once separated",
+     "why": "the injection numbers in the chapter summary"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 2,
+     "quote": "Separating instructions from data took prompt injection from 11/24 to 0/37",
+     "why": "chapter 5's one-line answer"
+    },
+    {
+     "file": "01_foundations/notebooks/04_prompting.ipynb",
+     "lines": [
+      25,
+      31
+     ],
+     "grade": 1,
+     "quote": "That's a prompt injection working exactly as intended",
+     "why": "chapter 1's delimiter demo: injection followed without a boundary, not with one"
+    },
+    {
+     "file": "05_context/notebooks/01_context_basics.ipynb",
+     "lines": [
+      70,
+      81
+     ],
+     "grade": 1,
+     "quote": "what stops the model from obeying it is being able to tell data from instructions",
+     "why": "sets up the injection experiment"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      30,
+      43
+     ],
+     "grade": 1,
+     "quote": "`build()` leaves labels off by default, for reasons the measurements below settle",
+     "why": "labels off by default"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      73,
+      77
+     ],
+     "grade": 1,
+     "quote": "A tool result is text from outside the system.",
+     "why": "sets up the injection test"
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      111,
+      122
+     ],
+     "grade": 1,
+     "quote": "A boundary the model isn't told the meaning of is just punctuation.",
+     "why": "what the fence is"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      21,
+      32
+     ],
+     "grade": 1,
+     "quote": "*\"obeyed 11 times in 24, and 0\n  times in 37\"*",
+     "why": "the injection numbers, quoted"
+    }
+   ]
+  },
+  {
+   "id": "Q23",
+   "kind": "rag",
+   "question": "Why does selection supersede old versions before scoring, and what does keep_last guarantee?",
+   "relevant": [
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ],
+     "grade": 3,
+     "quote": "**Superseding is about identity, not scoring.**",
+     "why": "stale reading beat current 0.778 vs 0.741; keep_last makes the last N must-keeps"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      64,
+      74
+     ],
+     "grade": 3,
+     "quote": "Relevance is worse than no help here. Scored by meaning against the request, the **stale** reading beats the current one.",
+     "why": "why supersede before scoring: identity, not score"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      118,
+      128
+     ],
+     "grade": 3,
+     "quote": "`keep_last=N` does: the N most recent items join the pinned ones as must-keeps, before any scoring happens.",
+     "why": "what keep_last guarantees, and that it refuses if they don't fit"
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      129,
+      186
+     ],
+     "grade": 3,
+     "quote": "`keep_last` is a GUARANTEE, and `w_recency` is not.",
+     "why": "what keep_last guarantees, and the refusal if it can't fit"
+    },
+    {
+     "file": "05_context/context.py",
+     "lines": [
+      1,
+      82
+     ],
+     "grade": 2,
+     "quote": "Two items with the same `about` are two versions of\n    the same thing",
+     "why": "the identity supersede() works on: only the later version is current"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      1,
+      22
+     ],
+     "grade": 2,
+     "quote": "1. **supersede**: of several versions of one thing, keep the newest",
+     "why": "the fixed order, supersede before score"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      178,
+      189
+     ],
+     "grade": 2,
+     "quote": "Not a score, because an old plan isn't less relevant than the new one. It's wrong.",
+     "why": "supersede() summarised"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      154,
+      173
+     ],
+     "grade": 2,
+     "quote": "the **stale** reading outscores the current one on meaning (0.778 vs 0.741)",
+     "why": "why supersede comes before scoring"
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      1,
+      76
+     ],
+     "grade": 2,
+     "quote": "An identity question, not a scoring one -- an old plan is not \"less\n                  relevant\" than the new one, it is wrong.",
+     "why": "the order, and why supersede comes first"
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      80,
+      124
+     ],
+     "grade": 2,
+     "quote": "Newest version of every `about`, and everything with no `about` at all.",
+     "why": "supersede() in code"
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      138,
+      171
+     ],
+     "grade": 1,
+     "quote": "**supersession** — replace the memory, or give it a validity range",
+     "why": "a wrong old version is a supersession problem, not a ranking one"
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 1,
+     "quote": "Whether a fact is still true is settled by supersession",
+     "why": "stale versions handled by supersession, not ranking"
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      64,
+      77
+     ],
+     "grade": 1,
+     "quote": "`select()` as **supersede → pin → score → fill**",
+     "why": "notebook 2's row: the order and keep_last"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      26,
+      30
+     ],
+     "grade": 1,
+     "quote": "are marked as two versions of the same reading",
+     "why": "two versions of one reading found by about"
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      156,
+      176
+     ],
+     "grade": 1,
+     "quote": "t4 was superseded **as a whole item**",
+     "why": "the cost of superseding whole items"
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      143,
+      157
+     ],
+     "grade": 1,
+     "quote": "because recency as a *weight* guarantees nothing",
+     "why": "why keep_last was added"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      44,
+      63
+     ],
+     "grade": 1,
+     "quote": "kept because `keep_last=4` guarantees the newest items",
+     "why": "keep_last in a traced selection"
+    },
+    {
+     "file": "05_context/notebooks/06_build_a_context_system.ipynb",
+     "lines": [
+      138,
+      142
+     ],
+     "grade": 1,
+     "quote": "a fact has no `about`, so `supersede()` cannot see that it is a version of anything",
+     "why": "the limit of supersession by identity"
+    }
+   ]
+  },
+  {
+   "id": "Q24",
+   "kind": "rag",
+   "question": "When the supervisor misrouted the bulging-unit report, which fix changed its choice: sharper agent descriptions or a rule in its own prompt?",
+   "relevant": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      63,
+      77
+     ],
+     "grade": 3,
+     "quote": "| A rule in the supervisor's own prompt | **8 of 8** (p ≤ 0.001) |",
+     "why": "the direct answer: descriptions 0 of 8, the supervisor's rule 8 of 8"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      117,
+      137
+     ],
+     "grade": 3,
+     "quote": "**The two sentences added to the descriptions did nothing to the first choice**",
+     "why": "the measurement: 1/8, 0/8, 8/8, and why"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      172,
+      182
+     ],
+     "grade": 3,
+     "quote": "a sharpened description changed the first choice 0 of 8 times, a rule in the prompt 8 of 8",
+     "why": "summary of the answer"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      78,
+      92
+     ],
+     "grade": 2,
+     "quote": "The supervisor routed by **who sent the message**.",
+     "why": "the misroute: bulging unit sent to support, 'you're safe'"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      94,
+      107
+     ],
+     "grade": 2,
+     "quote": "So each description gets one more sentence, saying where the agent's knowledge stops and who to ask instead.",
+     "why": "the descriptions fix, tried once"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      109,
+      115
+     ],
+     "grade": 2,
+     "quote": "With the rule in the supervisor's prompt, report A went to engineering **first**",
+     "why": "the prompt-rule fix, tried once"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      56,
+      58
+     ],
+     "grade": 2,
+     "quote": "a rule in an agent's own instructions changed its behaviour 8 times out of 8, and the same rule in a tool description 0 times out of 8",
+     "why": "restates notebook 2's measurement"
+    },
+    {
+     "file": "06_orchestration/notebooks/05_build_a_multi_agent_system.ipynb",
+     "lines": [
+      152,
+      158
+     ],
+     "grade": 2,
+     "quote": "routing you depend on belongs in the supervisor's own instructions: measured, 8 of 8 against 0 of 8",
+     "why": "chapter summary of the answer"
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ],
+     "grade": 2,
+     "quote": "A rule in the supervisor fixed routing 8/8; better agent descriptions fixed it 0/8",
+     "why": "chapter 6's one-line answer"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      53,
+      61
+     ],
+     "grade": 1,
+     "quote": "a misroute that told a customer \"you're safe\" when they weren't",
+     "why": "notebook 2's row"
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      30,
+      48
+     ],
+     "grade": 1,
+     "quote": "**The description is the only thing routing can go on.**",
+     "why": "a supervisor routes on descriptions"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      60,
+      70
+     ],
+     "grade": 1,
+     "quote": "**And without the rule it asked nobody, 0 times out of 4.**",
+     "why": "the same finding on peers and the larger model"
+    },
+    {
+     "file": "06_orchestration/supervisor.py",
+     "lines": [
+      85,
+      107
+     ],
+     "grade": 1,
+     "quote": "That is the whole of\n    what a supervisor knows about who to ask, so it decides routing.",
+     "why": "routing goes on descriptions"
+    }
+   ]
+  },
+  {
+   "id": "Q25",
+   "kind": "rag",
+   "question": "Why did majority voting fail on whether to widen the recall, and what rule worked instead?",
+   "relevant": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      88,
+      100
+     ],
+     "grade": 3,
+     "quote": "On \"widen the recall?\", the majority said no and was wrong.",
+     "why": "the direct answer: majority wrong, weights fragile, ask who actually checked"
+    },
+    {
+     "file": "06_orchestration/aggregate.py",
+     "lines": [
+      1,
+      89
+     ],
+     "grade": 3,
+     "quote": "a majority\nis only meaningful when the voters are interchangeable",
+     "why": "why counting fails for specialists, and decisive(): the one who checked decides"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      88,
+      116
+     ],
+     "grade": 3,
+     "quote": "**Majority voting belongs with identical agents**",
+     "why": "the full answer: majority 2-1 wrong, weights tie and flip, decisive(engineer) right"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      125,
+      134
+     ],
+     "grade": 2,
+     "quote": "**Counting specialists is the wrong aggregation.**",
+     "why": "summary: majority wrong, weights fragile, who checked"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      13,
+      40
+     ],
+     "grade": 1,
+     "quote": "**Aggregation** only needs more than a vote once the voters know different things.",
+     "why": "why a vote is not enough"
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      42,
+      51
+     ],
+     "grade": 1,
+     "quote": "aggregation that asks *who actually checked*",
+     "why": "names the rule that worked"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      1,
+      18
+     ],
+     "grade": 1,
+     "quote": "aggregated their answers by majority, by weight, and by who actually checked something",
+     "why": "names the three ways"
+    },
+    {
+     "file": "06_orchestration/notebooks/03_communication_state_and_collaboration.ipynb",
+     "lines": [
+      118,
+      123
+     ],
+     "grade": 1,
+     "quote": "**Three opinions cost three agent runs, and one of them decided it.**",
+     "why": "the cost of asking all three"
+    },
+    {
+     "file": "06_orchestration/notebooks/04_orchestration_patterns.ipynb",
+     "lines": [
+      107,
+      121
+     ],
+     "grade": 1,
+     "quote": "`aggregate.decisive(judge)` would therefore refuse to let it decide",
+     "why": "the who-checked rule applied to a debate's judge"
+    },
+    {
+     "file": "06_orchestration/notebooks/05_build_a_multi_agent_system.ipynb",
+     "lines": [
+      76,
+      80
+     ],
+     "grade": 1,
+     "quote": "the only rule that looked at what an agent had actually checked",
+     "why": "decisive used for the widening question"
+    },
+    {
+     "file": "06_orchestration/notebooks/05_build_a_multi_agent_system.ipynb",
+     "lines": [
+      82,
+      94
+     ],
+     "grade": 1,
+     "quote": "`majority` and `decisive` agree here, for entirely different reasons",
+     "why": "majority counted votes that checked nothing"
+    }
+   ]
+  },
+  {
+   "id": "Q26",
+   "kind": "agentic",
+   "question": "How does chapter 3's distinction between a refused and a broken tool call carry over to MCP in chapter 7?",
+   "relevant": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      111,
+      134
+     ],
+     "grade": 3,
+     "quote": "Over MCP,\n`broken` describes any failure a foreign server doesn't explain",
+     "why": "the direct carry-over: over MCP broken covers unexplained failures, invoker() now enforces the flag"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      157,
+      181
+     ],
+     "grade": 3,
+     "quote": "`07_mcp` on, where `broken` is the honest reading of any failure a server we did not write",
+     "why": "why invoker() enforces for_the_model once tools come over MCP"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      67,
+      83
+     ],
+     "grade": 3,
+     "quote": "Only one distinction is really lost against a server that\ndoesn't explain itself: `refused` vs `broken` inside a live tool.",
+     "why": "the direct answer: content for the model, _meta for the host"
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      156,
+      176
+     ],
+     "grade": 3,
+     "quote": "Across a process boundary there is one bool.",
+     "why": "chapter 3's kinds against one bool; content for the model, _meta for the host"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      100,
+      119
+     ],
+     "grade": 3,
+     "quote": "`refused` rather than `broken`, because the two mistakes are not the same size.",
+     "why": "the one lost distinction and its default"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      137,
+      157
+     ],
+     "grade": 3,
+     "quote": "`broken` is now the honest reading of **any failure a foreign server declines to explain**",
+     "why": "why invoker() had to enforce for_the_model once tools came over MCP"
+    },
+    {
+     "file": "07_mcp/remote.py",
+     "lines": [
+      1,
+      42
+     ],
+     "grade": 3,
+     "quote": "one distinction\nis lost -- `refused` versus `broken` inside a tool that chose to say nothing about which it was.",
+     "why": "the translation table and the refused default"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      62,
+      74
+     ],
+     "grade": 2,
+     "quote": "| `refused` | The tool ran and said no (`ToolError`), usually with a suggestion | Yes, including the suggestion |",
+     "why": "chapter 3's half: refused vs broken and who sees what"
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      77,
+      84
+     ],
+     "grade": 2,
+     "quote": "A broken tool is ours to fix",
+     "why": "chapter 3's distinction stated"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      1,
+      86
+     ],
+     "grade": 2,
+     "quote": "So a tool raises ToolError for the first kind, and anything else it raises is treated as the",
+     "why": "chapter 3's code for the distinction"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      59,
+      83
+     ],
+     "grade": 2,
+     "quote": "A tool says which kind it is by what it raises.",
+     "why": "chapter 3's distinction in full"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      147,
+      164
+     ],
+     "grade": 2,
+     "quote": "`invoker()` now enforces `for_the_model`, so a broken result's cause stays out of the conversation",
+     "why": "the one change chapter 3 needed for MCP"
+    },
+    {
+     "file": "07_mcp/expose.py",
+     "lines": [
+      60,
+      107
+     ],
+     "grade": 2,
+     "quote": "the same rule `invoker()` applies locally, applied here\n    because the conversation is on the other side of the wire",
+     "why": "broken stays out of content; the cause goes in _meta"
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      174,
+      176
+     ],
+     "grade": 2,
+     "quote": "guess `broken` and the model never sees `Try a larger nearby city`",
+     "why": "the forced guess between refused and broken"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      76,
+      98
+     ],
+     "grade": 2,
+     "quote": "| `is_error` true, no `_meta` | raises `ToolError` | `refused` — the one guess |",
+     "why": "MCP's answers translated into invoke()'s kinds"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      56,
+      62
+     ],
+     "grade": 2,
+     "quote": "Only the server knows which of its failures was a bug.",
+     "why": "the server splits content and _meta on for_the_model"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      64,
+      78
+     ],
+     "grade": 2,
+     "quote": "| `broken` vs `refused` | **guessed** — defaults to `refused` | **exact**, and the cause travels in `_meta` |",
+     "why": "foreign server vs our server"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      23,
+      38
+     ],
+     "grade": 2,
+     "quote": "`remote.py` read `forge/kind: refused` and raised `ToolError`, so the client's own `invoke()` classified it identically to a local refusal",
+     "why": "a refusal crossing the wire intact, live"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      96,
+      118
+     ],
+     "grade": 2,
+     "quote": "stopped being survivable once it meant \"a server we do not control declined to explain itself\"",
+     "why": "why invoker() changed"
+    },
+    {
+     "file": "03_tools/invoke.py",
+     "lines": [
+      89,
+      154
+     ],
+     "grade": 1,
+     "quote": "return Result(tool.name, \"refused\", str(e), repeatable=tool.repeatable)",
+     "why": "where refused and broken are decided"
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      138,
+      158
+     ],
+     "grade": 1,
+     "quote": "Made `ToolError` the way a tool says \"I ran, and the answer is no\"",
+     "why": "chapter 3's distinction, summarised"
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      40,
+      50
+     ],
+     "grade": 1,
+     "quote": "The rule from notebook 3 is a good rule and it has a grey zone",
+     "why": "chapter 3's rule on failures from outside the process"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      56,
+      65
+     ],
+     "grade": 1,
+     "quote": "MCP's errors translated into the ones `invoke()` already handles",
+     "why": "notebook 2's row"
+    },
+    {
+     "file": "07_mcp/expose.py",
+     "lines": [
+      1,
+      57
+     ],
+     "grade": 1,
+     "quote": "the failure kind           rides across in `_meta`",
+     "why": "our server carrying the result kind across"
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      146,
+      154
+     ],
+     "grade": 1,
+     "quote": "`is_error` is a **bool**. That is the entire error vocabulary",
+     "why": "MCP's one-bool error channel"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      1,
+      13
+     ],
+     "grade": 1,
+     "quote": "`invoke()` sorts six kinds of failure, and the wire carries one bool",
+     "why": "names the problem"
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      159,
+      169
+     ],
+     "grade": 1,
+     "quote": "the error taxonomy** was the only real loss, and it is one distinction rather than five",
+     "why": "summary of what is lost"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      106,
+      114
+     ],
+     "grade": 1,
+     "quote": "A stranger gets `is_error: True` and `pressure could not be completed.`",
+     "why": "what a client without forge/* sees"
+    },
+    {
+     "file": "07_mcp/notebooks/04_mcp_server.ipynb",
+     "lines": [
+      116,
+      130
+     ],
+     "grade": 1,
+     "quote": "| `for_the_model` hiding a bug from the model | yes, and only the server can do it |",
+     "why": "summary table"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      58,
+      68
+     ],
+     "grade": 1,
+     "quote": "A dead server is not something a model can fix",
+     "why": "a dead server classified broken and kept from the model"
+    },
+    {
+     "file": "07_mcp/remote.py",
+     "lines": [
+      128,
+      212
+     ],
+     "grade": 1,
+     "quote": "raise ToolError(_text(result))",
+     "why": "the translation in code"
+    },
+    {
+     "file": "07_mcp/server.py",
+     "lines": [
+      1,
+      86
+     ],
+     "grade": 1,
+     "quote": "Splits the audience: a short message to the model, detail to the host.",
+     "why": "the content/_meta convention on a server"
+    }
+   ]
+  },
+  {
+   "id": "Q27",
+   "kind": "rag",
+   "question": "How does the repo keep an agent working when an MCP server dies mid-run?",
+   "relevant": [
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      117,
+      133
+     ],
+     "grade": 3,
+     "quote": "So tools hold\na **`Connection`** box instead",
+     "why": "the direct answer: Connection box and Reconnect component"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      46,
+      56
+     ],
+     "grade": 3,
+     "quote": "what is sitting in it is a **`Connection`** — a box holding the real session rather than the session itself",
+     "why": "why a box: swap the session without rebuilding the tools"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      58,
+      68
+     ],
+     "grade": 3,
+     "quote": "A process died and was replaced underneath all of it.",
+     "why": "the server killed mid-run: broken, hidden from the model, then the connection replaced"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      70,
+      94
+     ],
+     "grade": 3,
+     "quote": "`Reconnect` in [`repair.py`](../repair.py) just uses it",
+     "why": "the policy: probe with tools/list, repair silently, tell the model only on giving up, repair budget"
+    },
+    {
+     "file": "07_mcp/repair.py",
+     "lines": [
+      29,
+      104
+     ],
+     "grade": 3,
+     "quote": "A component that repairs a named resource on the conversation when it stops answering.",
+     "why": "Reconnect in code: attempts, backoff, budget"
+    },
+    {
+     "file": "07_mcp/session.py",
+     "lines": [
+      185,
+      279
+     ],
+     "grade": 3,
+     "quote": "A box holding a `Session`, so the session can be replaced without rebuilding the tools.",
+     "why": "Connection in code: reconnect() and healthy() via tools/list"
+    },
+    {
+     "file": "01_foundations/chat.py",
+     "lines": [
+      76,
+      155
+     ],
+     "grade": 2,
+     "quote": "a session whose\n    server has died needs replacing",
+     "why": "why live sessions live on Conversation.resources: a dead server's session must be replaceable"
+    },
+    {
+     "file": "07_mcp/repair.py",
+     "lines": [
+      1,
+      26
+     ],
+     "grade": 2,
+     "quote": "Reconnecting a dead server, as a decision rather than as a reflex.",
+     "why": "Reconnect's two decisions"
+    },
+    {
+     "file": "07_mcp/repair.py",
+     "lines": [
+      106,
+      136
+     ],
+     "grade": 2,
+     "quote": "The {self.name} service is unreachable and its tools cannot be used.",
+     "why": "what the model is told when the server is not coming back"
+    },
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      118,
+      130
+     ],
+     "grade": 1,
+     "quote": "so they can be reached and replaced",
+     "why": "Conversation.resources exists so an MCP session can be replaced"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      47,
+      54
+     ],
+     "grade": 1,
+     "quote": "How to keep an agent working when a server dies mid-run",
+     "why": "names the topic"
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      56,
+      65
+     ],
+     "grade": 1,
+     "quote": "a server killed mid-run and reconnected",
+     "why": "notebook 6's row"
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      96,
+      118
+     ],
+     "grade": 1,
+     "quote": "`Conversation` gained `resources`, a place to keep live things",
+     "why": "where the connection lives"
+    }
+   ]
+  },
+  {
+   "id": "Q28",
+   "kind": "rag",
+   "question": "Why is CrewAI pinned to an old version in this repo?",
+   "relevant": [
+    {
+     "file": "08_frameworks/03_crewai/security_questionnaire.ipynb",
+     "lines": [
+      413,
+      432
+     ],
+     "grade": 3,
+     "quote": "This is CrewAI 0.193.2, chosen because every later release pins an older `mcp` and `chromadb` than this repo runs.",
+     "why": "the direct answer"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      173,
+      195
+     ],
+     "grade": 3,
+     "quote": "**Why CrewAI is pinned to 0.193.2 (September 2025).**",
+     "why": "the direct answer: later releases pin chromadb~=1.1 and mcp~=1.28, which break chapters 4 and 7"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      158,
+      171
+     ],
+     "grade": 1,
+     "quote": "**A framework's dependency pins are part of its cost.** See CrewAI below.",
+     "why": "points to the CrewAI pin"
+    }
+   ]
+  },
+  {
+   "id": "Q29",
+   "kind": "rag",
+   "question": "Why can't AutoGen's TokenUsageTermination enforce a token budget?",
+   "relevant": [
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      604,
+      613
+     ],
+     "grade": 3,
+     "quote": "**The budget cannot be a termination condition.**",
+     "why": "the direct answer: checked between turns, counts message usage; 36,682 reported vs 56,624 billed"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.py",
+     "lines": [
+      76,
+      119
+     ],
+     "grade": 3,
+     "quote": "AutoGen's own `TokenUsageTermination` is checked between\n        agent turns and counts the usage attached to the messages a turn emits.",
+     "why": "why it fails: the analyst's turn is many calls; 15,000 limit reached 44,971"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      99,
+      107
+     ],
+     "grade": 3,
+     "quote": "That's why `TokenUsageTermination` can't enforce a budget: the limit has to live in\n  the model client.",
+     "why": "the direct answer: messages report 36,682 of 56,624 billed"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      430,
+      473
+     ],
+     "grade": 2,
+     "quote": "a\n    check between turns is not enough, for the same reason it was not enough for AutoGen",
+     "why": "the budget checked before every model call instead"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.py",
+     "lines": [
+      334,
+      390
+     ],
+     "grade": 2,
+     "quote": "The usage AutoGen attaches to messages leaves out every call whose message the team never\n        # emits",
+     "why": "11,041 on messages against 21,856 billed: message usage undercounts"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      158,
+      171
+     ],
+     "grade": 2,
+     "quote": "**Limits have to live where the calls are made.**",
+     "why": "the lesson across frameworks, token budgets in AutoGen among them"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      67,
+      88
+     ],
+     "grade": 1,
+     "quote": "| TokenUsageTermination(max_total_token=max_tokens)",
+     "why": "the token-budget condition in the team's stopping rules"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      173,
+      187
+     ],
+     "grade": 1,
+     "quote": "The chat stops on whichever comes first",
+     "why": "the token budget as one of the stopping rules"
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.py",
+     "lines": [
+      1,
+      73
+     ],
+     "grade": 1,
+     "quote": "Token budgets per run, enforced in code",
+     "why": "the budgets, enforced outside AutoGen's conditions"
+    },
+    {
+     "file": "08_frameworks/04_autogen/team_scratch.py",
+     "lines": [
+      69,
+      138
+     ],
+     "grade": 1,
+     "quote": "a\n    check between turns is not enough, for the same reason it was not enough for AutoGen",
+     "why": "the budget checked per call"
+    }
+   ]
+  },
+  {
+   "id": "Q30",
+   "kind": "agentic",
+   "question": "In the Mem0 project, what decided the outcome, and which of its fixes went back into chapter 4?",
+   "relevant": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      159,
+      169
+     ],
+     "grade": 3,
+     "quote": "Its general fixes came back here:",
+     "why": "the direct answer: wrong things written; Profile, QdrantJournal, writing.py, hybrid Recall"
+    },
+    {
+     "file": "04_memory/writing.py",
+     "lines": [
+      1,
+      55
+     ],
+     "grade": 3,
+     "quote": "still told a runner the wrong race date,\nbecause the wrong things had been written",
+     "why": "what decided the outcome, and writing.py's checks that came back to chapter 4"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      332,
+      370
+     ],
+     "grade": 3,
+     "quote": "Round 1 went wrong for both builds at the same point: **what got written down**.",
+     "why": "what decided round 1, for each build"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      485,
+      521
+     ],
+     "grade": 3,
+     "quote": "The general parts went into chapter 4, because they are about writing memory down, not about running:",
+     "why": "round 4's fixes that went back: Profile, profile_form, unsupported, day_of, fill"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      638,
+      679
+     ],
+     "grade": 3,
+     "quote": "Round 5 targets what the measures found. Everything general went into chapter 4:",
+     "why": "round 5's fixes in writing.py and stores.py"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      789,
+      804
+     ],
+     "grade": 3,
+     "quote": "**What decided it was the writing, not the store.**",
+     "why": "the direct answer to what decided the outcome"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      802,
+      823
+     ],
+     "grade": 3,
+     "quote": "**What decided it was the writing, not the store.**",
+     "why": "the direct answer, with what went wrong in each build"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      869,
+      887
+     ],
+     "grade": 3,
+     "quote": "**What it added to the repo.** Chapter 4's `stores.py` now has `Profile`",
+     "why": "the fixes that went back: Profile, writing.py, QdrantJournal"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      121,
+      134
+     ],
+     "grade": 3,
+     "quote": "**What decided the outcome was how memory was written, not the store.**",
+     "why": "the direct answer, and the fixes that went back to chapter 4"
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      210,
+      275
+     ],
+     "grade": 2,
+     "quote": "Measured in\n        `08_frameworks/06_mem0` on about 47 notes",
+     "why": "hybrid recall and per-question search, brought back from the Mem0 project"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      125,
+      194
+     ],
+     "grade": 2,
+     "quote": "Measured in `08_frameworks/06_mem0`:\n    when a write missed a change, the old value was shown to the agent as a plain current fact",
+     "why": "Profile, one of the fixes that came back"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      153,
+      219
+     ],
+     "grade": 2,
+     "quote": "chapter 4's `Profile`,\n#     which also keeps each field's previous value and dates",
+     "why": "round 4's fixes, built as chapter 4 parts"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      462,
+      519
+     ],
+     "grade": 2,
+     "quote": "All but the running words are chapter 4's",
+     "why": "round 5's fixes, which live in chapter 4's writing.py and stores.py"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      618,
+      636
+     ],
+     "grade": 2,
+     "quote": "**Mem0's weakness is not extraction; it is old facts.**",
+     "why": "the measures: Mem0 stale facts, scratch extraction improving"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      733,
+      741
+     ],
+     "grade": 2,
+     "quote": "Two changes, both in chapter 4's `writing.py`:",
+     "why": "round 6's fixes"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      743,
+      753
+     ],
+     "grade": 2,
+     "quote": "The fix is in chapter 4's `unsupported`",
+     "why": "round 7's fix"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      755,
+      767
+     ],
+     "grade": 2,
+     "quote": "Nearly every miss was a write failure.",
+     "why": "retrieval measured: the writes decided it"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      769,
+      786
+     ],
+     "grade": 2,
+     "quote": "Chapter 4's `Recall` is now hybrid by default, and searches one question at a time.",
+     "why": "the retrieval fixes that went back to chapter 4"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      823,
+      849
+     ],
+     "grade": 2,
+     "quote": "The general parts went into chapter 4: `Profile`, and `writing.py`'s form, check, date reader and one-retry fill.",
+     "why": "round 4's fixes that went back"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      849,
+      871
+     ],
+     "grade": 2,
+     "quote": "**Round 5** added chapter 4's store rules, habits as their own kind",
+     "why": "rounds 5 to 7 and where both builds ended"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      85,
+      97
+     ],
+     "grade": 1,
+     "quote": "# 3b. the same journal, on one engine",
+     "why": "QdrantJournal, one of the fixes"
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      783,
+      845
+     ],
+     "grade": 1,
+     "quote": "Measured in `06_mem0`: a\n    # note saying \"runs Tuesday, Thursday, Saturday and Sunday evenings\" kept coming back",
+     "why": "QdrantJournal and retire, from the Mem0 project"
+    },
+    {
+     "file": "04_memory/writing.py",
+     "lines": [
+      58,
+      136
+     ],
+     "grade": 1,
+     "quote": "Measured in `06_mem0`: compared as\n    written, \"8 November\" saved as \"2026-11-08\" was refused",
+     "why": "the unsupported() check from the Mem0 project"
+    },
+    {
+     "file": "04_memory/writing.py",
+     "lines": [
+      139,
+      207
+     ],
+     "grade": 1,
+     "quote": "Measured in `06_mem0`: without them a model files a changed day in a note",
+     "why": "placement rules brought back from the Mem0 project"
+    },
+    {
+     "file": "08_frameworks/06_mem0/baseline.py",
+     "lines": [
+      1,
+      31
+     ],
+     "grade": 1,
+     "quote": "Three measures, kept apart, because a system can save a fact right and later show it wrong",
+     "why": "how the Mem0 project's runs were scored: extraction, current, stale, retrieval"
+    },
+    {
+     "file": "08_frameworks/06_mem0/baseline.py",
+     "lines": [
+      201,
+      259
+     ],
+     "grade": 1,
+     "quote": "\"never saved (write)\": misses.count(\"write\")",
+     "why": "per run, misses caused by the write versus retrieval"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_checks.py",
+     "lines": [
+      1,
+      78
+     ],
+     "grade": 1,
+     "quote": "`add` never updates or deletes: a changed fact becomes a second memory beside the first",
+     "why": "what Mem0 does that the project found"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      1,
+      70
+     ],
+     "grade": 1,
+     "quote": "chapter 4's design, not Mem0's",
+     "why": "the scratch coach built on chapter 4"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      71,
+      150
+     ],
+     "grade": 1,
+     "quote": "a race that moved never written, changed days put in a note instead of the profile, runs dated wrong",
+     "why": "the write step as what went wrong, round by round"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      408,
+      459
+     ],
+     "grade": 1,
+     "quote": "Round 4's stores: chapter 4's `Profile` in place of the plain `KeyValue`",
+     "why": "a fix that is now chapter 4's"
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_scratch.py",
+     "lines": [
+      520,
+      584
+     ],
+     "grade": 1,
+     "quote": "chapter 4's check now compares what days, dates and numbers MEAN",
+     "why": "a fix made in chapter 4 after round 6"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      139,
+      177
+     ],
+     "grade": 1,
+     "quote": "`QdrantJournal` is new in chapter 4's `stores.py`.",
+     "why": "one of the pieces added to chapter 4"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      284,
+      303
+     ],
+     "grade": 1,
+     "quote": "**It only ever adds.**",
+     "why": "what Mem0 does with a changed fact"
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      399,
+      437
+     ],
+     "grade": 1,
+     "quote": "Round 2's write step got every named fact right at the last check-in, but it still wrote three kinds of wrong fact.",
+     "why": "round 3's write fixes"
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      158,
+      171
+     ],
+     "grade": 1,
+     "quote": "in Mem0 the deciding factor was *when\n   memory gets written*",
+     "why": "the Mem0 outcome, summarised"
+    }
+   ]
+  }
+ ]
+}

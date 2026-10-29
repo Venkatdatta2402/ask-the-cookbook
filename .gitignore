@@ -4,5 +4,7 @@ __pycache__/
 .DS_Store
 # ask_index's token log
 progress.log
+# rewritten by every eval run; the baseline beside it is what is committed
+evals/reports/retrieval_latest.json
 # the project notes for Claude Code: kept local
 CLAUDE.md

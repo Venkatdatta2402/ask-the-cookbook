@@ -7,5 +7,5 @@ requires-python = ">=3.12"
 # The packages are listed in requirements.txt, the one list: Hugging Face Spaces installs from it.
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "evals/tests"]
 pythonpath = ["."]

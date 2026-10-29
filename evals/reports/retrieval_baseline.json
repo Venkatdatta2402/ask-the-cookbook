@@ -1,0 +1,1577 @@
+{
+ "k": 5,
+ "index_commit": "43c7bf5",
+ "means": {
+  "all": {
+   "precision": 0.7733,
+   "recall": 0.4215,
+   "mrr": 0.9667,
+   "ndcg": 0.7312,
+   "questions": 30
+  },
+  "rag": {
+   "precision": 0.8,
+   "recall": 0.4706,
+   "mrr": 0.9583,
+   "ndcg": 0.7603,
+   "questions": 24
+  },
+  "agentic": {
+   "precision": 0.6667,
+   "recall": 0.2249,
+   "mrr": 1.0,
+   "ndcg": 0.6149,
+   "questions": 6
+  }
+ },
+ "questions": [
+  {
+   "id": "Q1",
+   "kind": "rag",
+   "best_score": 0.7721,
+   "retrieved": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      75,
+      80
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      69,
+      90
+     ]
+    },
+    {
+     "file": "01_foundations/llm.py",
+     "lines": [
+      87,
+      123
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/05_structured_outputs.ipynb",
+     "lines": [
+      49,
+      67
+     ]
+    },
+    {
+     "file": "01_foundations/llm.py",
+     "lines": [
+      4,
+      84
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    3,
+    2,
+    1
+   ],
+   "precision": 1.0,
+   "recall": 0.5,
+   "mrr": 1.0,
+   "ndcg": 0.9554550451015821
+  },
+  {
+   "id": "Q2",
+   "kind": "rag",
+   "best_score": 0.7872,
+   "retrieved": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      94,
+      98
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/03_retries_and_reflection.ipynb",
+     "lines": [
+      146,
+      184
+     ]
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      267,
+      299
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      1,
+      13
+     ]
+    },
+    {
+     "file": "02_agent_runtime/runtime.py",
+     "lines": [
+      181,
+      218
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    0,
+    0,
+    1,
+    3
+   ],
+   "precision": 0.6,
+   "recall": 0.25,
+   "mrr": 1.0,
+   "ndcg": 0.49123218990634454
+  },
+  {
+   "id": "Q3",
+   "kind": "rag",
+   "best_score": 0.7691,
+   "retrieved": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      77,
+      84
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      59,
+      83
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      100,
+      119
+     ]
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      62,
+      74
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      40,
+      50
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    0,
+    2,
+    1
+   ],
+   "precision": 0.8,
+   "recall": 0.42857142857142855,
+   "mrr": 1.0,
+   "ndcg": 0.7539477285863129
+  },
+  {
+   "id": "Q4",
+   "kind": "rag",
+   "best_score": 0.7777,
+   "retrieved": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      125,
+      146
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      180,
+      202
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      23,
+      41
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/05_memory_in_the_loop.ipynb",
+     "lines": [
+      1,
+      19
+     ]
+    },
+    {
+     "file": "04_memory/memory_tools.py",
+     "lines": [
+      51,
+      137
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    2,
+    3,
+    2,
+    2
+   ],
+   "precision": 1.0,
+   "recall": 0.7142857142857143,
+   "mrr": 1.0,
+   "ndcg": 0.777578611363615
+  },
+  {
+   "id": "Q5",
+   "kind": "rag",
+   "best_score": 0.7023,
+   "retrieved": [
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      93,
+      114
+     ]
+    },
+    {
+     "file": "05_context/compression.py",
+     "lines": [
+      258,
+      331
+     ]
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      116,
+      122
+     ]
+    },
+    {
+     "file": "05_context/compression.py",
+     "lines": [
+      1,
+      77
+     ]
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      84,
+      91
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    0,
+    2,
+    3
+   ],
+   "precision": 0.8,
+   "recall": 0.6666666666666666,
+   "mrr": 1.0,
+   "ndcg": 0.8875825932815665
+  },
+  {
+   "id": "Q6",
+   "kind": "rag",
+   "best_score": 0.7467,
+   "retrieved": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      80,
+      86
+     ]
+    },
+    {
+     "file": "06_orchestration/supervisor.py",
+     "lines": [
+      111,
+      170
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      1,
+      16
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      139,
+      163
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/05_sub_agents.ipynb",
+     "lines": [
+      1,
+      18
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    1,
+    3,
+    0
+   ],
+   "precision": 0.8,
+   "recall": 0.6,
+   "mrr": 1.0,
+   "ndcg": 0.8596442706431733
+  },
+  {
+   "id": "Q7",
+   "kind": "rag",
+   "best_score": 0.7859,
+   "retrieved": [
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      99,
+      110
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/05_mcp_transport.ipynb",
+     "lines": [
+      17,
+      25
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      47,
+      54
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      16,
+      45
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      63,
+      82
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    1,
+    0,
+    1
+   ],
+   "precision": 0.8,
+   "recall": 0.2222222222222222,
+   "mrr": 1.0,
+   "ndcg": 0.6444316096250248
+  },
+  {
+   "id": "Q8",
+   "kind": "agentic",
+   "best_score": 0.7545,
+   "retrieved": [
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      131,
+      141
+     ]
+    },
+    {
+     "file": "06_orchestration/state.py",
+     "lines": [
+      31,
+      87
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      161,
+      188
+     ]
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ]
+    },
+    {
+     "file": "04_memory/stores.py",
+     "lines": [
+      85,
+      86
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    1,
+    0,
+    0,
+    0
+   ],
+   "precision": 0.4,
+   "recall": 0.14285714285714285,
+   "mrr": 1.0,
+   "ndcg": 0.39969666103112766
+  },
+  {
+   "id": "Q9",
+   "kind": "agentic",
+   "best_score": 0.7931,
+   "retrieved": [
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      302,
+      350
+     ]
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      513,
+      536
+     ]
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      1,
+      35
+     ]
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      489,
+      507
+     ]
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_checks.py",
+     "lines": [
+      1,
+      77
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    3,
+    3
+   ],
+   "precision": 1.0,
+   "recall": 0.3125,
+   "mrr": 1.0,
+   "ndcg": 0.9030970842075382
+  },
+  {
+   "id": "Q10",
+   "kind": "agentic",
+   "best_score": 0.7763,
+   "retrieved": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      94,
+      98
+     ]
+    },
+    {
+     "file": "README.md",
+     "lines": [
+      51,
+      60
+     ]
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      147,
+      163
+     ]
+    },
+    {
+     "file": "08_frameworks/02_langgraph/ap_desk.ipynb",
+     "lines": [
+      489,
+      507
+     ]
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      53,
+      64
+     ]
+    }
+   ],
+   "gains": [
+    2,
+    0,
+    0,
+    3,
+    0
+   ],
+   "precision": 0.4,
+   "recall": 0.2,
+   "mrr": 1.0,
+   "ndcg": 0.39135260534202365
+  },
+  {
+   "id": "Q11",
+   "kind": "agentic",
+   "best_score": 0.777,
+   "retrieved": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      70,
+      73
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/03_tokens_and_context.ipynb",
+     "lines": [
+      32,
+      53
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      133,
+      145
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/03_tokens_and_context.ipynb",
+     "lines": [
+      47,
+      89
+     ]
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      108,
+      116
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    1,
+    2,
+    1,
+    0
+   ],
+   "precision": 0.8,
+   "recall": 0.3333333333333333,
+   "mrr": 1.0,
+   "ndcg": 0.5008226048824438
+  },
+  {
+   "id": "Q12",
+   "kind": "rag",
+   "best_score": 0.7612,
+   "retrieved": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      92,
+      95
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      43,
+      47
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      35,
+      41
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      27,
+      33
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      55,
+      71
+     ]
+    }
+   ],
+   "gains": [
+    2,
+    3,
+    3,
+    1,
+    2
+   ],
+   "precision": 1.0,
+   "recall": 1.0,
+   "mrr": 1.0,
+   "ndcg": 0.8569652888015743
+  },
+  {
+   "id": "Q13",
+   "kind": "rag",
+   "best_score": 0.7738,
+   "retrieved": [
+    {
+     "file": "01_foundations/README.md",
+     "lines": [
+      82,
+      90
+     ]
+    },
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      62,
+      74
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/03_retries_and_reflection.ipynb",
+     "lines": [
+      1,
+      18
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      59,
+      83
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/01_mcp_concepts.ipynb",
+     "lines": [
+      156,
+      176
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    0,
+    0,
+    1,
+    0
+   ],
+   "precision": 0.4,
+   "recall": 0.125,
+   "mrr": 1.0,
+   "ndcg": 0.4834816815991279
+  },
+  {
+   "id": "Q14",
+   "kind": "rag",
+   "best_score": 0.7954,
+   "retrieved": [
+    {
+     "file": "02_agent_runtime/notebooks/06_agent_patterns.ipynb",
+     "lines": [
+      85,
+      112
+     ]
+    },
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      77,
+      86
+     ]
+    },
+    {
+     "file": "02_agent_runtime/patterns.py",
+     "lines": [
+      108,
+      160
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      211,
+      250
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      288,
+      304
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    3,
+    3,
+    1
+   ],
+   "precision": 1.0,
+   "recall": 0.5714285714285714,
+   "mrr": 1.0,
+   "ndcg": 0.8875385049894213
+  },
+  {
+   "id": "Q15",
+   "kind": "rag",
+   "best_score": 0.7594,
+   "retrieved": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      89,
+      92
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/02_the_agent_loop.ipynb",
+     "lines": [
+      162,
+      218
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/05_built_in_tools.ipynb",
+     "lines": [
+      136,
+      161
+     ]
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      110,
+      131
+     ]
+    },
+    {
+     "file": "05_context/notebooks/05_context_per_component.ipynb",
+     "lines": [
+      55,
+      79
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    3,
+    2,
+    1
+   ],
+   "precision": 1.0,
+   "recall": 0.25,
+   "mrr": 1.0,
+   "ndcg": 0.8040708765078747
+  },
+  {
+   "id": "Q16",
+   "kind": "rag",
+   "best_score": 0.8038,
+   "retrieved": [
+    {
+     "file": "02_agent_runtime/README.md",
+     "lines": [
+      105,
+      108
+     ]
+    },
+    {
+     "file": "02_agent_runtime/notebooks/04_planning.ipynb",
+     "lines": [
+      143,
+      147
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      27,
+      33
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      13,
+      17
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/08_asyncio.ipynb",
+     "lines": [
+      3,
+      11
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    0,
+    0,
+    0
+   ],
+   "precision": 0.4,
+   "recall": 0.4,
+   "mrr": 1.0,
+   "ndcg": 0.7428223494387413
+  },
+  {
+   "id": "Q17",
+   "kind": "rag",
+   "best_score": 0.7826,
+   "retrieved": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      86,
+      89
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      26,
+      57
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      112,
+      115
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/03_invocation.ipynb",
+     "lines": [
+      1,
+      22
+     ]
+    },
+    {
+     "file": "08_frameworks/03_crewai/security_questionnaire.ipynb",
+     "lines": [
+      191,
+      231
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    1,
+    1,
+    0
+   ],
+   "precision": 0.8,
+   "recall": 0.25,
+   "mrr": 1.0,
+   "ndcg": 0.6467270319981572
+  },
+  {
+   "id": "Q18",
+   "kind": "rag",
+   "best_score": 0.7744,
+   "retrieved": [
+    {
+     "file": "03_tools/README.md",
+     "lines": [
+      91,
+      95
+     ]
+    },
+    {
+     "file": "03_tools/verify.py",
+     "lines": [
+      4,
+      35
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      1,
+      17
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      132,
+      148
+     ]
+    },
+    {
+     "file": "03_tools/notebooks/04_verification.ipynb",
+     "lines": [
+      116,
+      130
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    2,
+    1
+   ],
+   "precision": 1.0,
+   "recall": 0.4444444444444444,
+   "mrr": 1.0,
+   "ndcg": 0.7644846879987715
+  },
+  {
+   "id": "Q19",
+   "kind": "rag",
+   "best_score": 0.7182,
+   "retrieved": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      82,
+      95
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      205,
+      217
+     ]
+    },
+    {
+     "file": "04_memory/recall.py",
+     "lines": [
+      1,
+      70
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/01_your_first_llm.ipynb",
+     "lines": [
+      39,
+      45
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      231,
+      243
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    0,
+    2
+   ],
+   "precision": 0.8,
+   "recall": 0.5714285714285714,
+   "mrr": 1.0,
+   "ndcg": 0.9159332700480359
+  },
+  {
+   "id": "Q20",
+   "kind": "rag",
+   "best_score": 0.7657,
+   "retrieved": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      16,
+      44
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/01_what_memory_is.ipynb",
+     "lines": [
+      159,
+      171
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      3,
+      34
+     ]
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      184,
+      195
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/02_stores.ipynb",
+     "lines": [
+      500,
+      524
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    0,
+    2
+   ],
+   "precision": 0.8,
+   "recall": 0.4444444444444444,
+   "mrr": 1.0,
+   "ndcg": 0.8104662669883588
+  },
+  {
+   "id": "Q21",
+   "kind": "rag",
+   "best_score": 0.7622,
+   "retrieved": [
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      109,
+      118
+     ]
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      103,
+      107
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      1,
+      20
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/04_types_of_memory.ipynb",
+     "lines": [
+      190,
+      208
+     ]
+    },
+    {
+     "file": "04_memory/notebooks/03_operations.ipynb",
+     "lines": [
+      351,
+      367
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    2,
+    3,
+    3,
+    2
+   ],
+   "precision": 1.0,
+   "recall": 0.4166666666666667,
+   "mrr": 1.0,
+   "ndcg": 0.8027478044303603
+  },
+  {
+   "id": "Q22",
+   "kind": "rag",
+   "best_score": 0.808,
+   "retrieved": [
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      79,
+      109
+     ]
+    },
+    {
+     "file": "01_foundations/notebooks/04_prompting.ipynb",
+     "lines": [
+      25,
+      31
+     ]
+    },
+    {
+     "file": "05_context/notebooks/04_context_construction.ipynb",
+     "lines": [
+      132,
+      147
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      117,
+      137
+     ]
+    },
+    {
+     "file": "05_context/README.md",
+     "lines": [
+      79,
+      114
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    1,
+    3,
+    0,
+    3
+   ],
+   "precision": 0.8,
+   "recall": 0.2727272727272727,
+   "mrr": 1.0,
+   "ndcg": 0.6705148518134127
+  },
+  {
+   "id": "Q23",
+   "kind": "rag",
+   "best_score": 0.7419,
+   "retrieved": [
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      118,
+      128
+     ]
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      64,
+      74
+     ]
+    },
+    {
+     "file": "05_context/notebooks/02_context_selection.ipynb",
+     "lines": [
+      178,
+      189
+     ]
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      129,
+      186
+     ]
+    },
+    {
+     "file": "05_context/selection.py",
+     "lines": [
+      80,
+      124
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    3,
+    2
+   ],
+   "precision": 1.0,
+   "recall": 0.5,
+   "mrr": 1.0,
+   "ndcg": 0.8952429981827418
+  },
+  {
+   "id": "Q24",
+   "kind": "rag",
+   "best_score": 0.779,
+   "retrieved": [
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      109,
+      115
+     ]
+    },
+    {
+     "file": "06_orchestration/README.md",
+     "lines": [
+      63,
+      77
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      117,
+      137
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      94,
+      107
+     ]
+    },
+    {
+     "file": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb",
+     "lines": [
+      172,
+      182
+     ]
+    }
+   ],
+   "gains": [
+    2,
+    3,
+    3,
+    2,
+    3
+   ],
+   "precision": 1.0,
+   "recall": 0.5555555555555556,
+   "mrr": 1.0,
+   "ndcg": 0.8587958337793852
+  },
+  {
+   "id": "Q25",
+   "kind": "rag",
+   "best_score": 0.6133,
+   "retrieved": [],
+   "gains": [],
+   "precision": 0.0,
+   "recall": 0.0,
+   "mrr": 0.0,
+   "ndcg": 0.0
+  },
+  {
+   "id": "Q26",
+   "kind": "agentic",
+   "best_score": 0.7837,
+   "retrieved": [
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      67,
+      83
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      100,
+      119
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      147,
+      164
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/02_mcp_client.ipynb",
+     "lines": [
+      137,
+      157
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      112,
+      115
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    3,
+    0
+   ],
+   "precision": 0.8,
+   "recall": 0.21052631578947367,
+   "mrr": 1.0,
+   "ndcg": 0.7718920066951964
+  },
+  {
+   "id": "Q27",
+   "kind": "rag",
+   "best_score": 0.7692,
+   "retrieved": [
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      117,
+      133
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      70,
+      94
+     ]
+    },
+    {
+     "file": "07_mcp/README.md",
+     "lines": [
+      47,
+      54
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      58,
+      68
+     ]
+    },
+    {
+     "file": "07_mcp/notebooks/06_build_an_mcp_agent.ipynb",
+     "lines": [
+      46,
+      56
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    1,
+    3,
+    3
+   ],
+   "precision": 1.0,
+   "recall": 0.4444444444444444,
+   "mrr": 1.0,
+   "ndcg": 0.8546456263113074
+  },
+  {
+   "id": "Q28",
+   "kind": "rag",
+   "best_score": 0.7299,
+   "retrieved": [
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      173,
+      195
+     ]
+    },
+    {
+     "file": "08_frameworks/03_crewai/security_questionnaire.ipynb",
+     "lines": [
+      413,
+      432
+     ]
+    },
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      87,
+      97
+     ]
+    },
+    {
+     "file": "05_context/notebooks/03_context_compression.ipynb",
+     "lines": [
+      66,
+      82
+     ]
+    },
+    {
+     "file": "08_frameworks/03_crewai/security_questionnaire.ipynb",
+     "lines": [
+      191,
+      231
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    0,
+    0,
+    0
+   ],
+   "precision": 0.4,
+   "recall": 1.0,
+   "mrr": 1.0,
+   "ndcg": 0.9580414003446834
+  },
+  {
+   "id": "Q29",
+   "kind": "rag",
+   "best_score": 0.7472,
+   "retrieved": [
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      99,
+      107
+     ]
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      604,
+      613
+     ]
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      430,
+      473
+     ]
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.ipynb",
+     "lines": [
+      173,
+      187
+     ]
+    },
+    {
+     "file": "08_frameworks/04_autogen/analysis_team.py",
+     "lines": [
+      76,
+      119
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    2,
+    1,
+    3
+   ],
+   "precision": 1.0,
+   "recall": 0.6666666666666666,
+   "mrr": 1.0,
+   "ndcg": 0.9243517417861665
+  },
+  {
+   "id": "Q30",
+   "kind": "agentic",
+   "best_score": 0.747,
+   "retrieved": [
+    {
+     "file": "08_frameworks/README.md",
+     "lines": [
+      121,
+      134
+     ]
+    },
+    {
+     "file": "08_frameworks/06_mem0/running_coach.ipynb",
+     "lines": [
+      802,
+      823
+     ]
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      159,
+      169
+     ]
+    },
+    {
+     "file": "08_frameworks/06_mem0/coach_mem0.py",
+     "lines": [
+      1,
+      64
+     ]
+    },
+    {
+     "file": "04_memory/README.md",
+     "lines": [
+      197,
+      200
+     ]
+    }
+   ],
+   "gains": [
+    3,
+    3,
+    3,
+    0,
+    0
+   ],
+   "precision": 0.6,
+   "recall": 0.15,
+   "mrr": 1.0,
+   "ndcg": 0.7227265726449517
+  }
+ ]
+}

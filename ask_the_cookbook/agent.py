@@ -87,9 +87,10 @@ class metered:
 
 
 def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LAST, floor=None,
-          max_tool_calls=A.MAX_TOOL_CALLS, client=None):
+          max_tool_calls=A.MAX_TOOL_CALLS, client=None, embed=None):
     """The loop, and the context system that chooses what its Think is sent. `client`: the OpenAI client its
-    Think calls the model through; chapter 1's shared one if not given."""
+    Think calls the model through; chapter 1's shared one if not given. `embed`: the embedding model its searches
+    use, if not the index's own (an API caller's Gemini key)."""
     from dataclasses import replace
 
     from llama_index.core.llms import MockLLM
@@ -122,7 +123,7 @@ def build(index, model=A.MODEL, context_tokens=CONTEXT_TOKENS, keep_last=KEEP_LA
 
     # the retriever's fusion step takes an LLM it never calls (one query, no variants): LlamaIndex's MockLLM
     # says so plainly, and keeps the scratch agent's model calls all on chapter 1's client
-    registry = Registry([Tool(f) for f in A.tool_functions(index, MockLLM(), floor=floor)])
+    registry = Registry([Tool(f) for f in A.tool_functions(index, MockLLM(), floor=floor, embed=embed)])
     context = ContextSystem()
     think = Think(model=model, tools=registry.tools, allow_fork=False, explain=False, max_tokens=4096, client=client)
     policy = Policy(budget=context_tokens, keep_last=keep_last, kinds=THINK_SEES)

@@ -1,0 +1,32 @@
+# Run the test suite on every push and pull request. Offline: stand-in models and fake clients, no keys, no tokens.
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# a newer push makes an older run's result moot
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true           # the tests read the saved index, whose vector store is in LFS
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"     # the Space's
+          cache: pip
+
+      - run: pip install -r requirements-dev.txt
+
+      - run: pytest -q

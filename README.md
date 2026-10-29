@@ -22,6 +22,7 @@ short_description: Questions on agentic-forge-cookbook, answered with sources
 exact lines it came from.**
 
 [![Live demo](https://img.shields.io/badge/%F0%9F%A4%97%20Live%20demo-Hugging%20Face%20Spaces-yellow)](https://huggingface.co/spaces/Venkatdatta/ask-the-cookbook)
+[![Tests](https://github.com/Venkatdatta2402/ask-the-cookbook/actions/workflows/tests.yml/badge.svg)](https://github.com/Venkatdatta2402/ask-the-cookbook/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 
@@ -31,6 +32,8 @@ LlamaIndex and others. This assistant answers questions about it, and its agenti
 own agent runtime**. The project asks the cookbook questions with the agent the cookbook teaches you to build.
 
 **Try it:** [huggingface.co/spaces/Venkatdatta/ask-the-cookbook](https://huggingface.co/spaces/Venkatdatta/ask-the-cookbook)
+· **Use it from code:** [the API](#api), with
+[interactive docs](https://venkatdatta-ask-the-cookbook.hf.space/api/docs)
 
 ---
 
@@ -38,6 +41,8 @@ own agent runtime**. The project asks the cookbook questions with the agent the 
 
 - [What it does](#what-it-does)
 - [How it works](#how-it-works)
+- [API](#api)
+- [Concurrency and performance](#concurrency-and-performance)
 - [Designed for a free tier](#designed-for-a-free-tier)
 - [Measured results](#measured-results)
 - [Getting started](#getting-started)
@@ -74,6 +79,9 @@ It's also a **chat**:
   exchanges word for word.
 - **Nothing stored.** The chat lasts for your browser session. Your key is used for your questions only.
 
+And it's an **API**: the same answers over HTTP, streamed as they're worked out, from an async FastAPI backend
+that runs on the same server as the page.
+
 ## How it works
 
 ```mermaid
@@ -94,8 +102,8 @@ flowchart LR
 
 The corpus is what a reader of the cookbook would read: the root and chapter READMEs, the **prose** of every
 notebook (markdown cells only, not code or outputs), and every Python module. Tests, stubs and the evaluation
-chapters' answer keys are left out, so the assistant can't read off the answers it's graded on. That comes to 124
-files and 1,015 chunks.
+chapters' answer keys are left out, so the assistant can't read off the answers it's graded on. The current file
+and chunk counts are under [Keeping the index current](#keeping-the-index-current), updated by every refresh.
 
 - **Prose** is split along its markdown headings, then into chunks of up to 800 tokens.
 - **Code** is split by its syntax tree into chunks of up to 80 lines, so a function stays in one piece.
@@ -138,6 +146,151 @@ The agent is assembled from the cookbook's chapters 1 to 6, not from a framework
 The chat keeps each question and final answer; the agent's tool calls are discarded once it answers. A RAG
 answer is kept with its `[n]` citations rewritten as `[file, lines a-b]`, so a later agentic turn can open
 exactly those lines. Compaction uses chapter 5's compressor, and is undone if the result wouldn't be smaller.
+
+## API
+
+Base URL: `https://venkatdatta-ask-the-cookbook.hf.space` ·
+[interactive docs](https://venkatdatta-ask-the-cookbook.hf.space/api/docs)
+
+| Endpoint | What it does |
+|---|---|
+| `POST /api/ask` | Answers a question: streamed as server-sent events (default), or as one JSON reply with `"stream": false` |
+| `GET /api/health` | Status, the model, the cookbook commit the index holds, the limits |
+| `GET /api/docs` | Interactive docs (OpenAPI) |
+
+**Your keys pay for your answers.** The API never uses the demo key.
+
+| Header | |
+|---|---|
+| `X-Groq-Key` | Required. The answer is written on your [Groq](https://console.groq.com/keys) account |
+| `X-Gemini-Key` | Required for `"mode": "agentic"`, whose up to 8 searches each embed a query. Optional for RAG |
+
+Each key is checked with its provider before any work starts, using a free call, and is never logged or stored.
+
+**Request body:** `question` (up to 500 characters), `mode` (`"rag"` or `"agentic"`), `quote` (optional: a
+passage the question is about), `stream` (default `true`).
+
+**Streaming with curl** (`-N` prints events as they arrive):
+
+```bash
+curl -N https://venkatdatta-ask-the-cookbook.hf.space/api/ask \
+  -H "Content-Type: application/json" \
+  -H "X-Groq-Key: $GROQ_API_KEY" \
+  -d '{"question": "What counts as a doom loop, and what does the runtime do when it detects one?"}'
+```
+
+```
+event: progress
+data: {"message": "Searching the cookbook"}
+
+event: progress
+data: {"message": "Reading 5 passages and writing the answer"}
+
+event: answer
+data: {"answer": "... [[1]](https://github.com/.../runtime.py#L181-L218) ...", "sources": [...], ...}
+
+event: done
+data: {"seconds": ..., "tokens": ...}
+```
+
+**From Python, asynchronously**, with `httpx`:
+
+```python
+import asyncio, json, os
+import httpx
+
+URL = "https://venkatdatta-ask-the-cookbook.hf.space/api/ask"
+
+async def ask(question, mode="rag"):
+    headers = {"X-Groq-Key": os.environ["GROQ_API_KEY"]}
+    if mode == "agentic":
+        headers["X-Gemini-Key"] = os.environ["GEMINI_API_KEY"]
+    async with httpx.AsyncClient(timeout=None) as client:
+        async with client.stream("POST", URL, json={"question": question, "mode": mode},
+                                 headers=headers) as response:
+            event = None
+            async for line in response.aiter_lines():
+                if line.startswith("event: "):
+                    event = line.removeprefix("event: ")
+                elif line.startswith("data: "):
+                    data = json.loads(line.removeprefix("data: "))
+                    if event == "progress":
+                        print("...", data["message"])
+                    elif event == "answer":
+                        return data
+                    elif event == "error":
+                        raise RuntimeError(f'{data["status"]}: {data["message"]}')
+
+print(asyncio.run(ask("Why shouldn't agent memory start with a vector database?"))["answer"])
+```
+
+| Response | When |
+|---|---|
+| `401` | A key is missing, malformed, or refused by its provider |
+| `422` | The question is empty or over 500 characters |
+| `429` | More than 5 requests a minute from one address (see `Retry-After`), or your key's own limit |
+| `error` event | Something failed mid-answer: `{"status", "message"}` |
+
+## Concurrency and performance
+
+### One server for the page and the API
+
+The Space runs on **ZeroGPU**, the only Gradio hardware a free account gets. ZeroGPU only accepts an app started
+by Gradio's own `launch()`. Four set-ups were tried on a throwaway Space:
+
+| Set-up | Result on ZeroGPU |
+|---|---|
+| A FastAPI app of our own, Gradio mounted on it, run by uvicorn | Port taken: Gradio's server-side renderer starts first |
+| The same, renderer off | Started, then **shut down by ZeroGPU after 2 seconds** |
+| Gradio's `launch()`, with our routes in the FastAPI app it creates | Runs, but the renderer in front answers `/api/*` itself |
+| **The same, renderer off** | **Works**: API, streaming, page and Gradio events, all on one server |
+
+So `app.py` hands the API's routes to Gradio: `launch(app_kwargs={"routes": api.router.routes}, ssr_mode=False)`.
+FastAPI takes `routes` when it's created, so the API is part of the server from the start.
+
+### Async where the waiting is
+
+A question spends almost all its time **waiting**: on Gemini to embed it, and on Groq to write the answer.
+
+- **RAG is async end to end.** The embedding and the answer are awaited, so while one request waits, the event
+  loop serves the others. No thread is held per request.
+- **The agent stays synchronous.** It's the cookbook's own loop, which deliberately uses threads (its chapter 2
+  explains why). It runs with `asyncio.to_thread`, and the event loop follows its progress and streams each step.
+- **Caps on work at once.** At most 8 RAG answers and 2 agent runs are worked out at once (`asyncio.Semaphore`).
+  A request over the cap waits its turn, and is told so in its stream; it isn't refused. This protects the
+  free-tier quotas that every visitor shares.
+- **Stopping when the caller leaves.** If the caller disconnects, RAG stops at once, because its awaits are
+  cancelled. A thread can't be killed, so an agent run is stopped where its next model call would go out: at most
+  the call already in flight is spent. Its slot is held until the thread has actually ended.
+- **Abuse guards.** Each address may send 5 requests a minute, and each key is checked with its provider before
+  any work. A made-up Groq key would otherwise get its question embedded on the owner's Gemini key before Groq
+  refused it.
+
+### Load test
+
+[`benchmarks/load_test.py`](benchmarks/load_test.py) sends **100 questions at once** over HTTP to a real uvicorn
+server. The model is a stand-in that takes 1 second to reply, so the test costs no tokens. Everything else is
+the real code: retrieval over the real index, the citation engine, sources and links.
+
+| Serving | Before the fixes below | After |
+|---|---|---|
+| Threads, the page's way (8 workers) | 71.7 s | 14.0 s |
+| Async API, cap of 8 (as deployed) | 51.3 s | 13.8 s |
+| Async API, cap lifted | 54.9 s | **3.0 s** (33 answers a second, on one event-loop thread) |
+
+With waiting alone, the cap-lifted run should take about 1 second, so the first numbers meant something else was
+using CPU. Profiling found **~500 ms of CPU per question**, which no event loop can overlap:
+
+| Found | Fix | CPU per question |
+|---|---|---|
+| The BM25 keyword index was rebuilt over every chunk for every question | Built once per index and shared; it's read-only | −390 ms |
+| The vector search ran twice: once for the refusal floor, again inside the fusion | The fusion reuses the first search's results | −45 ms |
+| LlamaIndex's in-memory store rebuilt its numpy matrix from every stored vector on every query | The matrix is kept between questions; one matrix multiply | −45 ms |
+| The async search made the Gemini embedding twice, and its sync fallback blocked the event loop | An async retriever that embeds once and awaits it | 1 embedding, not 2 |
+
+After the fixes, search costs **3.9 ms of CPU per question**, down from about 500 ms. That also shortens every
+RAG answer on the live page. Tests check that each fix returns exactly the same passages, in the same order,
+with the same scores.
 
 ## Designed for a free tier
 
@@ -185,17 +338,22 @@ python app.py                              # http://127.0.0.1:7860
 **Tests** run offline, with stand-in models and fake clients: no keys, no tokens.
 
 ```bash
-pytest
+pytest                                     # also run on every push by the Tests workflow
+python benchmarks/load_test.py             # the load test above, against a stand-in model
 ```
 
 They cover what's checked before any model call, citation parsing and linking, the agent's context budget and
-guards, concurrent runs on different keys, compaction, and the index refresh.
+guards, concurrent runs on different keys, compaction, and the index refresh. For the API, they also cover the
+key checks, streaming order, the limits, requests running at once, stopping work when the caller leaves, and
+that the search fixes return exactly the same passages and scores as before.
 
 ## Project structure
 
 ```
-app.py                     the Gradio app: the page, the two modes, citations, the waiting message
+app.py                     the page (Gradio), and the one server that serves it and the API
 ask_the_cookbook/
+    answers.py             answering, for the page and the API: RAG (sync and async), the agent, citations
+    api.py                 the API (FastAPI): streaming, key checks, limits, stopping when the caller leaves
     corpus.py              which cookbook files are read, and how (notebooks as their prose)
     search.py              the index, hybrid search with the refusal floor, the RAG engine, the agent's tools
     agent.py               the agent: the cookbook's loop and context system over those tools
@@ -206,7 +364,8 @@ data/
     index/                 the saved LlamaIndex index (the vector store is in Git LFS)
     corpus/                the cookbook's text exactly as indexed; answers link to these lines
 tests/                     offline tests
-.github/workflows/         the sync to the Space, and the index refresh
+benchmarks/                the load test
+.github/workflows/         the tests, the sync to the Space, and the index refresh
 ```
 
 ## Keeping the index current
@@ -242,7 +401,8 @@ Hugging Face's [`hub-sync`](https://github.com/huggingface/hub-sync) action, and
 | GitHub Actions variable | `HF_SPACE`: `Venkatdatta/ask-the-cookbook` |
 
 The Space runs on ZeroGPU, the hardware a free account gets for Gradio apps. The app needs no GPU, since its
-models run on Groq and Gemini.
+models run on Groq and Gemini. One server serves both the page and the API (see
+[One server for the page and the API](#one-server-for-the-page-and-the-api)).
 
 ## Limitations
 
@@ -255,6 +415,11 @@ models run on Groq and Gemini.
 - **Free-tier limits.** The demo key's daily allowance is shared by every visitor, and agentic answers take
   minutes.
 - **The index is refreshed by hand**, so it can trail the cookbook until the workflow is run.
+- **The per-address limit is a guard rail.** Behind Hugging Face's proxy, the caller's address comes from the
+  `X-Forwarded-For` header, which a caller can set. The key checks are the real protection.
+- **An agent run stops at its next model call**, not instantly, when its caller leaves: the cookbook's loop runs
+  on a thread, and Python can't kill a thread.
+- **Limits and remembered keys live in one process's memory.** A restart or a second replica starts them afresh.
 
 ## Where the code comes from
 
@@ -278,6 +443,9 @@ What changed:
   cookbook.
 - **Built for the app:** the chat, the ledger of calls made, the near-duplicate guard and the larger final-answer
   budget.
+- **Faster search, same results:** BM25 built once and shared, the vector search run once on a matrix kept between
+  questions, and an async retriever that embeds a question once. An agent run's searches can also use another
+  Gemini key (an API caller's).
 
 ## License
 

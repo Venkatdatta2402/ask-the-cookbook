@@ -5,6 +5,7 @@ import json
 import pytest
 from openai.types.chat import ChatCompletion
 
+from ask_the_cookbook import answers
 from ask_the_cookbook.runtime import llm as shared
 from ask_the_cookbook.runtime.selection import select
 from ask_the_cookbook.session import COMPACT_WORTH, KEEP_RECENT, Session
@@ -60,10 +61,10 @@ def test_the_meter_counts_what_the_chat_holds():
 def rag_offline(app, monkeypatch):
     """RAG on a stand-in LLM with no floor, recording what retrieval was asked."""
     from llama_index.core.llms import MockLLM
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
-    monkeypatch.setattr(app.A, "FLOOR", -1)
-    searched, real_rag = [], app.rag
-    monkeypatch.setattr(app, "rag", lambda q, key, stage: searched.append(q) or real_rag(q, key, stage))
+    monkeypatch.setattr(answers, "chat_model", lambda key: MockLLM(max_tokens=20))
+    monkeypatch.setattr(answers.A, "FLOOR", -1)
+    searched, real_rag = [], answers.rag
+    monkeypatch.setattr(answers, "rag", lambda q, key, stage: searched.append(q) or real_rag(q, key, stage))
     return searched
 
 
@@ -101,7 +102,7 @@ def test_a_selection_over_the_limit_is_refused_before_any_call(app, ask):
 
 def test_agentic_rag_has_the_passage_pinned_in_its_context(app, ask, fake_client, monkeypatch):
     made = []
-    monkeypatch.setattr(app, "client", lambda key: made.append(fake_client(key, search=False)) or made[-1])
+    monkeypatch.setattr(answers, "client", lambda key: made.append(fake_client(key, search=False)) or made[-1])
     passage = "the floor is applied on raw vector scores, before fusion"
     ask("Why before?", key="gsk_visitor", mode=app.AGENTIC, quote=passage)
     request = [m for m in made[0].sent[0]["messages"] if m.get("role") == "user"][-1]["content"]
@@ -110,7 +111,7 @@ def test_agentic_rag_has_the_passage_pinned_in_its_context(app, ask, fake_client
 
 def test_a_follow_up_turned_away_points_to_ask_about(app, ask, monkeypatch):
     from llama_index.core.llms import MockLLM
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
+    monkeypatch.setattr(answers, "chat_model", lambda key: MockLLM(max_tokens=20))
     first, _ = ask("What is the capital of Australia?")              # the floor turns it away: no chat yet
     assert "Ask about" not in first
     session = Session()
@@ -142,13 +143,13 @@ def test_numbered_citations_are_kept_as_file_and_lines(app, monkeypatch):
     passage = "\n".join(lines[start - 1:start + 4])
     node = TextNode(text=f"Source 1:\n{passage}\n", metadata={"file": "02_agent_runtime/runtime.py"})
     response = SimpleNamespace(source_nodes=[SimpleNamespace(node=node)])
-    monkeypatch.setattr(app, "chat_model", lambda key: None)
-    monkeypatch.setattr(app.A, "engine", lambda index, llm: None)
-    monkeypatch.setattr(app, "rag", lambda q, key, stage: {
+    monkeypatch.setattr(answers, "chat_model", lambda key: None)
+    monkeypatch.setattr(answers.A, "engine", lambda index, llm: None)
+    monkeypatch.setattr(answers, "rag", lambda q, key, stage: {
         "refused": False, "answer": "Compared on values [1].", "response": response})
-    shown, kept = app.ask_engine("How are calls compared?", "gsk_x", Session())
+    shown, kept = answers.ask_engine("How are calls compared?", "gsk_x", Session())
     assert kept == f"Compared on values [02_agent_runtime/runtime.py, lines {start}-{start + 4}]."
-    at = f"{app.blob('02_agent_runtime/runtime.py')}#L{start}-L{start + 4}"
+    at = f"{answers.blob('02_agent_runtime/runtime.py')}#L{start}-L{start + 4}"
     assert f"Compared on values [[1]]({at})." in shown                       # the citation opens the lines
     assert f"1. [02_agent_runtime/runtime.py, lines {start}-{start + 4}]({at})" in shown
 
@@ -165,9 +166,9 @@ def test_a_readme_source_opens_at_its_lines_named_by_its_heading(app):
     heading = next(n for n, line in enumerate(lines) if line.startswith("## "))
     start = next(n for n, line in enumerate(lines, 1) if n > heading + 1 and len(line.strip()) >= 30
                  and not line.startswith("#"))
-    name, url = app.source(passage(file, "\n".join(lines[start - 1:start + 2])))
+    name, url = answers.source(passage(file, "\n".join(lines[start - 1:start + 2])))
     assert name == f"{file}, lines {start}-{start + 2} § {lines[heading][3:].strip()}"
-    assert url == f"{app.blob(file)}?plain=1#L{start}-L{start + 2}"
+    assert url == f"{answers.blob(file)}?plain=1#L{start}-L{start + 2}"
 
 
 def test_a_module_source_opens_at_its_lines(app):
@@ -175,8 +176,8 @@ def test_a_module_source_opens_at_its_lines(app):
     file = "04_memory/stores.py"
     lines = (corpus.REPO / file).read_text(encoding="utf-8").splitlines()
     start = next(n for n, line in enumerate(lines, 1) if len(line.strip()) >= 30)
-    assert app.source(passage(file, "\n".join(lines[start - 1:start + 2]))) == (
-        f"{file}, lines {start}-{start + 2}", f"{app.blob(file)}#L{start}-L{start + 2}")
+    assert answers.source(passage(file, "\n".join(lines[start - 1:start + 2]))) == (
+        f"{file}, lines {start}-{start + 2}", f"{answers.blob(file)}#L{start}-L{start + 2}")
 
 
 def test_a_notebook_source_opens_on_github_named_by_its_heading(app):
@@ -186,19 +187,19 @@ def test_a_notebook_source_opens_on_github_named_by_its_heading(app):
     at = prose.index("## `act.py`: executing a decision already made")
     text = next(line for line in prose[at + 1:] if len(line.strip()) >= 30)
     node = passage(file, text)
-    assert app.source(node) == (f"{file} § `act.py`: executing a decision already made", app.blob(file))
-    assert app.where(node).startswith(f"{file}, lines ")          # the chat still keeps its lines, for the agent
+    assert answers.source(node) == (f"{file} § `act.py`: executing a decision already made", answers.blob(file))
+    assert answers.where(node).startswith(f"{file}, lines ")          # the chat still keeps its lines, for the agent
 
 
 def test_a_comment_in_a_code_example_is_not_a_heading(app, monkeypatch):
     text = "## Setup\nRun this:\n```bash\n# install the packages\npip install x\n```\nThen go on."
-    monkeypatch.setattr(app.A, "file_text", lambda file: text)
-    assert app.heading_above("any.md", 7) == "Setup"
+    monkeypatch.setattr(answers.A, "file_text", lambda file: text)
+    assert answers.heading_above("any.md", 7) == "Setup"
 
 
 def test_the_agent_starts_from_the_chat(app, ask, fake_client, monkeypatch):
     made = []
-    monkeypatch.setattr(app, "client", lambda key: made.append(fake_client(key, search=False)) or made[-1])
+    monkeypatch.setattr(answers, "client", lambda key: made.append(fake_client(key, search=False)) or made[-1])
     session = Session()
     session.add("How does chapter 4 rank memories?", "By relevance and recency.")
     session.notes = ["Earlier: the visitor asked about doom loops."]
@@ -250,7 +251,7 @@ def test_a_compaction_that_comes_out_larger_is_undone(app, monkeypatch):
                 return completion(json.dumps({"facts": facts}))
             return completion("A summary far longer than what it replaces. " * 200)
 
-    monkeypatch.setattr(app, "client", lambda key: Verbose())
+    monkeypatch.setattr(answers, "client", lambda key: Verbose())
     session = chat_of(6)
     history, held = list(session.history), session.held()
     shown, session, status = list(app.compact_now("gsk_visitor", session))[-1]
@@ -269,37 +270,37 @@ def test_a_compaction_that_comes_out_larger_is_undone(app, monkeypatch):
     ("A list [3] and [0.5] stay.", "A list [3] and [0.5] stay."),
 ])
 def test_every_citation_form_gpt_oss_writes_is_kept_as_file_and_lines(app, answer, kept):
-    assert app.cited(answer, {1: "a.py, lines 1-5", 2: "b.md, lines 7-9"}) == kept
+    assert answers.cited(answer, {1: "a.py, lines 1-5", 2: "b.md, lines 7-9"}) == kept
 
 
 def test_code_is_never_read_as_citations(app):
     """Live, inside a table: `pairs[0] == pairs[2] and pairs[1] == pairs[3]` had [2], [1], [3] linked to sources."""
     code = "`pairs[0] == pairs[2] and pairs[1] == pairs[3] and pairs[0] != pairs[1]`"
     links = {1: "u1", 2: "u2", 3: "u3"}
-    assert app.linked(f"| Oscillation | {code} |", links) == f"| Oscillation | {code} |"
+    assert answers.linked(f"| Oscillation | {code} |", links) == f"| Oscillation | {code} |"
     fenced = "```python\nif seen[1] == seen[2]:\n    stop()\n```"
-    assert app.linked(f"Like this [1]:\n{fenced}", links) == f"Like this [[1]](u1):\n{fenced}"
-    assert app.linked("an index pairs[2] outside code", links) == "an index pairs[2] outside code"
-    assert app.cited(f"See {code} [2].", {2: "a.py, lines 1-5"}) == f"See {code} [a.py, lines 1-5]."
-    assert app.link_files("`[04_memory/recall.py]` is code") == "`[04_memory/recall.py]` is code"
+    assert answers.linked(f"Like this [1]:\n{fenced}", links) == f"Like this [[1]](u1):\n{fenced}"
+    assert answers.linked("an index pairs[2] outside code", links) == "an index pairs[2] outside code"
+    assert answers.cited(f"See {code} [2].", {2: "a.py, lines 1-5"}) == f"See {code} [a.py, lines 1-5]."
+    assert answers.link_files("`[04_memory/recall.py]` is code") == "`[04_memory/recall.py]` is code"
 
 
 def test_a_bare_source_n_in_prose_is_a_citation_too(app):
     """Live: "The retry implementation in `Act.execute` is shown in Source 1." """
-    assert app.linked("It is shown in Source 1.", {1: "u1"}) == "It is shown in [[1]](u1)."
-    assert app.cited("It is shown in Source 1.", {1: "a.py, lines 1-5"}) == "It is shown in [a.py, lines 1-5]."
-    assert app.linked("**Sources**", {1: "u1"}) == "**Sources**"                     # a heading, no number
+    assert answers.linked("It is shown in Source 1.", {1: "u1"}) == "It is shown in [[1]](u1)."
+    assert answers.cited("It is shown in Source 1.", {1: "a.py, lines 1-5"}) == "It is shown in [a.py, lines 1-5]."
+    assert answers.linked("**Sources**", {1: "u1"}) == "**Sources**"                     # a heading, no number
 
 
 def test_the_models_own_sources_list_is_dropped(app):
     answer = ("No, the retries are internal.\n\n**Sources**  \n- The retry implementation is shown in Source 1.\n"
               "- The definition of a decision is in Source 2.")
-    assert app.without_own_sources(answer) == "No, the retries are internal."
+    assert answers.without_own_sources(answer) == "No, the retries are internal."
 
 
 def test_a_sources_heading_followed_by_prose_is_kept(app):
     answer = "### Sources\nThe two notebooks disagree here, and the code settles it."
-    assert app.without_own_sources(answer) == answer
+    assert answers.without_own_sources(answer) == answer
 
 
 def test_passages_from_one_section_are_one_source_and_renumbered(app, monkeypatch):
@@ -316,11 +317,11 @@ def test_passages_from_one_section_are_one_source_and_renumbered(app, monkeypatc
     nodes = [passage(module, "\n".join(code[start - 1:start + 2])), passage(notebook, first),
              passage(module, "\n".join(code[start + 4:start + 6])), passage(notebook, second)]
     response = SimpleNamespace(source_nodes=[SimpleNamespace(node=node) for node in nodes])
-    monkeypatch.setattr(app, "chat_model", lambda key: None)
-    monkeypatch.setattr(app.A, "engine", lambda index, llm: None)
-    monkeypatch.setattr(app, "rag", lambda q, key, stage: {
+    monkeypatch.setattr(answers, "chat_model", lambda key: None)
+    monkeypatch.setattr(answers.A, "engine", lambda index, llm: None)
+    monkeypatch.setattr(answers, "rag", lambda q, key, stage: {
         "refused": False, "answer": "Code [1], notebook [2], more code [3], notebook again [4].", "response": response})
-    shown, kept = app.ask_engine("How?", "gsk_x", Session())
+    shown, kept = answers.ask_engine("How?", "gsk_x", Session())
     listed = shown.split("**Sources**")[1].strip().splitlines()
     assert len(listed) == 3                                         # the notebook section once
     assert "notebook again [[2]](" in shown and "[[4]]" not in shown
@@ -335,12 +336,12 @@ def test_passages_from_one_section_are_one_source_and_renumbered(app, monkeypatc
     ("A list [3] stays.", "A list [3] stays."),
 ])
 def test_every_citation_form_is_shown_as_a_link(app, answer, shown):
-    assert app.linked(answer, {1: "u1", 2: "u2"}) == shown
+    assert answers.linked(answer, {1: "u1", 2: "u2"}) == shown
 
 
 def test_compact_now_on_a_visitors_key_uses_their_key(app, monkeypatch, no_shared_calls):
     visitor = Compactor()
-    monkeypatch.setattr(app, "client", lambda key: visitor)
+    monkeypatch.setattr(answers, "client", lambda key: visitor)
     session = chat_of(6)
     shown, session, status = list(app.compact_now("gsk_visitor", session))[-1]
     assert "Older turns compacted" in shown[-1]["content"]
@@ -357,7 +358,7 @@ def test_compact_now_without_a_key_uses_the_demo_key(app, monkeypatch):
 
 def test_after_compaction_the_agent_gets_the_summary(app, ask, fake_client, monkeypatch, no_shared_calls):
     made = []
-    monkeypatch.setattr(app, "client", lambda key: Compactor() if not made else made[-1])
+    monkeypatch.setattr(answers, "client", lambda key: Compactor() if not made else made[-1])
     session = chat_of(6)
     list(app.compact_now("gsk_visitor", session))
     made.append(fake_client("gsk_visitor", search=False))

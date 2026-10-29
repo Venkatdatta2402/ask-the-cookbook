@@ -9,13 +9,15 @@ import openai
 import pytest
 from llama_index.core.llms import MockLLM
 
+from ask_the_cookbook import answers
+
 
 @pytest.fixture
 def engine_offline(app, monkeypatch):
     """The engine on a stand-in LLM, and no floor: a stand-in embedding is near nothing, so with the floor every
     question would be turned away before the sources could be seen."""
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
-    monkeypatch.setattr(app.A, "FLOOR", -1)
+    monkeypatch.setattr(answers, "chat_model", lambda key: MockLLM(max_tokens=20))
+    monkeypatch.setattr(answers.A, "FLOOR", -1)
 
 
 @pytest.mark.parametrize("question, key, mode, says", [
@@ -33,13 +35,13 @@ def test_turned_away_before_any_model_call(app, ask, question, key, mode, says):
 def test_the_engine_answers_with_linked_sources(app, ask, engine_offline):
     reply, status = ask("What counts as a doom loop?")
     assert "**Sources**" in reply
-    assert f"/blob/{app.BUILT['commit']}/" in reply
+    assert f"/blob/{answers.BUILT['commit']}/" in reply
 
 
 def test_with_the_floor_a_question_nothing_is_near_is_turned_away(app, ask, monkeypatch):
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM(max_tokens=20))
+    monkeypatch.setattr(answers, "chat_model", lambda key: MockLLM(max_tokens=20))
     reply, _ = ask("What is the capital of Australia?")
-    assert reply.startswith(app.A.NOT_COVERED)
+    assert reply.startswith(answers.A.NOT_COVERED)
 
 
 def test_the_sidebar_says_whose_key_answers(app):
@@ -51,26 +53,26 @@ def test_the_sidebar_says_whose_key_answers(app):
 
 def test_a_visitors_key_answers_rag_too(app, ask, monkeypatch):
     used = []
-    monkeypatch.setattr(app, "chat_model", lambda key: used.append(key) or MockLLM(max_tokens=20))
+    monkeypatch.setattr(answers, "chat_model", lambda key: used.append(key) or MockLLM(max_tokens=20))
     ask("What counts as a doom loop?", key="gsk_visitor")
     ask("What counts as a doom loop?")
     assert used == ["gsk_visitor", "gsk_placeholder_owner"]
 
 
 def test_the_engine_key_swap_puts_the_owners_key_back(app):
-    llm = app.chat_model("gsk_visitor")
+    llm = answers.chat_model("gsk_visitor")
     assert llm._client.api_key == "gsk_visitor"
     assert os.environ["GROQ_API_KEY"] == "gsk_placeholder_owner"
 
 
 def test_the_agent_answers_on_the_visitors_key_with_linked_citations(app, ask, fake_client, monkeypatch):
     made = []
-    monkeypatch.setattr(app, "client", lambda key: made.append(fake_client(key)) or made[-1])
+    monkeypatch.setattr(answers, "client", lambda key: made.append(fake_client(key)) or made[-1])
     reply, _ = ask("What counts as a doom loop?", key="gsk_visitor", mode=app.AGENTIC)
     assert "Answered on gsk_visitor" in reply
-    assert f"/blob/{app.BUILT['commit']}/02_agent_runtime/runtime.py" in reply
+    assert f"/blob/{answers.BUILT['commit']}/02_agent_runtime/runtime.py" in reply
     assert "1 tool calls" in reply
-    assert [kw["model"] for kw in made[0].sent] == [app.A.MODEL] * 2
+    assert [kw["model"] for kw in made[0].sent] == [answers.A.MODEL] * 2
 
 
 @pytest.mark.parametrize("status, kind, says", [
@@ -79,7 +81,7 @@ def test_the_agent_answers_on_the_visitors_key_with_linked_citations(app, ask, f
 ])
 def test_errors_reach_the_visitor_as_words(app, ask, fake_client, monkeypatch, status, kind, says):
     error = kind("refused", response=httpx.Response(status, request=httpx.Request("POST", "https://x")), body=None)
-    monkeypatch.setattr(app, "client", lambda key: fake_client(key, fail=error))
+    monkeypatch.setattr(answers, "client", lambda key: fake_client(key, fail=error))
     assert says in ask("q", key="gsk_visitor", mode=app.AGENTIC)[0]
 
 
@@ -102,20 +104,20 @@ def test_the_demo_keys_refusal_names_which_limit(app, groq_says, says):
     ("[ap_desk.ipynb, lines 348‑352]", "08_frameworks/02_langgraph/ap_desk.ipynb"),     # a notebook: from the top
 ])
 def test_the_agents_file_citations_become_links_to_their_lines(app, cited, link):
-    assert app.link_files(f"Shown {cited}.") == f"Shown [{cited}]({app.blob('')}{link})."
+    assert answers.link_files(f"Shown {cited}.") == f"Shown [{cited}]({answers.blob('')}{link})."
 
 
 def test_the_agents_citations_in_gpt_oss_brackets_become_links_too(app):
     cited = "【08_frameworks/02_langgraph/ap_checks.py, lines 5‑6】"
-    assert app.link_files(f"Twice {cited}.") == (
+    assert answers.link_files(f"Twice {cited}.") == (
         f"Twice [[08_frameworks/02_langgraph/ap_checks.py, lines 5‑6]]"
-        f"({app.blob('08_frameworks/02_langgraph/ap_checks.py')}#L5-L6).")
+        f"({answers.blob('08_frameworks/02_langgraph/ap_checks.py')}#L5-L6).")
 
 
 def test_gpt_oss_line_notation_reaches_the_link(app):
     """Live: 【08_frameworks/02_langgraph/case.py†L19-L24】."""
-    linked = app.link_files("Ends the step 【08_frameworks/02_langgraph/case.py†L19-L24】.")
-    assert linked.endswith(f"({app.blob('08_frameworks/02_langgraph/case.py')}#L19-L24).")
+    linked = answers.link_files("Ends the step 【08_frameworks/02_langgraph/case.py†L19-L24】.")
+    assert linked.endswith(f"({answers.blob('08_frameworks/02_langgraph/case.py')}#L19-L24).")
 
 
 @pytest.mark.parametrize("text", [
@@ -124,7 +126,7 @@ def test_gpt_oss_line_notation_reaches_the_link(app):
     "values[1] and [the plan]",             # not citations at all
 ])
 def test_what_is_not_a_cookbook_file_citation_is_left_alone(app, text):
-    assert app.link_files(text) == text
+    assert answers.link_files(text) == text
 
 
 def test_while_waiting_the_message_says_what_is_happening_with_turning_dots(app, monkeypatch):
@@ -136,9 +138,9 @@ def test_while_waiting_the_message_says_what_is_happening_with_turning_dots(app,
         time.sleep(1.5)
         stage["now"] = "Reading 5 passages and writing the answer"
         time.sleep(1.5)
-        return {"refused": True, "answer": app.A.NOT_COVERED, "response": None}
+        return {"refused": True, "answer": answers.A.NOT_COVERED, "response": None}
 
-    monkeypatch.setattr(app, "rag", slow_rag)
+    monkeypatch.setattr(answers, "rag", slow_rag)
     from ask_the_cookbook.session import Session
     waiting = [shown[-1]["content"] for shown, *_ in app.respond("q", "", "gsk_x", app.RAG, Session())][:-1]
     assert all(m.startswith('<span class="cooking" style="--phase: -') for m in waiting)   # the words, every time
@@ -212,10 +214,10 @@ def test_a_refused_rag_question_is_never_sent_to_the_model(app, monkeypatch):
     def never(*args, **kwargs):
         raise AssertionError("the answer was written for a question the floor turned away")
     monkeypatch.setattr(CitationQueryEngine, "synthesize", never)
-    monkeypatch.setattr(app, "chat_model", lambda key: MockLLM())
+    monkeypatch.setattr(answers, "chat_model", lambda key: MockLLM())
     stage = {}
-    result = app.rag("What is the capital of Australia?", "gsk_x", stage)        # the floor turns it away
-    assert result["refused"] and result["answer"] == app.A.NOT_COVERED
+    result = answers.rag("What is the capital of Australia?", "gsk_x", stage)        # the floor turns it away
+    assert result["refused"] and result["answer"] == answers.A.NOT_COVERED
     assert stage["now"] == "Searching the cookbook"                               # it never got to writing
 
 

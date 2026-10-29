@@ -5,7 +5,7 @@ import json
 import pytest
 from openai.types.chat import ChatCompletion
 
-from ask_the_cookbook import agent, search
+from ask_the_cookbook import agent, answers, search
 from ask_the_cookbook.runtime.chat import Conversation
 
 # different enough that chapter 2's doom-loop check (same tool, similar arguments, same result) does not stop a run
@@ -36,7 +36,7 @@ def test_a_search_for_something_new_is_not(earlier, query):
 
 def test_the_search_tool_refuses_a_near_duplicate_and_says_why(app):
     from llama_index.core.llms import MockLLM
-    search_cookbook, _ = search.tool_functions(app.INDEX, MockLLM())
+    search_cookbook, _ = search.tool_functions(answers.INDEX, MockLLM())
     first = search_cookbook("LangGraph desk wait for a person")
     again = search_cookbook("waiting for a person LangGraph desk")
     assert first.startswith("[")                                        # passages, labelled
@@ -108,7 +108,7 @@ def test_the_step_limit_answer_gets_more_room_and_no_calls_note(app):
     Three searches run (the limit's fourth call is decided, never run); the answer the step limit forces gets
     FINAL_TOKENS -- all three -- and only what it can actually read, no labels of what it cannot."""
     client = Searcher()
-    result = agent.run(app.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
+    result = agent.run(answers.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
                        context_tokens=1800, max_tool_calls=4)
     *calls, final = client.sent
     assert "tools" not in final and result["answer"] == "What the searches found."
@@ -124,7 +124,7 @@ def test_when_the_must_keeps_leave_no_room_for_the_note_the_call_goes_without_it
     """The last two results fit the budget, but not beside the note: the run goes on, that call without the note --
     it stopped with "selection refused" before."""
     client = Searcher()
-    result = agent.run(app.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
+    result = agent.run(answers.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
                        context_tokens=1800, max_tool_calls=4)
     assert not (result["stopped"] or "").startswith("selection refused")
     text = " ".join(str(m.get("content")) for m in client.sent[3]["messages"])     # the 4th call: 3 results so far
@@ -133,9 +133,9 @@ def test_when_the_must_keeps_leave_no_room_for_the_note_the_call_goes_without_it
 
 def test_the_run_is_logged_without_any_text(app, capsys):
     client = Searcher()
-    result = agent.run(app.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
+    result = agent.run(answers.INDEX, "How do memory stores work?", search.Budget(label="test"), client=client,
                        max_tool_calls=1)
-    app.log_run(result)
+    answers.log_run(result)
     log = capsys.readouterr().out
     assert "agentic run: 1 tool calls" in log and "last call was given:" in log
     assert "tokens in / out" in log and "/1" in log                    # each call's input, and its output (1)
@@ -165,7 +165,7 @@ def test_every_model_call_after_the_first_carries_the_calls_so_far(app):
                 "choices": [{"index": 0, "finish_reason": "stop", "message": message}],
                 "usage": {"prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11}})
 
-    result = agent.run(app.INDEX, "How do memory stores work?", search.Budget(label="test"), client=Client())
+    result = agent.run(answers.INDEX, "How do memory stores work?", search.Budget(label="test"), client=Client())
     assert result["answer"] == "Done."
     first, third = (" ".join(str(m.get("content")) for m in sent[i]) for i in (0, 2))
     assert "Tool calls already made" not in first

@@ -4,6 +4,7 @@ against its own budget. The shared client (chapter 1's, made with the owner's ke
 import concurrent.futures
 
 from ask_the_cookbook import agent
+from ask_the_cookbook import answers
 from ask_the_cookbook import search
 from ask_the_cookbook.runtime import llm
 
@@ -18,7 +19,7 @@ def test_three_runs_at_once_stay_apart(app, ask, fake_client, monkeypatch):
     def make(key):
         clients[key] = fake_client(key, prompt_tokens=1000 if key.endswith("two") else 100)
         return clients[key]
-    monkeypatch.setattr(app, "client", make)
+    monkeypatch.setattr(answers, "client", make)
 
     runs = {f"gsk_visitor_{n}": f"A question from visitor {n} about memory" for n in ("one", "two", "three")}
     with concurrent.futures.ThreadPoolExecutor(len(runs)) as pool:
@@ -65,7 +66,7 @@ def test_repairing_a_failed_tool_call_uses_the_runs_key(app, ask, monkeypatch):
                 "usage": {"prompt_tokens": 10, "completion_tokens": 1, "total_tokens": 11}})
 
     visitor = Visitor()
-    monkeypatch.setattr(app, "client", lambda key: visitor)
+    monkeypatch.setattr(answers, "client", lambda key: visitor)
     reply = ask("How does recall rank?", "gsk_visitor", app.AGENTIC)[0]
     assert "The search failed" in reply
     assert visitor.repairs == 2             # three attempts: two repairs between them

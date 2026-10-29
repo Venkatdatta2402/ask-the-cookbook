@@ -15,8 +15,17 @@ from openai.types.chat import ChatCompletion  # noqa: E402
 
 from ask_the_cookbook import search  # noqa: E402
 
-# the index is opened with this when app.py is imported: a question is never sent to Gemini
-search.embed_model = lambda: MockEmbedding(embed_dim=search.EMBED_DIM)
+# the index is opened with this when answers.py is imported, and an API caller's Gemini key makes one too: a
+# question is never sent to Gemini. The key each was made for is recorded
+EMBEDDED_FOR = []
+
+
+def _stand_in_embedding(key=None):
+    EMBEDDED_FOR.append(key)
+    return MockEmbedding(embed_dim=search.EMBED_DIM)
+
+
+search.embed_model = _stand_in_embedding
 
 
 @pytest.fixture(scope="session")
@@ -26,8 +35,14 @@ def app():
 
 
 @pytest.fixture(scope="session")
-def index(app):
-    return app.INDEX
+def answers(app):
+    from ask_the_cookbook import answers as the_answers
+    return the_answers
+
+
+@pytest.fixture(scope="session")
+def index(answers):
+    return answers.INDEX
 
 
 @pytest.fixture

@@ -22,3 +22,8 @@ tree-sitter-language-pack==1.21.0
 gradio==6.30.0
 # the Space runs on ZeroGPU, the only Gradio hardware a free account gets: it needs this imported (app.py)
 spaces==0.51.3
+
+# the API (ask_the_cookbook/api.py): its routes go into the FastAPI app Gradio makes, and uvicorn serves both. Both
+# come with gradio already; pinned here, at the versions gradio 6.30.0 installs, because the code uses them directly
+fastapi==0.143.0
+uvicorn==0.54.0

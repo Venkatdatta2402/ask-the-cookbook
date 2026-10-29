@@ -17,7 +17,9 @@ offline against stand-ins (tests/) before any token is spent.
 
 import os
 import re
+import threading
 import time
+import weakref
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -184,13 +186,14 @@ def _metered():
     return _METERED
 
 
-def embed_model():
+def embed_model(key=None):
     """Gemini, as chapter 4 uses it. LlamaIndex's integration sends RETRIEVAL_DOCUMENT for what goes into
     the index and RETRIEVAL_QUERY for a question -- the distinction chapter 4 measured -- but its default
-    model is a preview one, so the model and the size are pinned."""
+    model is a preview one, so the model and the size are pinned. `key`: a Gemini key other than the owner's
+    (an API caller's own); any key gives the same vectors from the same model, so it searches the same index."""
     from google.genai import types
     from llama_index.embeddings.google_genai import GoogleGenAIEmbedding
-    return GoogleGenAIEmbedding(model_name=EMBED_MODEL, api_key=os.environ["GEMINI_API_KEY"],
+    return GoogleGenAIEmbedding(model_name=EMBED_MODEL, api_key=key or os.environ["GEMINI_API_KEY"],
                                 embedding_config=types.EmbedContentConfig(output_dimensionality=EMBED_DIM),
                                 embed_batch_size=50, retries=8, retry_max_seconds=65)
 
@@ -301,6 +304,75 @@ def refresh(index, documents, path=INDEX_DIR, every=10, log=print):
 # the corpus and the embedding model.
 FLOOR = 0.66
 
+_BM25 = weakref.WeakKeyDictionary()    # index -> {top_k: its BM25 retriever}
+_BM25_LOCK = threading.Lock()
+
+
+def bm25(index, top_k):
+    """The keyword search over an index's chunks, built once per index and shared. Built for every question, it took
+    ~390 ms of CPU each time (measured: 80% of a question's work besides waiting on the models), and under load the
+    questions queued behind each other's builds. It only reads once built, so questions at once can share it. Kept
+    for the exact set of chunks it was built from: `refresh()` changes an index in place, and gets a new one."""
+    from llama_index.retrievers.bm25 import BM25Retriever
+    chunks = hash(frozenset(index.index_struct.nodes_dict))
+    with _BM25_LOCK:
+        built = _BM25.setdefault(index, {})
+        if (chunks, top_k) not in built:
+            built[(chunks, top_k)] = BM25Retriever.from_defaults(docstore=index.docstore, similarity_top_k=top_k)
+        return built[(chunks, top_k)]
+
+
+_VECTORS = weakref.WeakKeyDictionary()     # index -> (its chunks, their ids, the matrix of their vectors, its norms)
+
+
+def vectors(index):
+    """An index's stored vectors as one matrix, kept between questions. LlamaIndex's in-memory store turns its
+    1,015 stored vectors (lists) into a numpy array on every query and compares them one at a time in Python: 45 ms
+    of CPU a question (profiled: 35 ms the conversion, 14 ms the loop), the largest part of a question's work left
+    once BM25 was shared. Kept for the exact set of chunks it was made from, as `bm25` is."""
+    import numpy as np
+    stored = index.vector_store.data.embedding_dict
+    chunks = hash(frozenset(stored))
+    with _BM25_LOCK:
+        kept = _VECTORS.get(index)
+        if kept is None or kept[0] != chunks:
+            ids = list(stored)
+            matrix = np.asarray([stored[i] for i in ids], dtype=float)
+            kept = _VECTORS[index] = (chunks, ids, matrix, np.linalg.norm(matrix, axis=1))
+        return kept[1:]
+
+
+def nearest(retriever, query_bundle, top_k):
+    """The vector search on `vectors()`: LlamaIndex's cosine (a dot product over the product of the norms), all
+    1,015 at once, and its own way of turning ids into passages -- so the same passages, in the same order, with the
+    same scores (tests/test_api.py compares them)."""
+    import numpy as np
+    from llama_index.core.vector_stores.types import VectorStoreQueryResult
+    ids, matrix, norms = vectors(retriever._index)
+    query = np.asarray(query_bundle.embedding, dtype=float)
+    scores = matrix @ query / (norms * np.linalg.norm(query))
+    top = np.argsort(-scores, kind="stable")[:top_k]
+    result = VectorStoreQueryResult(ids=[ids[i] for i in top], similarities=[float(scores[i]) for i in top])
+    # from here, VectorIndexRetriever._get_nodes_with_embeddings' own steps: the passages from the docstore
+    missing = retriever._determine_nodes_to_fetch(result)
+    if missing:
+        fetched = retriever._docstore.get_nodes(node_ids=missing, raise_error=False)
+        result.nodes = retriever._insert_fetched_nodes_into_query_result(result, fetched)
+    return retriever._convert_nodes_to_scored_nodes(result)
+
+
+class _Found(BaseRetriever):
+    """What the vector search already found, handed to the fusion as one of its two searches. The fusion used to run
+    the vector search again itself -- twice a question, 45 ms of CPU each (measured), and under load the questions
+    queued behind it."""
+
+    def __init__(self):
+        self.nodes = []
+        super().__init__()
+
+    def _retrieve(self, query_bundle):
+        return self.nodes
+
 
 class CookbookRetriever(BaseRetriever):
     """Vector search and BM25, fused by reciprocal rank -- behind a floor on the vector search.
@@ -308,31 +380,59 @@ class CookbookRetriever(BaseRetriever):
     Fusion turns scores into ranks, so after it there is no similarity left to set a floor on: a question
     about the capital of Australia still gets five "best" passages. The floor is applied first, on the
     vector search's raw cosine, as chapter 4's `Recall` does: if nothing in the cookbook is near the
-    question, no passages are returned and no answer is written. The question is embedded once; the vector
-    retriever stores the embedding on the query, and the fused search reuses it.
+    question, no passages are returned and no answer is written. The question is embedded once and searched
+    once: the fusion is given what that search found (`_Found`), and BM25's own results beside it.
 
-    BM25 is built from the index's chunks when this is made, so make a new one after a refresh.
+    BM25 is built from the index's chunks once, and shared by every retriever over the same chunks (`bm25`).
+
+    `embed`: the embedding model questions are embedded with, if not the index's own -- the same model on another
+    key (an API caller's). `_aretrieve` is the same search for asyncio: without it, LlamaIndex's async path calls
+    `_retrieve`, and the Gemini request blocks the event loop -- every other request on the server waits on it.
     """
 
-    def __init__(self, index, llm, k=5, floor="default"):
+    def __init__(self, index, llm, k=5, floor="default", embed=None):
         from llama_index.core.retrievers import QueryFusionRetriever
-        from llama_index.retrievers.bm25 import BM25Retriever
-        self.vector = index.as_retriever(similarity_top_k=2 * k)
-        self.bm25 = BM25Retriever.from_defaults(docstore=index.docstore, similarity_top_k=2 * k)
+        self.vector = index.as_retriever(similarity_top_k=2 * k, **({"embed_model": embed} if embed else {}))
+        self.bm25 = bm25(index, 2 * k)
+        self.found = _Found()
         # num_queries=1: fuse the two searches of the question as asked, without an LLM writing variants.
         # The LLM is still passed: QueryFusionRetriever otherwise reaches for LlamaIndex's global default
-        self.fused = QueryFusionRetriever([self.vector, self.bm25], llm=llm, num_queries=1,
+        self.fused = QueryFusionRetriever([self.found, self.bm25], llm=llm, num_queries=1,
                                           mode="reciprocal_rerank", similarity_top_k=k, use_async=False)
         self.floor = FLOOR if floor == "default" else floor
         self.best = None
         super().__init__()
 
+    def _near(self, query_bundle):
+        """The vector search, on the matrix kept between questions (`nearest`) when the index is in memory."""
+        if not hasattr(self.vector._index.vector_store, "data"):
+            return self.vector.retrieve(query_bundle)
+        return nearest(self.vector, query_bundle, self.vector._similarity_top_k)
+
     def _retrieve(self, query_bundle):
-        near = self.vector.retrieve(query_bundle)
+        if query_bundle.embedding is None and query_bundle.embedding_strs:
+            query_bundle.embedding = self.vector._embed_model.get_agg_embedding_from_queries(
+                query_bundle.embedding_strs)
+        near = self._near(query_bundle)
         self.best = near[0].score if near else None
         if self.floor is not None and (self.best is None or self.best < self.floor):
             return []
+        self.found.nodes = near
         return self.fused.retrieve(query_bundle)
+
+    async def _aretrieve(self, query_bundle):
+        # LlamaIndex's sync vector search keeps the question's embedding on the query; its async one makes it and
+        # drops it, and with the fusion searching again every question cost two Gemini embeddings (counted offline).
+        # Made here, once, and kept on the query as the sync path does
+        if query_bundle.embedding is None and query_bundle.embedding_strs:
+            query_bundle.embedding = await self.vector._embed_model.aget_agg_embedding_from_queries(
+                query_bundle.embedding_strs)
+        near = self._near(query_bundle)                 # no waiting in it: the embedding is made
+        self.best = near[0].score if near else None
+        if self.floor is not None and (self.best is None or self.best < self.floor):
+            return []
+        self.found.nodes = near
+        return await self.fused.aretrieve(query_bundle)
 
 
 def label(node):
@@ -347,12 +447,12 @@ def label(node):
 NOT_COVERED = "The cookbook does not cover that."
 
 
-def engine(index, llm, k=5, floor="default"):
+def engine(index, llm, k=5, floor="default", embed=None):
     """LlamaIndex's `CitationQueryEngine` over the cookbook retriever: sources are numbered, and the answer
     cites them as [1], [2]. It re-cuts each retrieved passage into citation-sized pieces first, so code
     chunks get a citation size large enough to keep a function whole."""
     from llama_index.core.query_engine import CitationQueryEngine
-    return CitationQueryEngine.from_args(index, retriever=CookbookRetriever(index, llm, k=k, floor=floor),
+    return CitationQueryEngine.from_args(index, retriever=CookbookRetriever(index, llm, k=k, floor=floor, embed=embed),
                                          llm=llm, citation_chunk_size=1024, citation_chunk_overlap=0)
 
 
@@ -464,15 +564,16 @@ def near_duplicate(query, earlier):
     return None
 
 
-def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None):
+def tool_functions(index, llm, k=SEARCH_K, floor=None, wrap=None, embed=None):
     """The agent's two tools as plain functions: LlamaIndex's agent and the scratch agent both get these.
-    `wrap`, if given, is applied to each (07_langsmith passes LangSmith's `traceable`).
+    `wrap`, if given, is applied to each (07_langsmith passes LangSmith's `traceable`). `embed`: as for
+    `CookbookRetriever`, the searches' embedding model if not the index's own.
 
     No floor by default. The floor is for the one-shot engine, which must turn away a question nothing is near;
     an agent searching step by step judges relevance itself, and a floor on meaning alone turns away an exact
     name: "double_send" scored 0.644 and came back empty, where BM25 would have matched it.
     """
-    retriever = CookbookRetriever(index, llm, k=k, floor=floor)
+    retriever = CookbookRetriever(index, llm, k=k, floor=floor, embed=embed)
     readable = {p.relative_to(CB.REPO).as_posix(): p for p in CB.files()}
 
     # Chapter 2's doom-loop rule, which LlamaIndex's FunctionAgent has no equivalent of: the same call with

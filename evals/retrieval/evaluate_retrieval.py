@@ -62,7 +62,8 @@ def evaluate(index=None, k=K):
     means = {}
     for name, subset in (("all", rows), ("rag", [r for r in rows if r["kind"] == "rag"]),
                          ("agentic", [r for r in rows if r["kind"] == "agentic"])):
-        means[name] = {m: round(M.mean(subset, m), 4) for m in METRICS} | {"questions": len(subset)}
+        # recall_best is not gated: it depends on the golden set alone, not on the search
+        means[name] = {m: round(M.mean(subset, m), 4) for m in (*METRICS, "recall_best")} | {"questions": len(subset)}
     return {"k": k, "index_commit": golden["index_commit"], "means": means, "questions": rows}
 
 
@@ -82,7 +83,7 @@ def table(report):
     lines = [f"k={report['k']}, index {report['index_commit']}"]
     for subset, m in report["means"].items():
         lines.append(f"  {subset:8} ({m['questions']:2})  P@{report['k']} {m['precision']:.3f}  "
-                     f"R@{report['k']} {m['recall']:.3f}  MRR {m['mrr']:.3f}  NDCG@{report['k']} {m['ndcg']:.3f}")
+                     f"R@{report['k']} {m['recall']:.3f} (best possible {m['recall_best']:.3f})  MRR {m['mrr']:.3f}  NDCG@{report['k']} {m['ndcg']:.3f}")
     for r in report["questions"]:
         recall = "  -  " if r["recall"] is None else f"{r['recall']:.2f}"
         lines.append(f"  {r['id']:4} {r['kind']:8} gains {r['gains']}  P {r['precision']:.2f}  R {recall}  "

@@ -12,7 +12,8 @@ passages cut from one golden one do not both score -- and each retrieved passage
     gains       the grade each retrieved passage earned, in rank order: [3, 0, 1, 0, 2]
     relevant    grade 1 and up: Precision@K and MRR count a passage that helps at all
     needed      grade 2 and up: Recall@K counts what an answer cannot do without. Over every relevant passage a
-                question with 35 of them could never pass 5/35 in five places, and the number would say nothing
+                question with 35 of them could never pass 5/35 in five places, and the number would say nothing.
+                Even over needed ones, k places cap it: `best_recall_at_k` is that cap, reported beside it
     NDCG@K      every grade, as gain 2**grade - 1, against the best ordering the golden set allows
 """
 
@@ -65,6 +66,13 @@ def recall_at_k(gains_, grades, k, min_grade=2):
     return sum(g >= min_grade for g in gains_[:k]) / wanted
 
 
+def best_recall_at_k(grades, k, min_grade=2):
+    """The most Recall@K a perfect search could reach: k places hold at most k of the needed passages, so a question
+    with 16 of them tops out at 5/16. Read beside recall, so that a capped number is not taken for a poor one."""
+    wanted = sum(g >= min_grade for g in grades)
+    return min(k, wanted) / wanted if wanted else None
+
+
 def reciprocal_rank(gains_, min_grade=1):
     """1 / the place of the first relevant passage; 0 when there is none."""
     return next((1 / place for place, g in enumerate(gains_, 1) if g >= min_grade), 0.0)
@@ -87,6 +95,7 @@ def score(retrieved, golden, k=5, min_jaccard=0.5):
     return {"gains": earned,
             "precision": precision_at_k(earned, k),
             "recall": recall_at_k(earned, grades, k),
+            "recall_best": best_recall_at_k(grades, k),
             "mrr": reciprocal_rank(earned),
             "ndcg": ndcg_at_k(earned, grades, k)}
 

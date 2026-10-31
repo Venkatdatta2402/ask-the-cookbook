@@ -52,6 +52,12 @@ def test_recall_counts_needed_passages_only():
     assert M.recall_at_k([3, 3, 2, 0, 0, 3], grades, 5) == 1         # the sixth place is past k
 
 
+def test_best_possible_recall_is_capped_by_the_places():
+    assert M.best_recall_at_k([3] * 16 + [1] * 19, 5) == pytest.approx(5 / 16)    # grade 1 does not count
+    assert M.best_recall_at_k([3, 2, 1], 5) == 1
+    assert M.best_recall_at_k([1, 1], 5) is None
+
+
 def test_reciprocal_rank_is_one_over_the_first_relevant_place():
     assert M.reciprocal_rank([0, 0, 2, 3]) == pytest.approx(1 / 3)
     assert M.reciprocal_rank([1]) == 1
@@ -77,7 +83,7 @@ def test_ndcg_only_counts_the_first_k_places():
 
 def test_score_puts_it_together():
     out = M.score([(A, (1, 86)), (B, (1, 13))], [(A, (1, 86), 3), (B, (77, 84), 2)], k=2)
-    assert out == {"gains": [3, 0], "precision": 0.5, "recall": 0.5, "mrr": 1.0,
+    assert out == {"gains": [3, 0], "precision": 0.5, "recall": 0.5, "recall_best": 1.0, "mrr": 1.0,
                    "ndcg": pytest.approx(7 / (7 + 3 / math.log2(3)))}
 
 

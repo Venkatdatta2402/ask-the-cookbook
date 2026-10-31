@@ -1,0 +1,766 @@
+{
+ "about": "A hand check of every claim in the 23 RAG answers of answers_2026-10-30.jsonl, as the judge extracted them: each read against the passages the answer was given (as the model saw them) and the reference points' evidence lines, with the judge's marks hidden until all 182 were done. Checked by Claude (Opus 5.5) on the owner's behalf, 2026-10-31.",
+ "marks": {
+  "right": "correct, and every part of it is in the passages",
+  "imprecise": "correct in substance, worded loosely: the wrong actor or source, or a narrower/looser phrasing",
+  "addition": "a part no passage states: a wider scope, a different number, an added reason or cost",
+  "wrong": "contradicts the cookbook"
+ },
+ "should be flagged": [
+  "Q4#6",
+  "Q2#1",
+  "Q16#7",
+  "Q19#2",
+  "Q20#3",
+  "Q1#1",
+  "Q7#5",
+  "Q14#3"
+ ],
+ "either way": [
+  "Q27#10",
+  "Q29#5"
+ ],
+ "contradicted": [
+  "Q4#6"
+ ],
+ "claims": {
+  "Q1#1": {
+   "claim": "`extract()` initially attempts to let the model enforce the JSON schema.",
+   "mark": "imprecise",
+   "note": "Credits the wrong thing: the API enforces the schema, not the model."
+  },
+  "Q1#2": {
+   "claim": "That alone does not guarantee a correct answer.",
+   "mark": "right"
+  },
+  "Q1#3": {
+   "claim": "A JSON schema only checks required fields and types, not value semantics.",
+   "mark": "right"
+  },
+  "Q1#4": {
+   "claim": "Even with schema enforcement, the model can return nonsense that is schema‑valid.",
+   "mark": "right"
+  },
+  "Q1#5": {
+   "claim": "`extract()` falls back to plain JSON and uses Pydantic validation when models cannot enforce schemas.",
+   "mark": "right"
+  },
+  "Q1#6": {
+   "claim": "The validation step supplies an error message to the model for retry, ensuring shape and sense.",
+   "mark": "right"
+  },
+  "Q1#7": {
+   "claim": "Validation is kept as a second line of defence to catch semantic errors, handle unsupported schema enforcement, and give feedback for retries.",
+   "mark": "right"
+  },
+  "Q2#1": {
+   "claim": "A doom‑loop is any pattern that shows the agent is stuck repeating the same work without making progress.",
+   "mark": "addition",
+   "note": "Wider than the cookbook: 'any pattern' of repeated work, where the passages give four specific checks."
+  },
+  "Q2#2": {
+   "claim": "The runtime’s `_doom_loop` routine flags a loop when it sees one of the following situations.",
+   "mark": "right"
+  },
+  "Q2#3": {
+   "claim": "Exact repeat of a tool call – the same tool is invoked with identical arguments on consecutive turns.",
+   "mark": "right"
+  },
+  "Q2#4": {
+   "claim": "Repeated error – the same error message is returned by a tool on two successive calls.",
+   "mark": "right"
+  },
+  "Q2#5": {
+   "claim": "Oscillation – the conversation alternates between two different tool calls in a 4‑step window (e.g., A‑B‑A‑B).",
+   "mark": "right"
+  },
+  "Q2#6": {
+   "claim": "Repeated result with similar arguments – the same tool is asked a very similar question and returns the same result (a “same‑result” repeat).",
+   "mark": "right"
+  },
+  "Q2#7": {
+   "claim": "When any of these conditions is met, the outer `Runtime` does not simply abort.",
+   "mark": "right"
+  },
+  "Q2#8": {
+   "claim": "Instead it triggers a graceful stop: the current `Think` component gets one final turn without invoking any tools, and then it produces a response that summarizes what it could gather and explains what it could not find.",
+   "mark": "right"
+  },
+  "Q3#1": {
+   "claim": "A refused tool is one that actually ran, examined the request, and decided it cannot fulfil it – it raises a ToolError.",
+   "mark": "right"
+  },
+  "Q3#2": {
+   "claim": "The error message usually contains a reason or a suggestion (e.g., “No weather station for Vestby. Try a larger nearby city.”).",
+   "mark": "right"
+  },
+  "Q3#3": {
+   "claim": "Because the tool itself knows why it refused, the model is allowed to see that information and can act on it (try a different city, change the query, etc.).",
+   "mark": "right"
+  },
+  "Q3#4": {
+   "claim": "A broken tool failed because of an internal bug – a missing key, a bad import, an unexpected exception, etc.",
+   "mark": "right"
+  },
+  "Q3#5": {
+   "claim": "It does not raise ToolError; any other exception is treated as “broken”.",
+   "mark": "right"
+  },
+  "Q3#6": {
+   "claim": "Since the problem is in the tool’s implementation and the model cannot fix it, the details are hidden from the model.",
+   "mark": "right"
+  },
+  "Q3#7": {
+   "claim": "The conversation only receives a generic notice that the tool could not be completed, while the real error is left for the developer to inspect.",
+   "mark": "right"
+  },
+  "Q3#8": {
+   "claim": "Refused – tool ran, says “no” with a reason; the model sees the refusal message.",
+   "mark": "right"
+  },
+  "Q3#9": {
+   "claim": "Broken – tool crashed due to a bug; the model does not see the underlying error details.",
+   "mark": "right"
+  },
+  "Q4#1": {
+   "claim": "Recall is placed in the loop as an injection, while remembering is exposed as a tool.",
+   "mark": "right"
+  },
+  "Q4#2": {
+   "claim": "`Retrieve` runs before `Think` on every turn and automatically prepends relevant memories to the prompt.",
+   "mark": "right"
+  },
+  "Q4#3": {
+   "claim": "This guarantees the model has the information available when it formulates its answer, even if the question does not explicitly sound like a memory lookup.",
+   "mark": "right"
+  },
+  "Q4#4": {
+   "claim": "Experiments showed that offering recall as a tool led to missed look‑ups; the model consulted memory in only four of five questions, and the fifth was answered from general knowledge despite the journal containing the answer.",
+   "mark": "right"
+  },
+  "Q4#5": {
+   "claim": "Injecting the recall step prevents the agent from needing to remember to ask for it and avoids the failure mode of a fluent answer that consulted nothing.",
+   "mark": "right"
+  },
+  "Q4#6": {
+   "claim": "Storing a memory costs essentially nothing, but judging whether information is worth persisting is a decision the model is good at.",
+   "mark": "wrong",
+   "note": "Reverses the cookbook: the answer says storing a memory costs nothing; the cookbook says NOT writing something down costs nothing (04_memory/memory_tools.py, README 'Recall is injected')."
+  },
+  "Q4#7": {
+   "claim": "`remember` is implemented as a tool that the model calls when it thinks the content should outlive the session.",
+   "mark": "right"
+  },
+  "Q4#8": {
+   "claim": "The runtime does not change – memory arrives as a tool whose signature the model sees, and the closure over the journal supplies the store handle.",
+   "mark": "right"
+  },
+  "Q4#9": {
+   "claim": "This keeps the write path under the model’s control while the read path is automatically provided.",
+   "mark": "right"
+  },
+  "Q4#10": {
+   "claim": "Recall is injected to ensure relevant memories are always presented before the model thinks, avoiding silent un‑grounded answers.",
+   "mark": "right"
+  },
+  "Q4#11": {
+   "claim": "Remembering is left as a tool so the model can deliberately choose when to write to memory.",
+   "mark": "right"
+  },
+  "Q5#1": {
+   "claim": "Compaction leaves pinned items untouched.",
+   "mark": "right"
+  },
+  "Q5#2": {
+   "claim": "Pinned items must stay exactly as‑is because a summarizer would paraphrase a rule.",
+   "mark": "right"
+  },
+  "Q5#3": {
+   "claim": "Compaction leaves task‑state items untouched.",
+   "mark": "right"
+  },
+  "Q5#4": {
+   "claim": "Summarising task‑state items would lose step numbers or other essential structure.",
+   "mark": "right"
+  },
+  "Q5#5": {
+   "claim": "Compaction leaves the most recent turns untouched (last `keep_recent` turns, default 6).",
+   "mark": "right"
+  },
+  "Q5#6": {
+   "claim": "The most recent turns are kept unchanged because the next step will likely build on them verbatim.",
+   "mark": "right"
+  },
+  "Q5#7": {
+   "claim": "Compaction leaves anything not originated from the run untouched.",
+   "mark": "right"
+  },
+  "Q5#8": {
+   "claim": "Items not originated from the run should not be compressed because they are already summaries or reference material and not part of the run’s evolving conversation.",
+   "mark": "right"
+  },
+  "Q5#9": {
+   "claim": "`compact()` only compresses older conversational content.",
+   "mark": "right"
+  },
+  "Q5#10": {
+   "claim": "`compact()` never alters pinned rules, task‑state information, the latest few turns, or external reference items.",
+   "mark": "right"
+  },
+  "Q5#11": {
+   "claim": "Altering those items would change their meaning, lose essential context, or discard already‑summarised data.",
+   "mark": "right"
+  },
+  "Q6#1": {
+   "claim": "Delegation keeps the original agent in charge.",
+   "mark": "right"
+  },
+  "Q6#2": {
+   "claim": "The supervising agent receives the user’s message, calls a specialist to get an answer, and then rewrites or forwards that answer back to the user.",
+   "mark": "right"
+  },
+  "Q6#3": {
+   "claim": "Every turn still passes through the supervisor, so the specialist only sees the request that the supervisor formulates and never talks to the user directly.",
+   "mark": "right"
+  },
+  "Q6#4": {
+   "claim": "Handoff (or transfer) moves the ownership of the chat to the specialist.",
+   "mark": "right"
+  },
+  "Q6#5": {
+   "claim": "When the current agent calls a `transfer_to_<name>` tool, its loop is stopped via the runtime’s `cancel` hook and the new agent becomes the active owner, speaking to the user on the same turn.",
+   "mark": "right"
+  },
+  "Q6#6": {
+   "claim": "The new agent sees the entire transcript so far and answers in its own voice, eliminating the extra “relay” step.",
+   "mark": "right"
+  },
+  "Q6#7": {
+   "claim": "In practice the handoff was measured to be about 2.5 × cheaper in token usage than delegation",
+   "mark": "right"
+  },
+  "Q6#8": {
+   "claim": "and avoids the risk of the supervisor inventing or mis‑summarising information",
+   "mark": "right"
+  },
+  "Q6#9": {
+   "claim": "delegation is “ask‑and‑relay” while a handoff is “pass‑the‑conversation‑to‑the‑next‑agent”.",
+   "mark": "right"
+  },
+  "Q7#1": {
+   "claim": "Running an MCP server in its own process does not sandbox it.",
+   "mark": "right"
+  },
+  "Q7#2": {
+   "claim": "The server is launched as a separate program, but it inherits the parent’s environment (including any API‑key variables) and therefore has the same authority as the notebook that started it.",
+   "mark": "right"
+  },
+  "Q7#3": {
+   "claim": "As the documentation notes, “a stdio server starts with your authority: it can read your credentials, open your files and reach the network as you” and “its separateness bought isolation of failures, not isolation of authority”.",
+   "mark": "right"
+  },
+  "Q7#4": {
+   "claim": "Unless you explicitly limit the child’s environment (e.g., using `inherit=False`), the MCP server can read your API keys.",
+   "mark": "right"
+  },
+  "Q7#5": {
+   "claim": "The SDK ships an allow‑list of safe environment variables and warns that overriding it with `env={**os.environ}` leaks secrets.",
+   "mark": "imprecise",
+   "note": "Credits the wrong source: the README warns about env={**os.environ}; the SDK does not."
+  },
+  "Q12#1": {
+   "claim": "`TaskGroup` is safer than `asyncio.gather` because a failure inside a `TaskGroup` cancels all of its sibling tasks immediately, so no extra work continues after an error.",
+   "mark": "right"
+  },
+  "Q12#2": {
+   "claim": "With `gather`, the exception is raised as soon as it occurs, but the other coroutines keep running in the background and waste resources — they finish later even though the caller has already moved on.",
+   "mark": "right"
+  },
+  "Q12#3": {
+   "claim": "You can wrap the work in an `asyncio.Semaphore` to keep the number of concurrent operations under control.",
+   "mark": "right"
+  },
+  "Q12#4": {
+   "claim": "`Semaphore(n)` caps the number of tasks that may be *in progress* at any moment; additional tasks wait until a slot is released.",
+   "mark": "right"
+  },
+  "Q12#5": {
+   "claim": "With a limit of 2, the first two tasks start right away while the others wait, ensuring at most two run simultaneously.",
+   "mark": "right"
+  },
+  "Q13#1": {
+   "claim": "The API rejects the call – e.g., the requested tool doesn’t exist.",
+   "mark": "right"
+  },
+  "Q13#2": {
+   "claim": "This rejection is caught by the server‑side check performed by Groq.",
+   "mark": "right"
+  },
+  "Q13#3": {
+   "claim": "The arguments are invalid for the domain – e.g., a value that must not be zero.",
+   "mark": "right"
+  },
+  "Q13#4": {
+   "claim": "These bad arguments are caught by the Pydantic type system and its `field_validator`s.",
+   "mark": "right"
+  },
+  "Q13#5": {
+   "claim": "These two failure modes are described in the foundations notes",
+   "mark": "right"
+  },
+  "Q14#1": {
+   "claim": "ReWOO and the LLM Compiler share the same planner‑and‑workers architecture",
+   "mark": "right"
+  },
+  "Q14#2": {
+   "claim": "they differ in the third role that follows the graph execution",
+   "mark": "right"
+  },
+  "Q14#3": {
+   "claim": "ReWOO uses a solver – a plain Think that receives only the evidence gathered by the graph and must produce the final answer",
+   "mark": "imprecise",
+   "note": "Narrower than the passage: the solver reads 'the plan and the evidence', not only the evidence."
+  },
+  "Q14#4": {
+   "claim": "the solver cannot request additional work",
+   "mark": "right"
+  },
+  "Q14#5": {
+   "claim": "the run always ends after this single answer step",
+   "mark": "right"
+  },
+  "Q14#6": {
+   "claim": "ReWOO terminates by construction",
+   "mark": "right"
+  },
+  "Q14#7": {
+   "claim": "ReWOO never replans",
+   "mark": "right"
+  },
+  "Q14#8": {
+   "claim": "LLM Compiler replaces the solver with a joiner (PlannerThink running ContinueOrFinish)",
+   "mark": "right"
+  },
+  "Q14#9": {
+   "claim": "the joiner component is allowed to say “not done, here are more steps”",
+   "mark": "right"
+  },
+  "Q14#10": {
+   "claim": "this sends the execution back into the loop for another round of planning and execution",
+   "mark": "right"
+  },
+  "Q14#11": {
+   "claim": "LLM Compiler can re‑plan or continue work when the first pass is insufficient",
+   "mark": "right"
+  },
+  "Q14#12": {
+   "claim": "ReWOO is the LLM Compiler with the loop‑back removed",
+   "mark": "right"
+  },
+  "Q14#13": {
+   "claim": "ReWOO plans exact tool calls up‑front",
+   "mark": "right"
+  },
+  "Q14#14": {
+   "claim": "ReWOO runs them and then answers once",
+   "mark": "right"
+  },
+  "Q14#15": {
+   "claim": "LLM Compiler can observe the results",
+   "mark": "right"
+  },
+  "Q14#16": {
+   "claim": "LLM Compiler can decide to continue",
+   "mark": "right"
+  },
+  "Q14#17": {
+   "claim": "LLM Compiler can iterate",
+   "mark": "right"
+  },
+  "Q15#1": {
+   "claim": "Observe exists to keep the raw output of a tool out of the conversation’s message history and to turn that huge, unstructured payload into a single, concise observation that the agent can read.",
+   "mark": "right"
+  },
+  "Q15#2": {
+   "claim": "Raw tool results can be thousands of tokens of JSON, so they are stored in `conversation.pending` and Observe creates a short factual sentence for the conversation instead of appending the whole payload — this saves context‑window space and prevents the agent from repeatedly re‑reading massive data on every turn.",
+   "mark": "right"
+  },
+  "Q15#3": {
+   "claim": "Observe is explicitly instructed never to change the value at all.",
+   "mark": "right"
+  },
+  "Q15#4": {
+   "claim": "It must copy the value exactly as the tool returned it.",
+   "mark": "right"
+  },
+  "Q15#5": {
+   "claim": "It must preserve the original units and formatting.",
+   "mark": "right"
+  },
+  "Q15#6": {
+   "claim": "It must not convert the value.",
+   "mark": "right"
+  },
+  "Q15#7": {
+   "claim": "It must not calculate the value.",
+   "mark": "right"
+  },
+  "Q15#8": {
+   "claim": "It must not round the value.",
+   "mark": "right"
+  },
+  "Q15#9": {
+   "claim": "It must not combine the value.",
+   "mark": "right"
+  },
+  "Q15#10": {
+   "claim": "It must not re‑format anything.",
+   "mark": "right"
+  },
+  "Q15#11": {
+   "claim": "It must not do this even if the surrounding conversation asks for a different representation.",
+   "mark": "right"
+  },
+  "Q16#1": {
+   "claim": "Graph and forking use ThreadPoolExecutor instead of asyncio.gather",
+   "mark": "right"
+  },
+  "Q16#2": {
+   "claim": "Jupyter notebooks already have an active asyncio event loop",
+   "mark": "right"
+  },
+  "Q16#3": {
+   "claim": "Starting another event loop would clash with the existing one and make debugging painful",
+   "mark": "right"
+  },
+  "Q16#4": {
+   "claim": "Using threads sidesteps the event-loop conflict entirely",
+   "mark": "right"
+  },
+  "Q16#5": {
+   "claim": "Graph and forking perform blocking network I/O",
+   "mark": "right"
+  },
+  "Q16#6": {
+   "claim": "When a thread waits, the GIL is released, so it doesn't consume CPU",
+   "mark": "right"
+  },
+  "Q16#7": {
+   "claim": "For I/O‑bound tasks, threads give the same benefit as coroutines without async complexity",
+   "mark": "addition",
+   "note": "Adds a reason no passage gives: 'without the extra complexity of async code'."
+  },
+  "Q17#1": {
+   "claim": "Chapter 3 adds a per-call timeout because the global Runtime budget is only checked between components",
+   "mark": "right"
+  },
+  "Q17#2": {
+   "claim": "If a tool hangs in the Act step, the runtime cannot notice the time limit and the agent may be blocked forever",
+   "mark": "right"
+  },
+  "Q17#3": {
+   "claim": "Wrapping each tool call in invoke(timeout=…) lets the system regain control as soon as the timeout expires, even if work continues elsewhere",
+   "mark": "right"
+  },
+  "Q17#4": {
+   "claim": "Retrying after a timeout is unsafe for non‑repeatable tools such as payments or irreversible side‑effects",
+   "mark": "right"
+  },
+  "Q17#5": {
+   "claim": "Client‑side timeout only stops the caller; the tool keeps running on the server, so a retry could cause duplicate execution",
+   "mark": "right"
+  },
+  "Q17#6": {
+   "claim": "Result.safe_to_retry (or MCP “no‑stop‑in‑flight” rule) marks non‑repeatable tools as unsafe to retry after a timeout",
+   "mark": "right"
+  },
+  "Q18#1": {
+   "claim": "`verified()` works by wrapping the original tool and adding a post‑run check that looks at the real world instead of trusting the tool’s own reply.",
+   "mark": "right"
+  },
+  "Q18#2": {
+   "claim": "It makes a shallow copy of the tool and replaces its `function` with a new `call` that first executes the original tool (`value = tool.function(**kwargs)`).",
+   "mark": "right"
+  },
+  "Q18#3": {
+   "claim": "After the tool runs, it invokes a user‑supplied `check(kwargs, value)` that inspects the arguments and the current state of the world (for example, reading back the saved note).",
+   "mark": "right"
+  },
+  "Q18#4": {
+   "claim": "If the check discovers a discrepancy – i.e., the tool said it succeeded but the world shows it didn’t – the check returns a message and `verified()` raises a `VerificationError`.",
+   "mark": "right"
+  },
+  "Q18#5": {
+   "claim": "The wrapper therefore turns the mismatch into an “unverified” result rather than silently accepting the tool’s claim.",
+   "mark": "right"
+  },
+  "Q18#6": {
+   "claim": "In practice this lets an agent notice that a note‑saving tool truncated a 110‑character note to 60 characters: the tool returns “Saved …”, but the check that reads the note back sees only 60 characters and raises the error, exposing the false success.",
+   "mark": "right"
+  },
+  "Q19#1": {
+   "claim": "Cosine similarity only varies by about 0.12 across the candidate set",
+   "mark": "right"
+  },
+  "Q19#2": {
+   "claim": "the activation (recency) term varies by roughly 0.8 – 0.9",
+   "mark": "addition",
+   "note": "A different number: '0.8 to 0.9', where the passages say 0.816 / 'nearly 0.8'."
+  },
+  "Q19#3": {
+   "claim": "When the raw values are simply multiplied by 0.5, the activation term ends up contributing the bulk of the decision (about seven‑eighths), so the split is far from even",
+   "mark": "right"
+  },
+  "Q19#4": {
+   "claim": "Cosine moves across a range of about 0.12",
+   "mark": "right"
+  },
+  "Q19#5": {
+   "claim": "Activation moves across nearly 0.8",
+   "mark": "right"
+  },
+  "Q19#6": {
+   "claim": "a weight of 0.5 on similarity is essentially decoration",
+   "mark": "right"
+  },
+  "Q19#7": {
+   "claim": "Min‑max normalise each term across the surviving candidates (scale the smallest value to 0 and the largest to 1)",
+   "mark": "right"
+  },
+  "Q19#8": {
+   "claim": "After this rescaling, a weight truly represents its share of the decision",
+   "mark": "right"
+  },
+  "Q19#9": {
+   "claim": "Apply a floor on the raw similarity before any normalisation so that unanswerable queries can be filtered out; the floor must run on the original similarity because normalising would erase the information needed to distinguish answerable from unanswerable cases",
+   "mark": "right"
+  },
+  "Q20#1": {
+   "claim": "Most of the facts an agent needs to recall are exact, name‑based values (e.g., a user’s timezone, a preferred language, a project root).",
+   "mark": "right"
+  },
+  "Q20#2": {
+   "claim": "Simple key‑value store returns the precise answer instantly and is best for those queries.",
+   "mark": "right"
+  },
+  "Q20#3": {
+   "claim": "A vector index returns approximate matches, which is a downgrade for exact answer questions and adds unnecessary complexity and latency.",
+   "mark": "addition",
+   "note": "Adds a cost no passage gives: 'adds unnecessary complexity and latency'."
+  },
+  "Q20#4": {
+   "claim": "For exact look‑ups, a vector database is the wrong first move.",
+   "mark": "right"
+  },
+  "Q21#1": {
+   "claim": "The write‑path that searches first and then decides “add / update / ignore” is tuned for semantic information.",
+   "mark": "right"
+  },
+  "Q21#2": {
+   "claim": "When a fact changes, the duplicate check sees the same proposition and the update action replaces the old entry with the new one, keeping the store consistent and preventing duplicate storage of the fact.",
+   "mark": "right"
+  },
+  "Q21#3": {
+   "claim": "Episodic memories are events that may be worded almost identically but refer to different points in time.",
+   "mark": "right"
+  },
+  "Q21#4": {
+   "claim": "The duplicate detector only looks at the retrieved text and does not see the distinguishing field (the date column) that indicates separate occurrences.",
+   "mark": "right"
+  },
+  "Q21#5": {
+   "claim": "The write path treats the later entry as a duplicate of the earlier one and updates it, overwriting the first event and erasing that part of the history.",
+   "mark": "right"
+  },
+  "Q21#6": {
+   "claim": "The rule works for facts because an update correctly reflects the current truth, but it destroys episodic memory because similar‑looking events are mistakenly merged, losing each distinct occurrence.",
+   "mark": "right"
+  },
+  "Q22#1": {
+   "claim": "Separating instructions from data reduces prompt‑injection success to essentially zero.",
+   "mark": "right"
+  },
+  "Q22#2": {
+   "claim": "Mixed instructions and data resulted in 11 out of 24 injections (≈46%).",
+   "mark": "right"
+  },
+  "Q22#3": {
+   "claim": "Applying separation mechanisms reduced injections to 0 out of 37.",
+   "mark": "right"
+  },
+  "Q22#4": {
+   "claim": "With only the fence changed, success fell from 7 out of 14 (≈50%) to 0 out of 16.",
+   "mark": "right"
+  },
+  "Q22#5": {
+   "claim": "Labels did not improve security.",
+   "mark": "right"
+  },
+  "Q22#6": {
+   "claim": "Labels changed nothing measurable but added a +36% token overhead.",
+   "mark": "right"
+  },
+  "Q23#1": {
+   "claim": "Selection runs supersede step before relevance scoring because older items are outright wrong",
+   "mark": "right"
+  },
+  "Q23#2": {
+   "claim": "Only the newest version of a given `about` is valid",
+   "mark": "right"
+  },
+  "Q23#3": {
+   "claim": "The previous version should never be presented to the model, even if its text matches the query better",
+   "mark": "right"
+  },
+  "Q23#4": {
+   "claim": "If superseding were left to scoring stage, a stale item could be ranked above the current one",
+   "mark": "right"
+  },
+  "Q23#5": {
+   "claim": "Relevance measures similarity, not truthfulness",
+   "mark": "right"
+  },
+  "Q23#6": {
+   "claim": "This would force the model to disambiguate which fact is up‑to‑date",
+   "mark": "right"
+  },
+  "Q23#7": {
+   "claim": "Removing superseded items up‑front makes the scorer work only on information that is still correct",
+   "mark": "right"
+  },
+  "Q23#8": {
+   "claim": "`keep_last` guarantees that after superseding, the N most recent items are added to the pinned set as “must‑keeps”",
+   "mark": "right"
+  },
+  "Q23#9": {
+   "claim": "Items kept by `keep_last` are kept regardless of their score",
+   "mark": "right"
+  },
+  "Q23#10": {
+   "claim": "If the kept items cannot all fit within the token budget, the selection process refuses (raises an error) instead of silently dropping one",
+   "mark": "right"
+  },
+  "Q23#11": {
+   "claim": "This makes the last N turns reliably available to the model",
+   "mark": "right"
+  },
+  "Q24#1": {
+   "claim": "The change came from adding a rule to the supervisor’s own prompt, not from sharpening the agent descriptions.",
+   "mark": "right"
+  },
+  "Q24#2": {
+   "claim": "In the experiments the sharper descriptions never altered the first‑choice routing (0 of 8 trials).",
+   "mark": "right"
+  },
+  "Q24#3": {
+   "claim": "The rule in the supervisor’s prompt caused the correct routing in every trial (8 of 8).",
+   "mark": "right"
+  },
+  "Q27#1": {
+   "claim": "The repository makes the agent tolerant of a dead MCP server by decoupling the live session from the tools that use it and by adding a dedicated “reconnect” step in the runtime loop.",
+   "mark": "right"
+  },
+  "Q27#2": {
+   "claim": "The session is stored in a mutable `Connection` box that lives on `Conversation.resources` instead of being baked into each tool.",
+   "mark": "right"
+  },
+  "Q27#3": {
+   "claim": "Because the box is a reference, the same tools can keep using it while the underlying session object is swapped out when the server crashes — no tool or registry has to be rebuilt.",
+   "mark": "right"
+  },
+  "Q27#4": {
+   "claim": "A `Reconnect` component is placed in the runtime loop (`Observe → Reconnect → Think → Act → Observe`).",
+   "mark": "right"
+  },
+  "Q27#5": {
+   "claim": "On each iteration it probes the server (using the cheap `tools/list` call, since the protocol’s `ping` always fails) and, if the connection is broken, attempts a limited number of repairs.",
+   "mark": "right"
+  },
+  "Q27#6": {
+   "claim": "Successful repairs are silent: the repair is logged but not sent to the model, because the model cannot act on “we reconnected” and extra context would only distract it.",
+   "mark": "right"
+  },
+  "Q27#7": {
+   "claim": "Only when the repair finally gives up does the component inject a message (“the weather service is unreachable”) that the model can react to.",
+   "mark": "right"
+  },
+  "Q27#8": {
+   "claim": "When the server actually dies, the transport raises an exception that is caught as a “broken” result.",
+   "mark": "right"
+  },
+  "Q27#9": {
+   "claim": "This result is marked `for_the_model = False`, so the model sees only an acknowledgement, while the cause is stored in `Result.value`.",
+   "mark": "right"
+  },
+  "Q27#10": {
+   "claim": "The `Reconnect` step later replaces the dead `Connection` with a fresh one, letting the agent continue.",
+   "mark": "imprecise",
+   "note": "Loose: reconnect() replaces the session inside the Connection box, not the box -- though the cited notebook itself says 'replaces it'."
+  },
+  "Q27#11": {
+   "claim": "The mutable `Connection` resource, the health‑check‑via‑`tools/list`, the bounded repair budget, and the silent‑repair policy keep the agent running even if the MCP server crashes in the middle of a run.",
+   "mark": "right"
+  },
+  "Q28#1": {
+   "claim": "CrewAI is locked to version 0.193.2",
+   "mark": "right"
+  },
+  "Q28#2": {
+   "claim": "Newer CrewAI versions have dependency pins that clash with the repository",
+   "mark": "right"
+  },
+  "Q28#3": {
+   "claim": "CrewAI releases ≥0.201 force chromadb~=1.1",
+   "mark": "right"
+  },
+  "Q28#4": {
+   "claim": "From CrewAI 1.7 also forces mcp~=1.28",
+   "mark": "right"
+  },
+  "Q28#5": {
+   "claim": "Installing those versions would downgrade mcp from 2.2 to 1.28",
+   "mark": "right"
+  },
+  "Q28#6": {
+   "claim": "Downgrading mcp to 1.28 breaks the 07_mcp chapter",
+   "mark": "right"
+  },
+  "Q28#7": {
+   "claim": "Installing those versions would downgrade chromadb from 1.5.9 to 1.1",
+   "mark": "right"
+  },
+  "Q28#8": {
+   "claim": "Downgrading chromadb to 1.1 breaks the 04_memory store",
+   "mark": "right"
+  },
+  "Q28#9": {
+   "claim": "Pinning to 0.193.2 avoids these conflicts",
+   "mark": "right"
+  },
+  "Q28#10": {
+   "claim": "Pinning to 0.193.2 keeps other chapters functional",
+   "mark": "right"
+  },
+  "Q29#1": {
+   "claim": "AutoGen’s built‑in TokenUsageTermination looks only at the token counts that are attached to the messages a turn emits.",
+   "mark": "right"
+  },
+  "Q29#2": {
+   "claim": "When an analyst turn involves many internal model calls, those calls generate tokens that never appear in a message, so they are not counted by the termination check.",
+   "mark": "right"
+  },
+  "Q29#3": {
+   "claim": "The token total reported by AutoGen (≈ 36 k) can be far lower than the actual API‑billed usage (≈ 56 k).",
+   "mark": "right"
+  },
+  "Q29#4": {
+   "claim": "Because the termination condition can’t see those hidden calls, it can’t reliably stop a run when the true budget is reached.",
+   "mark": "right"
+  },
+  "Q29#5": {
+   "claim": "The budget must instead be enforced in the model client itself, where every call’s tokens are tallied before the request is sent.",
+   "mark": "imprecise",
+   "note": "Loose: the budget is checked before each call; tokens are tallied after it."
+  }
+ }
+}

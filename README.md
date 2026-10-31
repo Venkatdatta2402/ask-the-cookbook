@@ -331,14 +331,16 @@ the reason for its grade. Tests check that every passage is a real chunk and eve
 
 **The metrics**, on the search RAG answers from (k = 5):
 
-| | Precision@5 | Recall@5 | MRR | NDCG@5 |
+| | Precision@5 | Recall@5 (best possible) | MRR | NDCG@5 |
 |---|---|---|---|---|
-| All 30 questions | 0.773 | 0.421 | 0.967 | 0.731 |
-| RAG questions (24) | 0.800 | 0.471 | 0.958 | 0.760 |
-| Agentic questions (6), as one search | 0.667 | 0.225 | 1.000 | 0.615 |
+| All 30 questions | 0.773 | 0.421 (0.645) | 0.967 | 0.731 |
+| RAG questions (24) | 0.800 | 0.471 (0.687) | 0.958 | 0.760 |
+| Agentic questions (6), as one search | 0.667 | 0.225 (0.479) | 1.000 | 0.615 |
 
 Precision counts any relevant passage (grade 1+), recall counts the passages an answer needs (grade 2+), and
-NDCG uses every grade. Each question's embedding is kept with the golden set, so the run calls no API and gives
+NDCG uses every grade. Recall can't reach 1.0: many questions need more than 5 passages, and 5 places hold at
+most 5. Q15 needs 16, so even a perfect search scores 5/16 there. "Best possible" is what a perfect search would
+score, so 0.471 against 0.687 means the search finds about two-thirds of what it could. Each question's embedding is kept with the golden set, so the run calls no API and gives
 the same numbers every time.
 
 **The gate.** These numbers are the committed baseline. The test suite fails if any of them drops, so a change to
@@ -348,9 +350,28 @@ on purpose (a stricter floor, a weaker keyword search) failed it both times.
 **Checks on answers.** Plain code, no model: an answer must cite, every citation must point to a source it was
 given, every source must be real lines of a real file, and at least one cited source must be a passage graded 3.
 
+**Judging answers.** Whether an answer is *right* takes a judge. Every RAG question has reference points (what a
+right answer says, each backed by quotes from the cookbook). The judge reads an answer claim by claim:
+
+1. It lists the claims without seeing the reference points, so it can't rewrite the answer to match them.
+2. It checks each claim against the reference points.
+3. It checks each claim against the 5 passages the answer was written from.
+
+That gives five numbers per answer:
+
+- **Claims wrong:** claims the reference points contradict.
+- **Faithfulness:** claims backed by a retrieved passage.
+- **Relevance:** claims on the question.
+- **Completeness:** reference points made.
+- **Citation accuracy:** cited claims whose cited passage backs them.
+
+Every number rests on the judge's own marks, so the owner checks a sample of them by hand, and the report gives how
+many were right. This is built and tested offline but has not been run live yet.
+
 ```bash
 python -m evals.run_evals                         # retrieval against the baseline (free)
-python -m evals.generation.collect_answers        # real RAG answers to check: spends about 90k Groq tokens
+python -m evals.generation.collect_answers        # real RAG answers: about 90k Groq tokens
+python -m evals.generation.claim_judge <answers>  # the judge: about 9-10k Groq tokens an answer
 ```
 
 [evals/README.md](evals/README.md) has the details.

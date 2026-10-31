@@ -1,0 +1,163 @@
+{
+ "how": "For each claim: \"right\": true if every mark the judge gave it is right, false if any is wrong -- and then \"note\": which, and why.",
+ "verdicts": "verdicts_2026-10-30.json",
+ "items": {
+  "Q1#2": {
+   "claim": "That alone does not guarantee a correct answer.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q1#7": {
+   "claim": "Validation is kept as a second line of defence to catch semantic errors, handle unsupported schema enforcement, and give feedback for retries.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q2#1": {
+   "claim": "A doom‑loop is any pattern that shows the agent is stuck repeating the same work without making progress.",
+   "kind": "flagged",
+   "right": true,
+   "note": "Right: no passage defines a doom loop this broadly; the passages give four specific checks."
+  },
+  "Q2#2": {
+   "claim": "The runtime’s `_doom_loop` routine flags a loop when it sees one of the following situations.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q2#7": {
+   "claim": "When any of these conditions is met, the outer `Runtime` does not simply abort.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q3#2": {
+   "claim": "The error message usually contains a reason or a suggestion (e.g., “No weather station for Vestby. Try a larger nearby city.”).",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q3#7": {
+   "claim": "The conversation only receives a generic notice that the tool could not be completed, while the real error is left for the developer to inspect.",
+   "kind": "flagged",
+   "right": false,
+   "note": "Cited passages back it: [4] says a broken tool's details are not shown, 'only that it couldn't be done'; [2] that the message is 'written for whoever is reading the run'. Marked cited under v1."
+  },
+  "Q4#5": {
+   "claim": "Injecting the recall step prevents the agent from needing to remember to ask for it and avoids the failure mode of a fluent answer that consulted nothing.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q4#7": {
+   "claim": "`remember` is implemented as a tool that the model calls when it thinks the content should outlive the session.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q5#10": {
+   "claim": "`compact()` never alters pinned rules, task‑state information, the latest few turns, or external reference items.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q12#4": {
+   "claim": "`Semaphore(n)` caps the number of tasks that may be *in progress* at any moment; additional tasks wait until a slot is released.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q14#3": {
+   "claim": "ReWOO uses a solver – a plain Think that receives only the evidence gathered by the graph and must produce the final answer",
+   "kind": "passed",
+   "right": true,
+   "note": "Lenient but fair: the passage says the solver reads 'the plan and the evidence'; 'only the evidence' is a small slip, not a change of substance."
+  },
+  "Q14#6": {
+   "claim": "ReWOO terminates by construction",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q14#15": {
+   "claim": "LLM Compiler can observe the results",
+   "kind": "flagged",
+   "right": false,
+   "note": "Backed by cited passage [4]: LLM Compiler has 'a step at the end that can send it back for replanning', and the patterns differ on 'whether anything looks at results before the end'."
+  },
+  "Q14#16": {
+   "claim": "LLM Compiler can decide to continue",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q17#3": {
+   "claim": "Wrapping each tool call in invoke(timeout=…) lets the system regain control as soon as the timeout expires, even if work continues elsewhere",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q19#5": {
+   "claim": "Activation moves across nearly 0.8",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q21#2": {
+   "claim": "When a fact changes, the duplicate check sees the same proposition and the update action replaces the old entry with the new one, keeping the store consistent and preventing duplicate storage of the fact.",
+   "kind": "flagged",
+   "right": false,
+   "note": "Backed: [2] says the write searches then decides add/update/ignore so a fact is not held five times; [5] that update replaces the old text. 'none' is wrong (v1 had it as 'other 5')."
+  },
+  "Q22#2": {
+   "claim": "Mixed instructions and data resulted in 11 out of 24 injections (≈46%).",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q23#1": {
+   "claim": "Selection runs supersede step before relevance scoring because older items are outright wrong",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q27#5": {
+   "claim": "On each iteration it probes the server (using the cheap `tools/list` call, since the protocol’s `ping` always fails) and, if the connection is broken, attempts a limited number of repairs.",
+   "kind": "passed",
+   "right": true,
+   "note": "Fair: 'ping always fails' is said of servers built with this SDK, which every server here is."
+  },
+  "Q27#8": {
+   "claim": "When the server actually dies, the transport raises an exception that is caught as a “broken” result.",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q27#11": {
+   "claim": "The mutable `Connection` resource, the health‑check‑via‑`tools/list`, the bounded repair budget, and the silent‑repair policy keep the agent running even if the MCP server crashes in the middle of a run.",
+   "kind": "flagged",
+   "right": false,
+   "note": "A summary of what the cited passages say, part by part (Connection box, tools/list probe, repair budget, silent repair: [1], [2]). v3 counts summaries; the judge wanted one passage saying it all."
+  },
+  "Q28#3": {
+   "claim": "CrewAI releases ≥0.201 force chromadb~=1.1",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q28#6": {
+   "claim": "Downgrading mcp to 1.28 breaks the 07_mcp chapter",
+   "kind": "passed",
+   "right": true,
+   "note": ""
+  },
+  "Q28#10": {
+   "claim": "Pinning to 0.193.2 keeps other chapters functional",
+   "kind": "flagged",
+   "right": false,
+   "note": "Backed by cited passage [1]: a current release 'breaks 07_mcp' and the chromadb '04_memory's store is built on', and 0.193.2 'is the newest release whose pins fit'."
+  }
+ },
+ "reviewed by": "Claude (Opus 5.5), on the owner's behalf, 2026-10-30, of the marks under grounding rule v3: each claim read against the answer, the passages as the model saw them, and the key's evidence lines"
+}

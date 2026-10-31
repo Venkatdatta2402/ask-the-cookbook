@@ -48,6 +48,39 @@ def test_every_graded_passage_is_an_indexed_chunk_and_its_quote_is_in_it(golden,
             assert any(r["quote"] in t for t in texts), f"{q['id']}: quote not in {r['file']} {r['lines']}"
 
 
+def test_every_rag_question_has_reference_points_for_the_judge(golden):
+    from evals.generation.claim_judge import golden_by_id
+    points = golden_by_id()
+    for q in golden["questions"]:
+        if q["kind"] == "rag":
+            assert points[q["id"]]["question"] == q["question"] and points[q["id"]]["points"], q["id"]
+    for q in points.values():
+        assert all(p["point"].strip() and p["quotes"] for p in q["points"]), q["id"]
+
+
+def test_every_reference_quote_is_in_its_evidence_lines(same_index, golden):
+    if not same_index:
+        pytest.skip(f"the index is no longer the one graded ({golden['index_commit']}): re-check the reference points")
+    import re
+
+    from ask_the_cookbook import answers, search
+    from evals.generation.claim_judge import golden_by_id
+
+    def flat(text):
+        # a sentence can run over lines, and a code comment's lines each start with "#"
+        return " ".join(" ".join(re.sub(r"^\s*#\s?", "", line) for line in text.splitlines()).split())
+
+    for q in golden_by_id().values():
+        shown = []
+        for file, first, last in q["evidence"]:
+            lines = search.file_text(file).splitlines() if file in answers.FILES else []
+            assert 1 <= first <= last <= len(lines), (q["id"], file, first, last)
+            shown.append(flat("\n".join(lines[first - 1:last])))
+        for i, p in enumerate(q["points"], 1):
+            for quote in p["quotes"]:
+                assert flat(quote) in " ".join(shown), f"{q['id']} point {i}: {quote[:60]}"
+
+
 def test_every_question_has_its_kept_embedding(golden):
     kept = json.loads(EMBEDDINGS.read_text(encoding="utf-8"))
     assert kept["model"] == "gemini-embedding-001" and kept["task"] == "RETRIEVAL_QUERY"

@@ -1,0 +1,2946 @@
+{
+ "Q1": {
+  "claims": [
+   {
+    "claim": "`extract()` initially attempts to let the model enforce the JSON schema.",
+    "quote": "`extract()` first tries to let the model enforce the JSON schema (the **shape** of the response)",
+    "cites": [],
+    "verdict": "supported",
+    "source": "foundations/llm.py 88-94",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "That alone does not guarantee a correct answer.",
+    "quote": "but that alone is not enough to guarantee a correct answer.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "foundations/llm.py 90-94",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "A JSON schema only checks required fields and types, not value semantics.",
+    "quote": "A JSON schema can only check that the required fields are present and that their types match; it cannot verify that the values make sense (e.g., that there is one score per candidate, that an index is within the list bounds, or that a score falls inside the requested range)",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "foundations/llm.py 92-94",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Even with schema enforcement, the model can return nonsense that is schema‑valid.",
+    "quote": "Even when the model supports `json_schema` and the API enforces the shape, the returned data can still be **nonsense** while still being schema‑valid, as shown by the example where an index of 20 was returned for a list of length 3 and a score of 869 was returned for a maximum of 10",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "foundations/llm.py 97-101",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "`extract()` falls back to plain JSON and uses Pydantic validation when models cannot enforce schemas.",
+    "quote": "Because some models (or older versions) cannot enforce schemas at all, `extract()` falls back to plain JSON and must rely on Pydantic validation to catch any errors",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "foundations/llm.py 111-114",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The validation step supplies an error message to the model for retry, ensuring shape and sense.",
+    "quote": "The validation step also provides a concrete error message that is fed back to the model for a retry, ensuring that the final result satisfies both shape **and** sense",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "foundations/llm.py 117-122",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Validation is kept as a second line of defence to catch semantic errors, handle unsupported schema enforcement, and give feedback for retries.",
+    "quote": "Therefore, validation is kept as a second line of defence to catch semantic errors, handle models that don’t support schema enforcement, and to give the model feedback for corrective retries.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "foundations/llm.py 90-94",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 3,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 15538,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q2": {
+  "claims": [
+   {
+    "claim": "A doom‑loop is any pattern that shows the agent is stuck repeating the same work without making progress.",
+    "quote": "A **doom‑loop** is any pattern that shows the agent is stuck repeating the same work without making progress.",
+    "cites": [],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "",
+    "on_question": true,
+    "grounded": "none",
+    "passage": 0,
+    "ground_why": "Passages only list specific doom‑loop patterns (tool repeat, error repeat, oscillation, similar‑result) and do not give a generic definition of a doom‑loop as any pattern of repeated work without progress."
+   },
+   {
+    "claim": "The runtime’s `_doom_loop` routine flags a loop when it sees one of the following situations.",
+    "quote": "The runtime’s `_doom_loop` routine flags a loop when it sees one of the following situations [5]:",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 181-218",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Exact repeat of a tool call – the same tool is invoked with identical arguments on consecutive turns.",
+    "quote": "Exact repeat of a tool call – the same tool is invoked with identical arguments on consecutive turns.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 185-186",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Repeated error – the same error message is returned by a tool on two successive calls.",
+    "quote": "Repeated error – the same error message is returned by a tool on two successive calls.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 188-190",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Oscillation – the conversation alternates between two different tool calls in a 4‑step window (e.g., A‑B‑A‑B).",
+    "quote": "Oscillation – the conversation alternates between two different tool calls in a 4‑step window (e.g., A‑B‑A‑B).",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 192-196",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Repeated result with similar arguments – the same tool is asked a very similar question and returns the same result (a “same‑result” repeat).",
+    "quote": "Repeated result with similar arguments – the same tool is asked a very similar question and returns the same result (a “same‑result” repeat).",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 211-217",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "When any of these conditions is met, the outer `Runtime` does not simply abort.",
+    "quote": "When any of these conditions is met, the outer `Runtime` does **not** simply abort.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 223-226",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Instead it triggers a graceful stop: the current `Think` component gets one final turn without invoking any tools, and then it produces a response that summarizes what it could gather and explains what it could not find.",
+    "quote": "Instead it triggers a graceful stop: the current `Think` component gets one final turn **without** invoking any tools, and then it produces a response that summarizes what it could gather and explains what it could not find [1].",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "runtime.py 223-226",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 21023,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q4": {
+  "claims": [
+   {
+    "claim": "Recall is placed in the loop as an injection, while remembering is exposed as a tool.",
+    "quote": "Recall (the *reading* side of memory) is placed in the loop as an **injection** rather than as a tool that the model must request, while remembering (the *writing* side) is exposed as a tool that the model calls only when it decides something is worth keeping.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/memory_tools.py L7-L9",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "`Retrieve` runs before `Think` on every turn and automatically prepends relevant memories to the prompt.",
+    "quote": "The `Retrieve` component runs before `Think` on every turn and automatically prepends any relevant memories to the prompt.",
+    "cites": [],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "The repository states that Retrieve runs before Think, but does not say it automatically prepends relevant memories to the prompt.",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "This guarantees the model has the information available when it formulates its answer, even if the question does not explicitly sound like a memory lookup.",
+    "quote": "This guarantees that the model has the information available when it formulates its answer, even if the question does not explicitly sound like a memory lookup.",
+    "cites": [],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "The repository does not mention guaranteeing that the model has the information available or that it automatically prepends memories for questions that do not explicitly request a lookup.",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "Experiments showed that offering recall as a tool led to missed look‑ups; the model consulted memory in only four of five questions, and the fifth was answered from general knowledge despite the journal containing the answer.",
+    "quote": "The design was chosen after experiments showed that offering `recall` as a tool led to missed look‑ups – the model consulted memory in only four of five questions, and the fifth was answered from general knowledge even though the journal contained the answer [Source 2].",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/memory_tools.py L13-L16",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Injecting the recall step prevents the agent from needing to remember to ask for it and avoids the failure mode of a fluent answer that consulted nothing.",
+    "quote": "By injecting the recall step, the agent never has to remember to ask for it, and the failure mode of “a fluent answer that consulted nothing” is avoided [Source 4].",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "04_memory/README.md L135-L136",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "Storing a memory costs essentially nothing, but judging whether information is worth persisting is a decision the model is good at.",
+    "quote": "Storing a memory costs essentially nothing, but judging whether a piece of information is worth persisting is a decision the model is good at.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/memory_tools.py L19-L20",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "`remember` is implemented as a tool that the model calls when it thinks the content should outlive the session.",
+    "quote": "Therefore `remember` is implemented as a tool that the model calls when it thinks the content should outlive the session.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/memory_tools.py L8-L9",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "The runtime does not change – memory arrives as a tool whose signature the model sees, and the closure over the journal supplies the store handle.",
+    "quote": "The runtime does not change – memory arrives as a tool whose signature the model sees, and the closure over the journal supplies the store handle [Source 5].",
+    "cites": [
+     5
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "The repository does not describe that the runtime remains unchanged or that memory arrives as a tool whose signature the model sees with a closure over the journal supplying the store handle.",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "This keeps the write path under the model’s control while the read path is automatically provided.",
+    "quote": "This keeps the write path under the model’s control while the read path is automatically provided [Source 1].",
+    "cites": [
+     1
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "The repository does not state that the write path is under the model’s control while the read path is automatically provided.",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "Recall is injected to ensure relevant memories are always presented before the model thinks, avoiding silent un‑grounded answers.",
+    "quote": "In short, recall is injected to ensure that relevant memories are always presented to the model before it thinks, avoiding silent “un‑grounded” answers, whereas remembering is left as a tool so the model can deliberately choose when to write to memory.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/README.md L126-L128",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "Remembering is left as a tool so the model can deliberately choose when to write to memory.",
+    "quote": "In short, recall is injected to ensure that relevant memories are always presented to the model before it thinks, avoiding silent “un‑grounded” answers, whereas remembering is left as a tool so the model can deliberately choose when to write to memory.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/README.md L126-L128",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 27765,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q5": {
+  "claims": [
+   {
+    "claim": "Compaction leaves pinned items untouched.",
+    "quote": "Pinned items – rules, instructions, requests, etc.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 262-263",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Pinned items must stay exactly as‑is because a summarizer would paraphrase a rule.",
+    "quote": "A summarizer would paraphrase a rule, turning it into a different rule, so pinned items must stay exactly as‑is.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 262-263",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Compaction leaves task‑state items untouched.",
+    "quote": "Task‑state items – the current plan and the scratchpad.",
+    "cites": [
+     1,
+     5
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 263-264",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Summarising task‑state items would lose step numbers or other essential structure.",
+    "quote": "These are already the run’s own summary of where things stand; summarising them would lose step numbers or other essential structure.",
+    "cites": [
+     1,
+     5
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Compaction leaves the most recent turns untouched (last `keep_recent` turns, default 6).",
+    "quote": "The most recent turns (the last `keep_recent` turns, default 6).",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 265",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The most recent turns are kept unchanged because the next step will likely build on them verbatim.",
+    "quote": "The next step of the run will most likely build on these verbatim, so they are kept unchanged.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 265",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Compaction leaves anything not originated from the run untouched.",
+    "quote": "Anything that did not originate from the run – e.g., a pasted profile, an always‑present catalogue, or a retrieved memory.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 266-267",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Items not originated from the run should not be compressed because they are already summaries or reference material and not part of the run’s evolving conversation.",
+    "quote": "These are already summaries or reference material; they are not part of the run’s evolving conversation and should not be compressed.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 267-271",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "`compact()` only compresses older conversational content.",
+    "quote": "`compact()` only compresses older conversational content;",
+    "cites": [
+     1,
+     2,
+     5
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 274-282",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "`compact()` never alters pinned rules, task‑state information, the latest few turns, or external reference items.",
+    "quote": "it never alters pinned rules, task‑state information, the latest few turns, or external reference items",
+    "cites": [
+     1,
+     2,
+     5
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 258-267",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Altering those items would change their meaning, lose essential context, or discard already‑summarised data.",
+    "quote": "doing so would change their meaning, lose essential context, or discard already‑summarised data.",
+    "cites": [
+     1,
+     2,
+     5
+    ],
+    "verdict": "supported",
+    "source": "05_context/compression.py 262-267",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 18626,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q6": {
+  "claims": [
+   {
+    "claim": "Delegation keeps the original agent in charge.",
+    "quote": "Delegation keeps the original agent in charge.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/supervisor.py 113-114",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "The supervising agent receives the user’s message, calls a specialist to get an answer, and then rewrites or forwards that answer back to the user.",
+    "quote": "The supervising agent receives the user’s message, calls a specialist to get an answer, and then rewrites or forwards that answer back to the user.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Every turn still passes through the supervisor, so the specialist only sees the request that the supervisor formulates and never talks to the user directly.",
+    "quote": "Every turn still passes through the supervisor, so the specialist only sees the request that the supervisor formulates and never talks to the user directly.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/supervisor.py 113-116",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "Handoff (or transfer) moves the ownership of the chat to the specialist.",
+    "quote": "Handoff (or transfer) moves the ownership of the chat to the specialist.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/supervisor.py 114-115",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "When the current agent calls a `transfer_to_<name>` tool, its loop is stopped via the runtime’s `cancel` hook and the new agent becomes the active owner, speaking to the user on the same turn.",
+    "quote": "When the current agent calls a `transfer_to_<name>` tool, its loop is stopped via the runtime’s `cancel` hook and the new agent becomes the active owner, speaking to the user on the same turn.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/supervisor.py 118-121",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "The new agent sees the entire transcript so far and answers in its own voice, eliminating the extra “relay” step.",
+    "quote": "The new agent sees the entire transcript so far and answers in its own voice, eliminating the extra “relay” step.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/supervisor.py 115-116",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "In practice the handoff was measured to be about 2.5 × cheaper in token usage than delegation",
+    "quote": "In practice the handoff was measured to be about 2.5 × cheaper in token usage than delegation",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/README.md 84-86",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "and avoids the risk of the supervisor inventing or mis‑summarising information",
+    "quote": "and avoids the risk of the supervisor inventing or mis‑summarising information",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "delegation is “ask‑and‑relay” while a handoff is “pass‑the‑conversation‑to‑the‑next‑agent”.",
+    "quote": "delegation is “ask‑and‑relay” while a handoff is “pass‑the‑conversation‑to‑the‑next‑agent”.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "06_orchestration/README.md 81-83",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 2,
+  "unmarked": 0,
+  "tokens": 22637,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q7": {
+  "claims": [
+   {
+    "claim": "Running an MCP server in its own process does not sandbox it.",
+    "quote": "Running an MCP server in its own process does **not** sandbox it.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The server is launched as a separate program, but it inherits the parent’s environment (including any API‑key variables) and therefore has the same authority as the notebook that started it.",
+    "quote": "The server is launched as a separate program, but it inherits the parent’s environment (including any API‑key variables) and therefore has the same authority as the notebook that started it.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "As the documentation notes, “a stdio server starts with your authority: it can read your credentials, open your files and reach the network as you” and “its separateness bought isolation of failures, not isolation of authority”.",
+    "quote": "As the documentation notes, “a stdio server starts with your authority: it can read your credentials, open your files and reach the network as you” and “its separateness bought isolation of failures, not isolation of authority”",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Unless you explicitly limit the child’s environment (e.g., using `inherit=False`), the MCP server can read your API keys.",
+    "quote": "Consequently, unless you explicitly limit the child’s environment (e.g., using `inherit=False`), the MCP server can read your API keys.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The SDK ships an allow‑list of safe environment variables and warns that overriding it with `env={**os.environ}` leaks secrets.",
+    "quote": "This is why the SDK ships an allow‑list of safe environment variables and warns that overriding it with `env={**os.environ}` leaks secrets",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 12635,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q12": {
+  "claims": [
+   {
+    "claim": "`TaskGroup` is safer than `asyncio.gather` because a failure inside a `TaskGroup` cancels all of its sibling tasks immediately, so no extra work continues after an error.",
+    "quote": "`TaskGroup` is safer than `asyncio.gather` because a failure inside a `TaskGroup` cancels all of its sibling tasks immediately, so no extra work continues after an error.",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "With `gather`, the exception is raised as soon as it occurs, but the other coroutines keep running in the background and waste resources — they finish later even though the caller has already moved on.",
+    "quote": "With `gather`, the exception is raised as soon as it occurs, but the other coroutines keep running in the background and waste resources — they finish later even though the caller has already moved on",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "You can wrap the work in an `asyncio.Semaphore` to keep the number of concurrent operations under control.",
+    "quote": "To keep the number of concurrent operations under control, you can wrap the work in an `asyncio.Semaphore`.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "`Semaphore(n)` caps the number of tasks that may be *in progress* at any moment; additional tasks wait until a slot is released.",
+    "quote": "A `Semaphore(n)` caps the number of tasks that may be *in progress* at any moment; additional tasks wait until a slot is released.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "With a limit of 2, the first two tasks start right away while the others wait, ensuring at most two run simultaneously.",
+    "quote": "For example, with a limit of 2, the first two tasks start right away while the others wait, ensuring at most two run simultaneously.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3
+  ],
+  "unanchored": 1,
+  "unmarked": 0,
+  "tokens": 11435,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q13": {
+  "claims": [
+   {
+    "claim": "The API rejects the call – e.g., the requested tool doesn’t exist.",
+    "quote": "The API rejects the call – e.g., the requested tool doesn’t exist.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "This rejection is caught by the server‑side check performed by Groq.",
+    "quote": "This rejection is caught by the server‑side check performed by Groq.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "The arguments are invalid for the domain – e.g., a value that must not be zero.",
+    "quote": "The arguments are invalid for the domain – e.g., a value that must not be zero.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "These bad arguments are caught by the Pydantic type system and its `field_validator`s.",
+    "quote": "These bad arguments are caught by the Pydantic type system and its `field_validator`s.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "These two failure modes are described in the foundations notes",
+    "quote": "These two failure modes are described in the foundations notes",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "1-4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 12303,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q14": {
+  "claims": [
+   {
+    "claim": "ReWOO and the LLM Compiler share the same planner‑and‑workers architecture",
+    "quote": "ReWOO and the LLM Compiler share the same planner‑and‑workers architecture",
+    "cites": [],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "they differ in the third role that follows the graph execution",
+    "quote": "they differ in the **third role** that follows the graph execution",
+    "cites": [],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO uses a solver – a plain Think that receives only the evidence gathered by the graph and must produce the final answer",
+    "quote": "ReWOO uses a solver – a plain `Think` that receives only the evidence gathered by the graph and must produce the final answer",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "the solver cannot request additional work",
+    "quote": "Because the solver cannot request additional work",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "the run always ends after this single answer step",
+    "quote": "the run always ends after this single answer step",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO terminates by construction",
+    "quote": "ReWOO **terminates by construction**",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO never replans",
+    "quote": "ReWOO **never replans**",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "LLM Compiler replaces the solver with a joiner (PlannerThink running ContinueOrFinish)",
+    "quote": "LLM Compiler replaces the solver with a **joiner** (`PlannerThink` running `ContinueOrFinish`).",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "the joiner component is allowed to say “not done, here are more steps”",
+    "quote": "This component is allowed to say “not done, here are more steps,”",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "this sends the execution back into the loop for another round of planning and execution",
+    "quote": "which sends the execution back into the loop for another round of planning and execution.",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "LLM Compiler can re‑plan or continue work when the first pass is insufficient",
+    "quote": "Thus the LLM Compiler can **re‑plan** or continue work when the first pass is insufficient.",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO is the LLM Compiler with the loop‑back removed",
+    "quote": "ReWOO is the LLM Compiler with the loop‑back removed",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO plans exact tool calls up‑front",
+    "quote": "it plans exact tool calls up‑front",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "ReWOO runs them and then answers once",
+    "quote": "runs them, and then answers once",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "LLM Compiler can observe the results",
+    "quote": "the LLM Compiler can observe the results",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "none",
+    "passage": 0,
+    "ground_why": "No passage states that LLM Compiler can observe the results"
+   },
+   {
+    "claim": "LLM Compiler can decide to continue",
+    "quote": "decide to continue",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "LLM Compiler can iterate",
+    "quote": "and iterate",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   4
+  ],
+  "unanchored": 1,
+  "unmarked": 0,
+  "tokens": 28297,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q15": {
+  "claims": [
+   {
+    "claim": "Observe exists to keep the raw output of a tool out of the conversation’s message history and to turn that huge, unstructured payload into a single, concise observation that the agent can read.",
+    "quote": "Observe exists to keep the raw output of a tool out of the conversation’s message history and to turn that huge, unstructured payload into a single, concise observation that the agent can read.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 89-90",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Raw tool results can be thousands of tokens of JSON, so they are stored in `conversation.pending` and Observe creates a short factual sentence for the conversation instead of appending the whole payload — this saves context‑window space and prevents the agent from repeatedly re‑reading massive data on every turn.",
+    "quote": "Raw tool results can be thousands of tokens of JSON, so they are stored in `conversation.pending` and Observe creates a short factual sentence for the conversation instead of appending the whole payload — this saves context‑window space and prevents the agent from repeatedly re‑reading massive data on every turn",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 89-91",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Observe is explicitly instructed never to change the value at all.",
+    "quote": "Observe is explicitly instructed **never to change the value at all**",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 70-73",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must copy the value exactly as the tool returned it.",
+    "quote": "It must copy the value exactly as the tool returned it",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 70-71",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must preserve the original units and formatting.",
+    "quote": "preserving the original units and formatting",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 70-71",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not convert the value.",
+    "quote": "must not convert",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-72",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not calculate the value.",
+    "quote": "must not calculate",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-72",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not round the value.",
+    "quote": "must not round",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-72",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not combine the value.",
+    "quote": "must not combine",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-72",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not re‑format anything.",
+    "quote": "must not re‑format anything",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-72",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "It must not do this even if the surrounding conversation asks for a different representation.",
+    "quote": "even if the surrounding conversation asks for a different representation",
+    "cites": [
+     3
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/observe.py 71-73",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2
+  ],
+  "unanchored": 4,
+  "unmarked": 0,
+  "tokens": 17463,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q16": {
+  "claims": [
+   {
+    "claim": "Graph and forking use ThreadPoolExecutor instead of asyncio.gather",
+    "quote": "Graph and forking are implemented with a `ThreadPoolExecutor` rather than with `asyncio.gather`",
+    "cites": [],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 105-107",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "Jupyter notebooks already have an active asyncio event loop",
+    "quote": "Jupyter notebooks (and the surrounding runtime) already have an active asyncio event loop",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/notebooks/04_planning.ipynb 145-146",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Starting another event loop would clash with the existing one and make debugging painful",
+    "quote": "Starting another loop inside library code would clash with the existing one and make debugging painful",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 106-107",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Using threads sidesteps the event-loop conflict entirely",
+    "quote": "Using threads sidesteps this issue entirely",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 106",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Graph and forking perform blocking network I/O",
+    "quote": "The operations performed by Graph and forking are blocking network I/O (e.g., HTTP requests or sleeps)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 107-108",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "When a thread waits, the GIL is released, so it doesn't consume CPU",
+    "quote": "While a thread is waiting, the GIL is released, so the thread can sit idle without consuming CPU",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 107",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "For I/O‑bound tasks, threads give the same benefit as coroutines without async complexity",
+    "quote": "Because the tasks are I/O‑bound, threads give the same benefit as coroutines without needing the extra complexity of async code",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "02_agent_runtime/README.md 107-108",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 10917,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q17": {
+  "claims": [
+   {
+    "claim": "Chapter 3 adds a per-call timeout because the global Runtime budget is only checked between components",
+    "quote": "Chapter 3 adds a **per‑call timeout** because the global `Runtime(max_seconds=…)` budget is only examined **between** components, not while a tool is actually executing.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "03_tools/README.md 86-89",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "If a tool hangs in the Act step, the runtime cannot notice the time limit and the agent may be blocked forever",
+    "quote": "If a tool hangs inside the `Act` step, the runtime never gets a chance to notice that the overall time limit has been exceeded, so the whole agent can be blocked forever.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "03_tools/notebooks/03_invocation.ipynb 39-43",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Wrapping each tool call in invoke(timeout=…) lets the system regain control as soon as the timeout expires, even if work continues elsewhere",
+    "quote": "By wrapping each tool call in `invoke(timeout=…)` the system can regain control as soon as the timeout expires, even though the underlying work may still be running in its own thread or process",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "03_tools/notebooks/03_invocation.ipynb 43",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Retrying after a timeout is unsafe for non‑repeatable tools such as payments or irreversible side‑effects",
+    "quote": "Retrying after such a timeout is **unsafe when the tool is non‑repeatable** (e.g., it sends a payment or performs an irreversible side‑effect).",
+    "cites": [
+     1,
+     3
+    ],
+    "verdict": "supported",
+    "source": "03_tools/README.md 88-89",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Client‑side timeout only stops the caller; the tool keeps running on the server, so a retry could cause duplicate execution",
+    "quote": "The client‑side timeout only stops the caller from waiting; the tool continues to run on the server, and a retry could cause the operation to be performed twice.",
+    "cites": [
+     1,
+     3
+    ],
+    "verdict": "supported",
+    "source": "03_tools/notebooks/03_invocation.ipynb 57",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Result.safe_to_retry (or MCP “no‑stop‑in‑flight” rule) marks non‑repeatable tools as unsafe to retry after a timeout",
+    "quote": "Therefore `Result.safe_to_retry` (or the MCP “no‑stop‑in‑flight” rule) marks non‑repeatable tools as unsafe to retry after a timeout.",
+    "cites": [
+     1,
+     3
+    ],
+    "verdict": "supported",
+    "source": "03_tools/README.md 88-89",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 1,
+  "unmarked": 0,
+  "tokens": 13979,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q3": {
+  "claims": [
+   {
+    "claim": "A refused tool is one that actually ran, examined the request, and decided it cannot fulfil it – it raises a ToolError.",
+    "quote": "A **refused** tool is one that actually ran, examined the request, and decided it cannot fulfil it – it raises a `ToolError`.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The error message usually contains a reason or a suggestion (e.g., “No weather station for Vestby. Try a larger nearby city.”).",
+    "quote": "The error message usually contains a reason or a suggestion (e.g., “No weather station for Vestby. Try a larger nearby city.”).",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "not in the key",
+    "source": "",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Because the tool itself knows why it refused, the model is allowed to see that information and can act on it (try a different city, change the query, etc.).",
+    "quote": "Because the tool itself knows why it refused, the model is allowed to see that information and can act on it (try a different city, change the query, etc.)",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "A broken tool failed because of an internal bug – a missing key, a bad import, an unexpected exception, etc.",
+    "quote": "A **broken** tool, on the other hand, failed because of an internal bug – a missing key, a bad import, an unexpected exception, etc.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "It does not raise ToolError; any other exception is treated as “broken”.",
+    "quote": "It does **not** raise `ToolError`; any other exception is treated as “broken”.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "invoke.py 142-147",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Since the problem is in the tool’s implementation and the model cannot fix it, the details are hidden from the model.",
+    "quote": "Since the problem is in the tool’s implementation and the model cannot fix it, the details are hidden from the model.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The conversation only receives a generic notice that the tool could not be completed, while the real error is left for the developer to inspect.",
+    "quote": "The conversation only receives a generic notice that the tool could not be completed, while the real error is left for the developer to inspect",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": "Passage 1 states that broken results give a generic notice while the cited passages do not mention this."
+   },
+   {
+    "claim": "Refused – tool ran, says “no” with a reason; the model sees the refusal message.",
+    "quote": "- **Refused** – tool ran, says “no” with a reason; the model sees the refusal message.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Broken – tool crashed due to a bug; the model does not see the underlying error details.",
+    "quote": "- **Broken** – tool crashed due to a bug; the model does **not** see the underlying error details.",
+    "cites": [
+     2,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 16017,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q18": {
+  "claims": [
+   {
+    "claim": "`verified()` works by wrapping the original tool and adding a post‑run check that looks at the real world instead of trusting the tool’s own reply.",
+    "quote": "`verified()` works by **wrapping the original tool and adding a post‑run check** that looks at the real world instead of trusting the tool’s own reply.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "It makes a shallow copy of the tool and replaces its `function` with a new `call` that first executes the original tool (`value = tool.function(**kwargs)`).",
+    "quote": "It makes a shallow copy of the tool and replaces its `function` with a new `call` that first executes the original tool (`value = tool.function(**kwargs)`).",
+    "cites": [],
+    "verdict": "supported",
+    "source": "Reference point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "After the tool runs, it invokes a user‑supplied `check(kwargs, value)` that inspects the arguments and the current state of the world (for example, reading back the saved note).",
+    "quote": "After the tool runs, it invokes a user‑supplied `check(kwargs, value)` that inspects the arguments and the current state of the world (for example, reading back the saved note).",
+    "cites": [],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "If the check discovers a discrepancy – i.e., the tool said it succeeded but the world shows it didn’t – the check returns a message and `verified()` raises a `VerificationError`.",
+    "quote": "If the check discovers a discrepancy – i.e., the tool said it succeeded but the world shows it didn’t – the check returns a message and `verified()` raises a `VerificationError` [Source 2].",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "The wrapper therefore turns the mismatch into an “unverified” result rather than silently accepting the tool’s claim.",
+    "quote": "The wrapper therefore turns the mismatch into an **“unverified”** result rather than silently accepting the tool’s claim [Source 1].",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "Reference point 5",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "In practice this lets an agent notice that a note‑saving tool truncated a 110‑character note to 60 characters: the tool returns “Saved …”, but the check that reads the note back sees only 60 characters and raises the error, exposing the false success.",
+    "quote": "In practice this lets an agent notice that a note‑saving tool truncated a 110‑character note to 60 characters: the tool returns “Saved …”, but the check that reads the note back sees only 60 characters and raises the error, exposing the false success [Source 4].",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   2
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 14908,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q19": {
+  "claims": [
+   {
+    "claim": "Cosine similarity only varies by about 0.12 across the candidate set",
+    "quote": "Cosine similarity only varies by about 0.12 across the candidate set",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "the activation (recency) term varies by roughly 0.8 – 0.9",
+    "quote": "the activation (recency) term varies by roughly 0.8 – 0.9",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "When the raw values are simply multiplied by 0.5, the activation term ends up contributing the bulk of the decision (about seven‑eighths), so the split is far from even",
+    "quote": "When the raw values are simply multiplied by 0.5, the activation term ends up contributing the bulk of the decision (about seven‑eighths), so the split is far from even",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "Reference point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Cosine moves across a range of about 0.12",
+    "quote": "Cosine moves across a range of about 0.12",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Activation moves across nearly 0.8",
+    "quote": "Activation moves across nearly 0.8",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "a weight of 0.5 on similarity is essentially decoration",
+    "quote": "a weight of 0.5 on similarity is essentially decoration",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Min‑max normalise each term across the surviving candidates (scale the smallest value to 0 and the largest to 1)",
+    "quote": "Min‑max normalise each term across the surviving candidates (scale the smallest value to 0 and the largest to 1)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "After this rescaling, a weight truly represents its share of the decision",
+    "quote": "After this rescaling, a weight truly represents its share of the decision",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Apply a floor on the raw similarity before any normalisation so that unanswerable queries can be filtered out; the floor must run on the original similarity because normalising would erase the information needed to distinguish answerable from unanswerable cases",
+    "quote": "Apply a floor on the raw similarity before any normalisation so that unanswerable queries can be filtered out; the floor must run on the original similarity because normalising would erase the information needed to distinguish answerable from unanswerable cases",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 16683,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q20": {
+  "claims": [
+   {
+    "claim": "Most of the facts an agent needs to recall are exact, name‑based values (e.g., a user’s timezone, a preferred language, a project root).",
+    "quote": "most of the facts an agent needs to recall are exact, name‑based values (e.g., a user’s timezone, a preferred language, a project root)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/README.md 18-20",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "Simple key‑value store returns the precise answer instantly and is best for those queries.",
+    "quote": "Those queries are best served by a simple key‑value store that returns the precise answer instantly",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/README.md 20-21",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "A vector index returns approximate matches, which is a downgrade for exact answer questions and adds unnecessary complexity and latency.",
+    "quote": "A vector index, by contrast, returns *approximate* matches, which is a downgrade for questions that have an exact answer and adds unnecessary complexity and latency",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/README.md 20-21",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "For exact look‑ups, a vector database is the wrong first move.",
+    "quote": "for exact look‑ups a vector database is the wrong first move",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/README.md 18-21",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 17258,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q21": {
+  "claims": [
+   {
+    "claim": "The write‑path that searches first and then decides “add / update / ignore” is tuned for semantic information.",
+    "quote": "The write‑path that **searches first and then decides “add / update / ignore”** is tuned for *semantic* information.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/README.md L104-112",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "When a fact changes, the duplicate check sees the same proposition and the update action replaces the old entry with the new one, keeping the store consistent and preventing duplicate storage of the fact.",
+    "quote": "When a fact changes (e.g., “the checkout pool is 200 connections” → “the checkout pool is 210 connections”), the duplicate check sees the same proposition and the **update** action replaces the old entry with the new one, keeping the store consistent and preventing the same fact from being stored many times — exactly what we want for facts",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "04_memory/notebooks/04_types_of_memory.ipynb L32-33",
+    "why": "",
+    "on_question": true,
+    "grounded": "none",
+    "passage": 0,
+    "ground_why": "Citation 2 does not mention the duplicate check seeing the same proposition nor that the update action prevents duplicate storage; other passages do not fully cover this claim."
+   },
+   {
+    "claim": "Episodic memories are events that may be worded almost identically but refer to different points in time.",
+    "quote": "Episodic memories, however, are *events* that may be worded almost identically but refer to different points in time (e.g., two deploy failures on Aug 3 and Aug 12).",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/README.md L109-112",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "The duplicate detector only looks at the retrieved text and does not see the distinguishing field (the date column) that indicates separate occurrences.",
+    "quote": "The duplicate detector only looks at the text that is retrieved; it does not see the distinguishing field (the date column) that tells the system these are separate occurrences.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "04_memory/notebooks/04_types_of_memory.ipynb L198-202",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "The write path treats the later entry as a duplicate of the earlier one and updates it, overwriting the first event and erasing that part of the history.",
+    "quote": "Consequently the write path treats the later entry as a duplicate of the earlier one and **updates** it, overwriting the first event and erasing that part of the history 【Source 4】.",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "04_memory/notebooks/04_types_of_memory.ipynb L198-199",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The rule works for facts because an update correctly reflects the current truth, but it destroys episodic memory because similar‑looking events are mistakenly merged, losing each distinct occurrence.",
+    "quote": "Thus the rule works for facts because an update correctly reflects the current truth, but it **destroys episodic memory** because events that look similar are mistakenly merged, losing the record of each distinct occurrence 【Source 1】.",
+    "cites": [
+     1
+    ],
+    "verdict": "supported",
+    "source": "point 1-5",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 14645,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q22": {
+  "claims": [
+   {
+    "claim": "Separating instructions from data reduces prompt‑injection success to essentially zero.",
+    "quote": "Separating the model’s instructions from the data it sees cuts prompt‑injection success from a substantial failure rate to essentially zero.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "Mixed instructions and data resulted in 11 out of 24 injections (≈46%).",
+    "quote": "When instructions and data were mixed in a single message the injection was obeyed 11 times out of 24 (≈46 %).",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Applying separation mechanisms reduced injections to 0 out of 37.",
+    "quote": "After the two separation mechanisms were applied (either roles, a fence, or both) the injection was obeyed 0 times out of 37.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "With only the fence changed, success fell from 7 out of 14 (≈50%) to 0 out of 16.",
+    "quote": "In a tighter controlled test where only the fence changed, the success rate fell from 7 out of 14 (≈50 %) to 0 out of 16.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Labels did not improve security.",
+    "quote": "Labels, on the other hand, did not improve security.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "Labels changed nothing measurable but added a +36% token overhead.",
+    "quote": "The experiments found that labels changed nothing measurable while adding a large token overhead (+36 % tokens).",
+    "cites": [
+     3,
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3
+  ],
+  "unanchored": 3,
+  "unmarked": 0,
+  "tokens": 15367,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q23": {
+  "claims": [
+   {
+    "claim": "Selection runs supersede step before relevance scoring because older items are outright wrong",
+    "quote": "Selection first runs the supersede step (the “identity” step) before any relevance scoring because older items are not merely less useful – they are outright wrong.",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "Only the newest version of a given `about` is valid",
+    "quote": "Only the newest version of a given `about` is valid;",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "The previous version should never be presented to the model, even if its text matches the query better",
+    "quote": "the previous version should never be presented to the model, even if its text happens to match the query better.",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "If superseding were left to scoring stage, a stale item could be ranked above the current one",
+    "quote": "If superseding were left to the scoring stage, a stale item could be ranked above the current one",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Relevance measures similarity, not truthfulness",
+    "quote": "(relevance measures similarity, not truthfulness)",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "This would force the model to disambiguate which fact is up‑to‑date",
+    "quote": "forcing the model to disambiguate which fact is up‑to‑date.",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Removing superseded items up‑front makes the scorer work only on information that is still correct",
+    "quote": "By removing superseded items up‑front, the scorer works only on information that is still correct",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 3,
+    "ground_why": ""
+   },
+   {
+    "claim": "`keep_last` guarantees that after superseding, the N most recent items are added to the pinned set as “must‑keeps”",
+    "quote": "The `keep_last` option is a *guarantee*: after superseding, the N most recent items are added to the pinned set and are treated as “must‑keeps”.",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "Items kept by `keep_last` are kept regardless of their score",
+    "quote": "They are kept regardless of their score",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "If the kept items cannot all fit within the token budget, the selection process refuses (raises an error) instead of silently dropping one",
+    "quote": "if they cannot all fit within the token budget the selection process refuses (raises an error) instead of silently dropping one.",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 6",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "This makes the last N turns reliably available to the model",
+    "quote": "This makes the last N turns reliably available to the model",
+    "cites": [
+     1,
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 17470,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q24": {
+  "claims": [
+   {
+    "claim": "The change came from adding a rule to the supervisor’s own prompt, not from sharpening the agent descriptions.",
+    "quote": "The change came from **adding a rule to the supervisor’s own prompt**, not from sharpening the agent descriptions.",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/README.md L75-L77; 06_orchestration/notebooks/02_delegation_and_supervision.ipynb L125-L126",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "In the experiments the sharper descriptions never altered the first‑choice routing (0 of 8 trials).",
+    "quote": "the sharper descriptions never altered the first‑choice routing (0 of 8 trials)",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/README.md L75-L77; 06_orchestration/notebooks/02_delegation_and_supervision.ipynb L124",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The rule in the supervisor’s prompt caused the correct routing in every trial (8 of 8).",
+    "quote": "the rule in the supervisor’s prompt caused the correct routing in every trial (8 of 8)",
+    "cites": [
+     2,
+     3
+    ],
+    "verdict": "supported",
+    "source": "06_orchestration/notebooks/02_delegation_and_supervision.ipynb L125-L126",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 11160,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ },
+ "Q25": {
+  "refused": true
+ },
+ "Q27": {
+  "claims": [
+   {
+    "claim": "The repository makes the agent tolerant of a dead MCP server by decoupling the live session from the tools that use it and by adding a dedicated “reconnect” step in the runtime loop.",
+    "quote": "The repository makes the agent tolerant of a dead MCP server by **decoupling the live session from the tools that use it** and by adding a dedicated “reconnect” step in the runtime loop.",
+    "cites": [],
+    "verdict": "supported",
+    "source": "point 1, point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "other",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "The session is stored in a mutable `Connection` box that lives on `Conversation.resources` instead of being baked into each tool.",
+    "quote": "The session is stored in a mutable `Connection` box that lives on `Conversation.resources` instead of being baked into each tool.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "Because the box is a reference, the same tools can keep using it while the underlying session object is swapped out when the server crashes — no tool or registry has to be rebuilt.",
+    "quote": "Because the box is a reference, the same tools can keep using it while the underlying session object is swapped out when the server crashes — no tool or registry has to be rebuilt.",
+    "cites": [
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 5,
+    "ground_why": ""
+   },
+   {
+    "claim": "A `Reconnect` component is placed in the runtime loop (`Observe → Reconnect → Think → Act → Observe`).",
+    "quote": "A `Reconnect` component is placed in the runtime loop (`Observe → Reconnect → Think → Act → Observe`).",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 1,
+    "ground_why": ""
+   },
+   {
+    "claim": "On each iteration it probes the server (using the cheap `tools/list` call, since the protocol’s `ping` always fails) and, if the connection is broken, attempts a limited number of repairs.",
+    "quote": "On each iteration it probes the server (using the cheap `tools/list` call, since the protocol’s `ping` always fails) and, if the connection is broken, attempts a limited number of repairs.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Successful repairs are silent: the repair is logged but not sent to the model, because the model cannot act on “we reconnected” and extra context would only distract it.",
+    "quote": "Successful repairs are silent: the repair is logged but not sent to the model, because the model cannot act on “we reconnected” and extra context would only distract it.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 5",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "Only when the repair finally gives up does the component inject a message (“the weather service is unreachable”) that the model can react to.",
+    "quote": "Only when the repair finally gives up does the component inject a message (“the weather service is unreachable”) that the model can react to.",
+    "cites": [
+     2
+    ],
+    "verdict": "supported",
+    "source": "point 5",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 2,
+    "ground_why": ""
+   },
+   {
+    "claim": "When the server actually dies, the transport raises an exception that is caught as a “broken” result.",
+    "quote": "When the server actually dies, the transport raises an exception that is caught as a “broken” result.",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "This result is marked `for_the_model = False`, so the model sees only an acknowledgement, while the cause is stored in `Result.value`.",
+    "quote": "This result is marked `for_the_model = False`, so the model sees only an acknowledgement, while the cause is stored in `Result.value`.",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "The `Reconnect` step later replaces the dead `Connection` with a fresh one, letting the agent continue.",
+    "quote": "The `Reconnect` step later replaces the dead `Connection` with a fresh one, letting the agent continue.",
+    "cites": [
+     4
+    ],
+    "verdict": "supported",
+    "source": "point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 4,
+    "ground_why": ""
+   },
+   {
+    "claim": "The mutable `Connection` resource, the health‑check‑via‑`tools/list`, the bounded repair budget, and the silent‑repair policy keep the agent running even if the MCP server crashes in the middle of a run.",
+    "quote": "Together, the mutable `Connection` resource, the health‑check‑via‑`tools/list`, the bounded repair budget, and the silent‑repair policy keep the agent running even if the MCP server crashes in the middle of a run.",
+    "cites": [
+     1,
+     2,
+     4,
+     5
+    ],
+    "verdict": "supported",
+    "source": "point 1, point 4, point 5, point 6",
+    "why": "",
+    "on_question": true,
+    "grounded": "none",
+    "passage": 0,
+    "ground_why": "no single passage states the combined claim of mutable Connection, tools/list health check, bounded repair budget, and silent‑repair policy together"
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 19047,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q28": {
+  "claims": [
+   {
+    "claim": "CrewAI is locked to version 0.193.2",
+    "quote": "CrewAI is deliberately locked to the older 0.193.2 release",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 1",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Newer CrewAI versions have dependency pins that clash with the repository",
+    "quote": "newer CrewAI versions bring dependency pins that clash with the rest of the repository",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "CrewAI releases ≥0.201 force chromadb~=1.1",
+    "quote": "Every CrewAI release ≥ 0.201 forces `chromadb~=1.1`",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "From CrewAI 1.7 also forces mcp~=1.28",
+    "quote": "(and from 1.7 also `mcp~=1.28`)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 2",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Installing those versions would downgrade mcp from 2.2 to 1.28",
+    "quote": "Installing those would downgrade `mcp` from 2.2 to 1.28",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Downgrading mcp to 1.28 breaks the 07_mcp chapter",
+    "quote": "(which breaks the 07_mcp chapter)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Installing those versions would downgrade chromadb from 1.5.9 to 1.1",
+    "quote": "and `chromadb` from 1.5.9 to 1.1",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Downgrading chromadb to 1.1 breaks the 04_memory store",
+    "quote": "(which the 04_memory store relies on)",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 3",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Pinning to 0.193.2 avoids these conflicts",
+    "quote": "Pinning to 0.193.2 avoids these conflicts",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Pinning to 0.193.2 keeps other chapters functional",
+    "quote": "and keeps the other chapters functional",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "Reference point 4",
+    "why": "",
+    "on_question": true,
+    "grounded": "none",
+    "passage": 0,
+    "ground_why": "No passage states that pinning to 0.193.2 keeps other chapters functional."
+   }
+  ],
+  "points made": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 21037,
+  "judge": "openai/gpt-oss-120b",
+  "ground version": 3
+ },
+ "Q29": {
+  "claims": [
+   {
+    "claim": "AutoGen’s built‑in TokenUsageTermination looks only at the token counts that are attached to the messages a turn emits.",
+    "quote": "AutoGen’s built‑in `TokenUsageTermination` looks only at the token counts that are attached to the **messages a turn emits**.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "analysis_team.ipynb 607",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "When an analyst turn involves many internal model calls, those calls generate tokens that never appear in a message, so they are not counted by the termination check.",
+    "quote": "When an analyst turn involves many internal model calls (writing code, running it, retrying, etc.) those calls generate tokens that never appear in a message, so they are not counted by the termination check.",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "analysis_team.py 84-87",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The token total reported by AutoGen (≈ 36 k) can be far lower than the actual API‑billed usage (≈ 56 k).",
+    "quote": "As a result the token total reported by AutoGen (≈ 36 k) can be far lower than the actual API‑billed usage (≈ 56 k).",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "analysis_team.ipynb 607",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "Because the termination condition can’t see those hidden calls, it can’t reliably stop a run when the true budget is reached.",
+    "quote": "Because the termination condition can’t see those hidden calls, it can’t reliably stop a run when the true budget is reached",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "analysis_team.ipynb 607",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   },
+   {
+    "claim": "The budget must instead be enforced in the model client itself, where every call’s tokens are tallied before the request is sent.",
+    "quote": "the budget must instead be enforced in the model client itself, where every call’s tokens are tallied before the request is sent",
+    "cites": [
+     1,
+     2
+    ],
+    "verdict": "supported",
+    "source": "analysis_team.py 84-85",
+    "why": "",
+    "on_question": true,
+    "grounded": "cited",
+    "passage": 0,
+    "ground_why": ""
+   }
+  ],
+  "points made": [
+   1,
+   2
+  ],
+  "unanchored": 0,
+  "unmarked": 0,
+  "tokens": 13978,
+  "judge": "openai/gpt-oss-120b",
+  "points renumbered": "reference points trimmed 2026-10-30; numbers mapped to the kept points",
+  "ground version": 3
+ }
+}

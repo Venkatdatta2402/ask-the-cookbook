@@ -209,11 +209,24 @@ EXAMPLES = [
     "Why is CrewAI pinned to an old version in this repo?",
 ]
 
+# The page's script, two jobs.
 # "Ask about": select text in the chat and a small button appears beside it; pressing it puts the selection in the
 # Asking about box. The page script keeps the selection and presses a hidden button whose event copies it into the box
 # (an event's `js` with no Python function fills its outputs straight from the browser).
+# "Use via API": Gradio's footer button opens Gradio's own API page, which has nothing on it here -- the page's events
+# are private -- so it opens the real API's docs (/api/docs) instead, in a new tab so the chat stays. Gradio 6.30's
+# `footer_links` cannot do this: its page only reads the four built-in names, and skips a custom link.
 ASK_ABOUT_JS = """
 () => {
+  const apiDocs = new URL("/api/docs", window.location.href).href;
+  if (new URLSearchParams(window.location.search).get("view") === "api") window.location.replace(apiDocs);
+  document.addEventListener("click", (event) => {         // capture: before Gradio's own handler runs
+    if (!event.target.closest || !event.target.closest("button.show-api")) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.open(apiDocs, "_blank", "noopener");
+  }, true);
+
   let chosen = "";
   const chip = document.createElement("button");
   chip.id = "ask-about-chip";

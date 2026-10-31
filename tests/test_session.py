@@ -129,6 +129,7 @@ def test_the_page_carries_the_ask_about_parts(app):
         assert httpx.get(app.demo.local_url).status_code == 200
         config = httpx.get(app.demo.local_url.rstrip("/") + "/config").text
         assert "ask-about-trigger" in config and "ask-about-chip" in config
+        assert "button.show-api" in config and "/api/docs" in config      # "Use via API" goes to the real API docs
     finally:
         app.demo.close()
 
